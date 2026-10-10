@@ -18,6 +18,7 @@ public sealed class AccountController(
     public IActionResult Register() => View(new RegisterViewModel());
 
     [HttpPost("Register")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model, CancellationToken ct)
     {
         if (!ModelState.IsValid)
@@ -48,6 +49,7 @@ public sealed class AccountController(
         View(new LoginViewModel { ReturnUrl = returnUrl });
 
     [HttpPost("Login")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model, CancellationToken ct)
     {
         if (!ModelState.IsValid)
@@ -74,6 +76,7 @@ public sealed class AccountController(
     }
 
     [HttpPost("Logout")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout(CancellationToken ct)
     {
         await sender.Send(new LogoutCommand(), ct);

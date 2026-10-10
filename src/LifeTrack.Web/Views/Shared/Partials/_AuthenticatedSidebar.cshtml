@@ -18,7 +18,7 @@
             <span class="app-sidebar__account-label">Sesión activa</span>
             <span class="app-sidebar__account-text">Tu espacio personal</span>
         </div>
-        <form method="post" asp-controller="Account" asp-action="Logout">
+        <form method="post" asp-controller="Account" asp-action="Logout" data-app-validate>
             <button class="app-sidebar__logout" type="submit" aria-label="Cerrar sesión"><span aria-hidden="true">↪</span></button>
         </form>
     </div>

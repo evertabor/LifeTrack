@@ -20,6 +20,18 @@ public sealed class CategoryRepository(
             .AnyAsync(c => c.UserId == userId && c.Name == normalizedName, cancellationToken);
     }
 
+    public async Task<Category?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken)
+    {
+        return await context.Categories
+            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId, cancellationToken);
+    }
+
+    public Task RemoveAsync(Category category, CancellationToken cancellationToken)
+    {
+        context.Categories.Remove(category);
+        return Task.CompletedTask;
+    }
+
     public async Task<IReadOnlyList<Category>> ListAsync(Guid userId, CancellationToken cancellationToken)
     {
         return await context.Categories

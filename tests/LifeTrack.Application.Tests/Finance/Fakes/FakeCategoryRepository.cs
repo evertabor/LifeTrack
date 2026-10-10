@@ -18,6 +18,17 @@ public sealed class FakeCategoryRepository : ICategoryRepository
         return Task.FromResult(_categories.Any(c => c.UserId == userId && c.Name == normalizedName));
     }
 
+    public Task<Category?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(_categories.FirstOrDefault(c => c.Id == id && c.UserId == userId));
+    }
+
+    public Task RemoveAsync(Category category, CancellationToken cancellationToken)
+    {
+        _categories.Remove(category);
+        return Task.CompletedTask;
+    }
+
     public Task<IReadOnlyList<Category>> ListAsync(Guid userId, CancellationToken cancellationToken)
     {
         return Task.FromResult<IReadOnlyList<Category>>(

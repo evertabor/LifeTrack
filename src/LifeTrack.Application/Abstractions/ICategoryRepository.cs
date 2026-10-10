@@ -6,5 +6,7 @@ public interface ICategoryRepository
 {
     Task AddAsync(Category category, CancellationToken cancellationToken);
     Task<bool> ExistsAsync(string normalizedName, Guid userId, CancellationToken cancellationToken);
+    Task<Category?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken);
+    Task RemoveAsync(Category category, CancellationToken cancellationToken);
     Task<IReadOnlyList<Category>> ListAsync(Guid userId, CancellationToken cancellationToken);
 }

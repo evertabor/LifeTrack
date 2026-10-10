@@ -12,7 +12,7 @@
                 <h1 id="login-title">Iniciar sesión</h1>
                 <p class="app-auth__intro">Retoma el control de tus finanzas y hábitos.</p>
             </header>
-        <form class="app-auth__form" method="post" asp-action="Login">
+        <form class="app-auth__form" method="post" asp-action="Login" data-app-validate novalidate>
             <input asp-for="ReturnUrl" type="hidden" />
             <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
             <div class="app-form-field">

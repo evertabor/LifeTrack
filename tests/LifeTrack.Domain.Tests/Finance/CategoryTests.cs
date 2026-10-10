@@ -55,4 +55,37 @@ public class CategoryTests
         var ex = Assert.Throws<DomainException>(() => Category.Create(name, userId));
         Assert.Contains("50", ex.Message);
     }
+
+    [Fact]
+    public void EditName_WithValidName_UpdatesName()
+    {
+        var category = Category.Create("Comida", Guid.NewGuid());
+        category.EditName("Transporte");
+        Assert.Equal("Transporte", category.Name);
+    }
+
+    [Fact]
+    public void EditName_WithWhitespaceAroundName_TrimsAndStoresTrimmed()
+    {
+        var category = Category.Create("Comida", Guid.NewGuid());
+        category.EditName("  Transporte  ");
+        Assert.Equal("Transporte", category.Name);
+    }
+
+    [Fact]
+    public void EditName_WithEmptyString_ThrowsDomainException()
+    {
+        var category = Category.Create("Comida", Guid.NewGuid());
+        var ex = Assert.Throws<DomainException>(() => category.EditName(""));
+        Assert.Contains("obligatorio", ex.Message);
+    }
+
+    [Fact]
+    public void EditName_With51Characters_ThrowsDomainException()
+    {
+        var category = Category.Create("Comida", Guid.NewGuid());
+        var name = new string('a', 51);
+        var ex = Assert.Throws<DomainException>(() => category.EditName(name));
+        Assert.Contains("50", ex.Message);
+    }
 }

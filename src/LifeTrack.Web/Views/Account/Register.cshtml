@@ -12,7 +12,7 @@
                 <h1 id="register-title">Crear cuenta</h1>
                 <p class="app-auth__intro">Empieza a organizar tus finanzas y hábitos en un solo lugar.</p>
             </header>
-        <form class="app-auth__form" method="post" asp-action="Register">
+        <form class="app-auth__form" method="post" asp-action="Register" data-app-validate novalidate>
             <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
             <div class="app-form-field">
                 <label asp-for="Email" class="form-label">Correo electrónico</label>

@@ -1,0 +1,32 @@
+@model LifeTrack.Web.ViewModels.Categories.CategoryEditViewModel
+
+@{
+    ViewData["Title"] = "Editar categoría";
+    ViewData["Breadcrumb"] = "Finanzas / Categorías";
+}
+
+<section class="categories-edit" aria-labelledby="categories-edit-title">
+    <header class="categories-index__header">
+        <p class="categories-index__pretitle">Categorías</p>
+        <div class="categories-index__heading">
+            <div>
+                <h1 id="categories-edit-title">Editar categoría</h1>
+                <p class="categories-index__description">Cambia el nombre de tu categoría. El nuevo nombre debe ser único.</p>
+            </div>
+        </div>
+    </header>
+    <div class="app-card categories-panel">
+        <form method="post" asp-controller="Categories" asp-action="Edit" asp-route-id="@Model.Id" data-app-validate novalidate aria-labelledby="categories-edit-title">
+            <div class="app-form-field">
+                <label asp-for="NewName" class="form-label">Nombre</label>
+                <input asp-for="NewName" class="form-control" autocomplete="off" aria-describedby="category-name-help category-name-error" required maxlength="50" />
+                <div id="category-name-help" class="form-text">Máximo 50 caracteres.</div>
+                <span asp-validation-for="NewName" class="field-validation-error" id="category-name-error"></span>
+            </div>
+            <div class="categories-edit__actions">
+                <a class="btn btn-secondary" asp-controller="Categories" asp-action="Index">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+</section>

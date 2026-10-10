@@ -318,11 +318,6 @@ body {
   gap: var(--app-space-2);
 }
 
-.app-topbar__search {
-  display: none;
-  width: 13rem;
-}
-
 .app-topbar__tool {
   align-items: center;
   background: transparent;
@@ -466,7 +461,6 @@ body {
 }
 
 @media (min-width: 768px) {
-  .app-topbar__search,
   .app-topbar__user-name {
     display: inline-flex;
   }

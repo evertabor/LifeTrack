@@ -57,6 +57,8 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .ExcludeFromDescription()
     .AllowAnonymous();
 
+app.MapGet("/", () => Results.Redirect("/categories"));
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
