@@ -1,12 +1,25 @@
 <aside id="app-authenticated-sidebar" class="app-sidebar app-on-dark" data-app-sidebar aria-hidden="false" aria-label="Navegación de la aplicación">
     <div class="app-sidebar__header">
-        <a class="app-sidebar__brand" asp-controller="Categories" asp-action="Index">LifeTrack</a>
-        <button class="app-sidebar__close" type="button" data-app-nav-close aria-label="Cerrar navegación">Cerrar</button>
+        <div>
+            <a class="app-sidebar__brand" asp-controller="Categories" asp-action="Index"><span class="app-sidebar__brand-mark" aria-hidden="true">L</span>LifeTrack</a>
+            <p class="app-sidebar__tagline">Control financiero personal</p>
+        </div>
+        <button class="app-sidebar__close" type="button" data-app-nav-close aria-label="Cerrar navegación"><span aria-hidden="true">×</span></button>
     </div>
     <nav class="app-nav" aria-label="Navegación principal">
         <p class="app-nav__heading">Finanzas</p>
         <ul class="app-nav__list">
-            <li><a class="app-nav__link" asp-controller="Categories" asp-action="Index" aria-current="page">Categorías</a></li>
+            <li><a class="app-nav__link" asp-controller="Categories" asp-action="Index" aria-current="page"><span class="app-nav__icon" aria-hidden="true">▦</span><span>Categorías</span><span class="app-nav__chevron" aria-hidden="true">›</span></a></li>
         </ul>
     </nav>
+    <div class="app-sidebar__account">
+        <div class="app-sidebar__avatar" aria-hidden="true">LT</div>
+        <div class="app-sidebar__account-copy">
+            <span class="app-sidebar__account-label">Sesión activa</span>
+            <span class="app-sidebar__account-text">Tu espacio personal</span>
+        </div>
+        <form method="post" asp-controller="Account" asp-action="Logout">
+            <button class="app-sidebar__logout" type="submit" aria-label="Cerrar sesión"><span aria-hidden="true">↪</span></button>
+        </form>
+    </div>
 </aside>

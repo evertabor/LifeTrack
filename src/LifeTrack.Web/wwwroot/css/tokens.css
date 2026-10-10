@@ -10,27 +10,36 @@
   --app-color-primary-050: #F2F8FD;
   --app-color-danger-700: #B91C1C;
   --app-color-danger-100: #FEE2E2;
+  --app-color-accent-700: #C2410C;
+  --app-color-accent-100: #FFEDD5;
   --app-color-surface-page: #F5F8FC;
   --app-color-surface: #FFFFFF;
+  --app-color-surface-muted: #EEF3F8;
   --app-color-border: #D9E2EC;
+  --app-color-control-boundary: #486581;
   --app-color-text-primary: #243B53;
   --app-color-text-secondary: #486581;
   --app-color-on-primary: var(--app-color-surface);
   --app-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --app-font-size-base: 1rem;
   --app-font-size-small: 0.875rem;
+  --app-font-size-h3: 1.25rem;
   --app-font-size-h1: clamp(1.75rem, 1.5rem + 1vw, 2rem);
   --app-font-weight-medium: 500;
   --app-font-weight-bold: 600;
   --app-line-height-body: 1.6;
   --app-line-height-heading: 1.25;
+  --app-space-1: 0.25rem;
+  --app-space-2: 0.5rem;
   --app-space-3: 0.75rem;
   --app-space-4: 1rem;
   --app-space-5: 1.5rem;
   --app-space-6: 2rem;
+  --app-space-7: 3rem;
   --app-sidebar-width: 16rem;
   --app-radius-md: 8px;
   --app-radius-lg: 12px;
+  --app-radius-pill: 999px;
   --app-shadow-raised: 0 4px 12px rgba(16, 42, 67, 0.1);
   --app-container-max: 75rem;
   --app-control-min-size: 2.75rem;
@@ -39,4 +48,25 @@
   --app-color-focus: var(--app-color-primary-600);
   --app-color-focus-ring: rgba(40, 120, 181, 0.25);
   --app-transition-fast: 120ms ease-out;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --app-color-primary-800: #0B1B2D;
+  --app-color-primary-700: #245F96;
+  --app-color-primary-100: #D5E8FA;
+  --app-color-primary-050: #172A40;
+  --app-color-accent-700: #F97316;
+  --app-color-accent-100: #542B18;
+  --app-color-surface-page: #0F172A;
+  --app-color-surface: #162033;
+  --app-color-surface-muted: #1F2A3D;
+  --app-color-border: #334155;
+  --app-color-text-primary: #F8FAFC;
+  --app-color-text-secondary: #CBD5E1;
+  --app-color-control-boundary: #94A3B8;
+  --app-color-on-primary: #F8FAFC;
+  --app-color-focus: #7DD3FC;
+  --app-color-focus-ring: rgba(125, 211, 252, 0.3);
+  --app-shadow-raised: 0 4px 12px rgba(2, 6, 23, 0.35);
 }

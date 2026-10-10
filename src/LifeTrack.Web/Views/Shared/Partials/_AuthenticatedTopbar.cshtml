@@ -1,15 +1,16 @@
 <header class="app-topbar">
     <div class="app-topbar__start">
-        <button class="app-topbar__menu" type="button" data-app-nav-open aria-controls="app-authenticated-sidebar" aria-expanded="false">Abrir navegación</button>
-        <div class="app-topbar__titles">
-            @if (ViewData["Breadcrumb"] is not null)
-            {
-                <span class="app-topbar__breadcrumb">@ViewData["Breadcrumb"]</span>
-            }
-            <h1 class="app-topbar__title">@ViewData["Title"]</h1>
-        </div>
+        <button class="app-topbar__menu" type="button" data-app-nav-open aria-controls="app-authenticated-sidebar" aria-expanded="false" aria-label="Abrir navegación"><span aria-hidden="true">☰</span></button>
+        @if (ViewData["Breadcrumb"] is string breadcrumb)
+        {
+            <nav class="app-topbar__breadcrumb" aria-label="Migas de pan">@breadcrumb</nav>
+        }
     </div>
-    <form method="post" asp-controller="Account" asp-action="Logout" class="app-topbar__account">
-        <button class="btn btn-outline-secondary" type="submit">Cerrar sesión</button>
-    </form>
+    <div class="app-topbar__tools">
+        <label class="app-topbar__search"><span class="visually-hidden">Búsqueda no disponible todavía</span><input type="search" placeholder="Próximamente" aria-label="Búsqueda no disponible todavía" disabled /><span aria-hidden="true">⌕</span></label>
+        <button class="app-topbar__tool" type="button" aria-label="Ayuda no disponible todavía" disabled><span aria-hidden="true">?</span><span class="app-topbar__tool-text">Ayuda</span></button>
+        <button class="app-topbar__tool" type="button" data-app-theme-toggle aria-label="Activar tema oscuro" aria-pressed="false"><span aria-hidden="true">◐</span></button>
+        <button class="app-topbar__tool" type="button" aria-label="Notificaciones no disponibles todavía" disabled><span aria-hidden="true">♧</span></button>
+        <div class="app-topbar__user"><span class="app-topbar__avatar" aria-hidden="true">LT</span><span class="app-topbar__user-name">LifeTrack</span></div>
+    </div>
 </header>

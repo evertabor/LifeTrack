@@ -2,11 +2,19 @@
 
 @{
     ViewData["Title"] = "Categorías";
+    ViewData["Breadcrumb"] = "Finanzas / Categorías";
 }
 
 <section class="categories-index" aria-labelledby="categories-title">
     <header class="categories-index__header">
-        <h1 id="categories-title">Categorías</h1>
+        <p class="categories-index__pretitle">Configuración financiera</p>
+        <div class="categories-index__heading">
+            <div>
+                <h1 id="categories-title">Categorías</h1>
+                <p class="categories-index__description">Organiza tus movimientos para entender mejor en qué se va tu dinero.</p>
+            </div>
+            <a class="btn btn-primary categories-index__action" href="#category-form-title">Crear categoría</a>
+        </div>
     </header>
 
     @if (Model.HasSuccessMessage)
@@ -14,23 +22,50 @@
         <div class="app-alert app-alert--success" role="status">@Model.SuccessMessage</div>
     }
 
-    <partial name="Partials/_CategoryForm" model="new LifeTrack.Web.ViewModels.Categories.CategoryFormViewModel()" />
+    <div class="categories-index__grid">
+        <partial name="Partials/_CategoryForm" model="Model.NewCategory" />
 
-    @if (Model.HasCategories)
-    {
-        <ul class="categories-list" aria-label="Lista de categorías">
-            @foreach (var category in Model.Categories)
+        <section class="app-card categories-panel" aria-labelledby="categories-list-title">
+            <header class="categories-panel__header">
+                <div>
+                    <p class="categories-panel__eyebrow">Listado</p>
+                    <h2 id="categories-list-title">Tus categorías</h2>
+                </div>
+                <span class="categories-panel__count">@Model.CategoryCountLabel</span>
+            </header>
+            <div class="categories-panel__toolbar">
+                <label class="categories-panel__search"><span class="visually-hidden">Búsqueda no disponible todavía</span><input type="search" placeholder="Próximamente" disabled aria-label="Búsqueda no disponible todavía" /><span aria-hidden="true">⌕</span></label>
+                <span class="categories-panel__hint">Vista actual</span>
+            </div>
+
+            @if (Model.HasCategories)
             {
-                <li class="app-card categories-list__item">
-                    <span class="categories-list__name">@category.Name</span>
-                </li>
+                <div class="categories-table-wrapper">
+                    <table class="categories-table">
+                        <caption class="visually-hidden">Lista de categorías</caption>
+                        <thead>
+                            <tr><th scope="col">Nombre de la categoría</th></tr>
+                        </thead>
+                        <tbody>
+                    @foreach (var category in Model.Categories)
+                    {
+                            <tr><td><span class="categories-list__marker" aria-hidden="true"></span>@category.Name</td></tr>
+                    }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="categories-pagination" aria-label="Paginación de categorías">
+                    <button type="button" disabled>Anterior</button><span>Página 1 · Todas visibles</span><button type="button" disabled>Siguiente</button>
+                </div>
             }
-        </ul>
-    }
-    else
-    {
-        <div class="app-card categories-empty">
-            <p class="categories-empty__text">Aún no tienes categorías. Crea la primera más arriba.</p>
-        </div>
-    }
+            else
+            {
+                <div class="categories-empty">
+                    <span class="categories-empty__mark" aria-hidden="true">+</span>
+                    <h3 class="categories-empty__title">Empieza por una categoría</h3>
+                    <p class="categories-empty__text">Crea una categoría para clasificar tus ingresos y gastos.</p>
+                </div>
+            }
+        </section>
+    </div>
 </section>

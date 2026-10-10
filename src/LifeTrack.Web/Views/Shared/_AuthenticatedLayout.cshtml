@@ -20,10 +20,6 @@
             <partial name="Partials/_AuthenticatedTopbar" />
             <main id="main-content" role="main" class="app-main">
                 <div class="app-container app-content-container">
-                    @if (ViewData["Breadcrumb"] is not null)
-                    {
-                        <nav class="app-breadcrumb" aria-label="Migas de pan">@ViewData["Breadcrumb"]</nav>
-                    }
                     @RenderBody()
                 </div>
             </main>

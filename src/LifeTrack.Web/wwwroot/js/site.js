@@ -6,7 +6,8 @@
         OPEN_BUTTON: "[data-app-nav-open]",
         CLOSE_BUTTON: "[data-app-nav-close]",
         SIDEBAR: "[data-app-sidebar]",
-        SIDEBAR_LINK: "[data-app-sidebar] a"
+        SIDEBAR_LINK: "[data-app-sidebar] a",
+        THEME_TOGGLE: "[data-app-theme-toggle]"
     };
 
     const CSS_CLASSES = {
@@ -26,8 +27,54 @@
         FALSE: "false",
         INERT_VALUE: "",
         OPEN: true,
-        CLOSED: false
+        CLOSED: false,
+        THEME_ATTRIBUTE: "data-theme",
+        THEME_STORAGE_KEY: "lifetrack-theme",
+        THEME_LIGHT: "light",
+        THEME_DARK: "dark",
+        ARIA_LABEL: "aria-label",
+        ARIA_PRESSED: "aria-pressed",
+        THEME_LIGHT_LABEL: "Activar tema claro",
+        THEME_DARK_LABEL: "Activar tema oscuro"
     };
+
+    function _getStoredTheme() {
+        try {
+            return window.localStorage.getItem(CONSTANTS.THEME_STORAGE_KEY);
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function _setTheme(theme, toggle) {
+        document.documentElement.setAttribute(CONSTANTS.THEME_ATTRIBUTE, theme);
+        toggle.setAttribute(CONSTANTS.ARIA_LABEL, theme === CONSTANTS.THEME_DARK ? CONSTANTS.THEME_LIGHT_LABEL : CONSTANTS.THEME_DARK_LABEL);
+        toggle.setAttribute(CONSTANTS.ARIA_PRESSED, theme === CONSTANTS.THEME_DARK ? CONSTANTS.TRUE : CONSTANTS.FALSE);
+
+        try {
+            window.localStorage.setItem(CONSTANTS.THEME_STORAGE_KEY, theme);
+        } catch (error) {
+            return;
+        }
+    }
+
+    function _initializeTheme() {
+        const toggle = document.querySelector(SELECTORS.THEME_TOGGLE);
+
+        if (!toggle) {
+            return;
+        }
+
+        const storedTheme = _getStoredTheme();
+        const theme = storedTheme === CONSTANTS.THEME_DARK ? CONSTANTS.THEME_DARK : CONSTANTS.THEME_LIGHT;
+        _setTheme(theme, toggle);
+        toggle.addEventListener(CONSTANTS.EVENT_CLICK, function () {
+            const nextTheme = document.documentElement.getAttribute(CONSTANTS.THEME_ATTRIBUTE) === CONSTANTS.THEME_DARK
+                ? CONSTANTS.THEME_LIGHT
+                : CONSTANTS.THEME_DARK;
+            _setTheme(nextTheme, toggle);
+        });
+    }
 
     function _setNavigation(shell, openButton, sidebar, isOpen) {
         const isMobile = window.matchMedia(CONSTANTS.MOBILE_QUERY).matches;
@@ -54,6 +101,7 @@
     }
 
     function _initialize() {
+        _initializeTheme();
         const shell = document.querySelector(SELECTORS.SHELL);
         const openButton = document.querySelector(SELECTORS.OPEN_BUTTON);
         const sidebar = document.querySelector(SELECTORS.SIDEBAR);
