@@ -28,6 +28,7 @@
   --app-space-4: 1rem;
   --app-space-5: 1.5rem;
   --app-space-6: 2rem;
+  --app-sidebar-width: 16rem;
   --app-radius-md: 8px;
   --app-radius-lg: 12px;
   --app-shadow-raised: 0 4px 12px rgba(16, 42, 67, 0.1);
@@ -37,4 +38,5 @@
   --app-focus-outline-offset: 2px;
   --app-color-focus: var(--app-color-primary-600);
   --app-color-focus-ring: rgba(40, 120, 181, 0.25);
+  --app-transition-fast: 120ms ease-out;
 }

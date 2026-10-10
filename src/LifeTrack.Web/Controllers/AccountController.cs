@@ -27,7 +27,7 @@ public sealed class AccountController(
         {
             var result = await sender.Send(new RegisterAccountCommand(model.Email, model.Password), ct);
             if (result.Succeeded)
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Categories");
 
             return View(new RegisterViewModel { Email = model.Email, ErrorMessage = string.Join(" ", result.Errors ?? Array.Empty<string>()) });
         }
@@ -57,7 +57,7 @@ public sealed class AccountController(
         {
             var result = await sender.Send(new LoginCommand(model.Email, model.Password), ct);
             if (result.Succeeded)
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Categories");
 
             return View(new LoginViewModel { Email = model.Email, ReturnUrl = model.ReturnUrl, ErrorMessage = result.ErrorMessage });
         }
@@ -77,6 +77,6 @@ public sealed class AccountController(
     public async Task<IActionResult> Logout(CancellationToken ct)
     {
         await sender.Send(new LogoutCommand(), ct);
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Categories");
     }
 }

@@ -1,0 +1,15 @@
+<header class="app-topbar">
+    <div class="app-topbar__start">
+        <button class="app-topbar__menu" type="button" data-app-nav-open aria-controls="app-authenticated-sidebar" aria-expanded="false">Abrir navegación</button>
+        <div class="app-topbar__titles">
+            @if (ViewData["Breadcrumb"] is not null)
+            {
+                <span class="app-topbar__breadcrumb">@ViewData["Breadcrumb"]</span>
+            }
+            <h1 class="app-topbar__title">@ViewData["Title"]</h1>
+        </div>
+    </div>
+    <form method="post" asp-controller="Account" asp-action="Logout" class="app-topbar__account">
+        <button class="btn btn-outline-secondary" type="submit">Cerrar sesión</button>
+    </form>
+</header>

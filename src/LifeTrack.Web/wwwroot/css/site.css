@@ -24,6 +24,39 @@ body {
   border-bottom: 1px solid var(--app-color-border);
 }
 
+.app-skip-link {
+  background: var(--app-color-primary-900);
+  color: var(--app-color-on-primary);
+  left: var(--app-space-4);
+  padding: var(--app-space-3) var(--app-space-4);
+  position: absolute;
+  top: var(--app-space-3);
+  transform: translateY(-200%);
+  transition: transform var(--app-transition-fast);
+  z-index: 20;
+}
+
+.app-skip-link:focus {
+  transform: translateY(0);
+}
+
+.app-public-header__content {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: 4.5rem;
+}
+
+.app-public-header__nav {
+  align-items: center;
+  display: flex;
+  gap: var(--app-space-4);
+}
+
+.app-public-header__nav a {
+  color: var(--app-color-text-secondary);
+}
+
 .app-brand {
   color: var(--app-color-primary-900);
   font-weight: var(--app-font-weight-bold);
@@ -35,6 +68,138 @@ body {
 
 .app-main {
   min-height: calc(100vh - 8rem);
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-sidebar {
+  background: var(--app-color-primary-800);
+  bottom: 0;
+  color: var(--app-color-on-primary);
+  left: 0;
+  overflow-y: auto;
+  padding: var(--app-space-5) var(--app-space-4);
+  position: fixed;
+  top: 0;
+  width: var(--app-sidebar-width);
+  z-index: 10;
+}
+
+.app-sidebar__header,
+.app-topbar,
+.app-topbar__start {
+  align-items: center;
+  display: flex;
+}
+
+.app-sidebar__header {
+  justify-content: space-between;
+  margin-bottom: var(--app-space-6);
+}
+
+.app-sidebar__brand,
+.app-brand {
+  color: var(--app-color-primary-900);
+  font-weight: var(--app-font-weight-bold);
+  text-decoration: none;
+}
+
+.app-sidebar__brand {
+  color: var(--app-color-on-primary);
+  font-size: 1.25rem;
+}
+
+.app-sidebar__close,
+.app-topbar__menu {
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: var(--app-radius-md);
+  color: inherit;
+  min-height: var(--app-control-min-size);
+  padding: var(--app-space-2) var(--app-space-3);
+}
+
+.app-sidebar__close {
+  display: none;
+}
+
+.app-nav__heading {
+  color: var(--app-color-primary-100);
+  font-size: var(--app-font-size-small);
+  font-weight: var(--app-font-weight-bold);
+  margin: 0 0 var(--app-space-2);
+  text-transform: uppercase;
+}
+
+.app-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.app-nav__link {
+  border-radius: var(--app-radius-md);
+  color: var(--app-color-on-primary);
+  display: block;
+  padding: var(--app-space-3) var(--app-space-4);
+  text-decoration: none;
+}
+
+.app-nav__link:hover,
+.app-nav__link:focus-visible {
+  background: var(--app-color-primary-700);
+  color: var(--app-color-on-primary);
+}
+
+.app-shell__content {
+  margin-left: var(--app-sidebar-width);
+  min-height: 100vh;
+}
+
+.app-topbar {
+  background: var(--app-color-surface);
+  border-bottom: 1px solid var(--app-color-border);
+  justify-content: space-between;
+  min-height: 5rem;
+  padding: var(--app-space-3) var(--app-space-5);
+}
+
+.app-topbar__menu {
+  display: none;
+}
+
+.app-topbar__titles {
+  margin-left: var(--app-space-4);
+}
+
+.app-topbar__breadcrumb {
+  color: var(--app-color-text-secondary);
+  display: block;
+  font-size: var(--app-font-size-small);
+}
+
+.app-topbar__title {
+  color: var(--app-color-text-primary);
+  font-size: var(--app-font-size-h1);
+  line-height: var(--app-line-height-heading);
+  margin: 0;
+}
+
+.app-content-container {
+  padding-bottom: var(--app-space-6);
+  padding-top: var(--app-space-6);
+}
+
+.app-breadcrumb {
+  color: var(--app-color-text-secondary);
+  font-size: var(--app-font-size-small);
+  margin-bottom: var(--app-space-3);
+}
+
+.app-shell__overlay {
+  display: none;
 }
 
 .app-footer {
@@ -68,6 +233,39 @@ body {
 @media (min-width: 576px) {
   .app-auth__card {
     padding: var(--app-space-6);
+  }
+}
+
+@media (max-width: 991.98px) {
+  .app-sidebar {
+    transform: translateX(-100%);
+    transition: transform var(--app-transition-fast);
+  }
+
+  .app-shell__content {
+    margin-left: 0;
+  }
+
+  .app-shell--nav-open .app-sidebar {
+    transform: translateX(0);
+  }
+
+  .app-shell--nav-open .app-shell__overlay {
+    background: var(--app-color-primary-900);
+    display: block;
+    inset: 0;
+    opacity: 0.6;
+    position: fixed;
+    z-index: 9;
+  }
+
+  .app-sidebar__close,
+  .app-topbar__menu {
+    display: block;
+  }
+
+  .app-topbar__menu {
+    color: var(--app-color-primary-800);
   }
 }
 

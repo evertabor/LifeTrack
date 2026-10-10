@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LifeTrack</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/tokens.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/bootstrap-overrides.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/LifeTrack.Web.styles.css" asp-append-version="true" />
+</head>
+<body class="app-authenticated-shell">
+    <a class="app-skip-link" href="#main-content">Saltar al contenido</a>
+    <div class="app-shell" data-app-shell>
+        <partial name="Partials/_AuthenticatedSidebar" />
+        <button class="app-shell__overlay" type="button" data-app-nav-close aria-label="Cerrar navegación"></button>
+        <div class="app-shell__content">
+            <partial name="Partials/_AuthenticatedTopbar" />
+            <main id="main-content" role="main" class="app-main">
+                <div class="app-container app-content-container">
+                    @if (ViewData["Breadcrumb"] is not null)
+                    {
+                        <nav class="app-breadcrumb" aria-label="Migas de pan">@ViewData["Breadcrumb"]</nav>
+                    }
+                    @RenderBody()
+                </div>
+            </main>
+            <partial name="Partials/_AppFooter" />
+        </div>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js" defer></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
