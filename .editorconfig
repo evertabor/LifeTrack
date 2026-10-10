@@ -1,0 +1,47 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{csproj,props,targets,json,yml,yaml,md}]
+indent_size = 2
+
+[*.cs]
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_using_directive_placement = outside_namespace:warning
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_prefer_braces = true:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_sort_system_directives_first = true
+
+# ---- Security analyzers: always on (OWASP A05 Injection, A04 Cryptographic Failures) ----
+# CA2100: SQL built from strings. CA3001: SQL injection (taint). CA3002: XSS (taint).
+# CA3003: file path injection. CA3006: process command injection. CA3007: open redirect.
+# CA5350/CA5351: weak or broken crypto (SHA1, 3DES, MD5, DES). CA5358: insecure cipher modes.
+# CA5379: weak key derivation. CA5394: insecure randomness. CA2300/CA2301: insecure deserialization.
+dotnet_diagnostic.CA2100.severity = warning
+dotnet_diagnostic.CA3001.severity = warning
+dotnet_diagnostic.CA3002.severity = warning
+dotnet_diagnostic.CA3003.severity = warning
+dotnet_diagnostic.CA3006.severity = warning
+dotnet_diagnostic.CA3007.severity = warning
+dotnet_diagnostic.CA5350.severity = warning
+dotnet_diagnostic.CA5351.severity = warning
+dotnet_diagnostic.CA5358.severity = warning
+dotnet_diagnostic.CA5379.severity = warning
+dotnet_diagnostic.CA5394.severity = warning
+dotnet_diagnostic.CA2300.severity = warning
+dotnet_diagnostic.CA2301.severity = warning
+
+# ---- Not useful in ASP.NET Core (ConfigureAwait) ----
+dotnet_diagnostic.CA2007.severity = none
+
+# Underscores in test names are fine.
+[tests/**.cs]
+dotnet_diagnostic.CA1707.severity = none

@@ -1,0 +1,12 @@
+@model LifeTrack.Web.ViewModels.Categories.CategoryFormViewModel
+
+<form class="app-card categories-form" method="post" asp-controller="Categories" asp-action="Create" aria-labelledby="category-form-title">
+    <h2 id="category-form-title" class="categories-form__title">Nueva categoría</h2>
+    <div class="app-form-field">
+        <label for="Name" class="form-label">Nombre</label>
+        <input id="Name" name="Name" class="form-control" type="text" autocomplete="off" aria-describedby="category-name-help category-name-error" required />
+        <div id="category-name-help" class="form-text">Máximo 50 caracteres.</div>
+        <span class="field-validation-error" id="category-name-error"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Crear categoría</button>
+</form>

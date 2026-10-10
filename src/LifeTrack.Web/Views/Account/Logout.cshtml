@@ -1,0 +1,20 @@
+@model dynamic
+
+@{
+    ViewData["Title"] = "Cerrar sesión";
+}
+
+<section class="app-auth" aria-labelledby="logout-title">
+    <div class="app-auth__shell app-auth__shell--compact">
+        <div class="app-auth__card">
+            <header class="app-auth__header">
+                <p class="app-auth__eyebrow">Cuenta</p>
+                <h1 id="logout-title">Cerrar sesión</h1>
+                <p class="app-auth__intro">Tu sesión actual se cerrará en este dispositivo.</p>
+            </header>
+            <form class="app-auth__form" method="post" asp-action="Logout">
+                <button class="btn btn-primary app-auth__submit" type="submit">Cerrar sesión</button>
+            </form>
+        </div>
+    </div>
+</section>

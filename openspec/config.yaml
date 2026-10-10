@@ -1,0 +1,107 @@
+schema: spec-driven
+
+context: |
+  Proyecto: LifeTrack, aplicación personal de finanzas y hábitos.
+  Stack: .NET 10, ASP.NET Core MVC con Razor, EF Core, MediatR 13.*, Identity y SQL Server/Azure SQL.
+  Arquitectura: Clean Architecture; dependencias hacia Domain.
+  Documentación y artefactos SDD en español; identificadores y código en inglés.
+  Solución ejecutable LifeTrack.sln con ocho proyectos: cuatro de producción y cuatro de pruebas.
+  CI valida formato, compilación, pruebas y recopilación de cobertura en Release.
+
+strict_tdd: false
+
+testing:
+  detected: 2026-10-09
+  workspace_test_command: "dotnet test"
+  workspace_test_command_scope: "LifeTrack.sln en la raíz de LifeTrack; la solución contiene ocho proyectos y dotnet test ejecuta sus cuatro proyectos de pruebas."
+  ci_commands:
+    restore: "dotnet restore"
+    formatter: "dotnet format --verify-no-changes --no-restore"
+    build: "dotnet build -c Release --no-restore"
+    test_coverage: "dotnet test -c Release --no-build --collect:\"XPlat Code Coverage\""
+  projects:
+    - path: "src/LifeTrack.Domain/LifeTrack.Domain.csproj"
+      stack: ".NET 10 class library; núcleo de dominio sin dependencias de proyecto ni paquetes NuGet."
+      test_command: null
+      test_project: "tests/LifeTrack.Domain.Tests/LifeTrack.Domain.Tests.csproj"
+      test_framework: "xUnit 2.9.*; Microsoft.NET.Test.Sdk; coverlet.collector."
+      test_layers: "Pruebas unitarias de invariantes y reglas de dominio."
+    - path: "src/LifeTrack.Application/LifeTrack.Application.csproj"
+      stack: ".NET 10 class library; casos de uso con referencia a Domain y MediatR 13.*."
+      test_command: null
+      test_project: "tests/LifeTrack.Application.Tests/LifeTrack.Application.Tests.csproj"
+      test_framework: "xUnit 2.9.*; Microsoft.NET.Test.Sdk; coverlet.collector."
+      test_layers: "Pruebas unitarias de casos de uso y riesgos de seguridad/regresión."
+    - path: "src/LifeTrack.Infrastructure/LifeTrack.Infrastructure.csproj"
+      stack: ".NET 10 class library; EF Core SQL Server, Identity y persistencia; depende de Application."
+      test_command: null
+      test_project: "tests/LifeTrack.Architecture.Tests/LifeTrack.Architecture.Tests.csproj"
+      test_framework: "xUnit 2.9.*; NetArchTest.Rules 1.3.*; coverlet.collector."
+      test_layers: "Las pruebas de arquitectura verifican límites de dependencias; no se identificó una suite de integración dedicada a persistencia."
+    - path: "src/LifeTrack.Web/LifeTrack.Web.csproj"
+      stack: ".NET 10 ASP.NET Core MVC con Razor; Identity UI y composición de la aplicación."
+      test_command: null
+      test_project: "tests/LifeTrack.Architecture.Tests/LifeTrack.Architecture.Tests.csproj"
+      additional_test_project: "tests/LifeTrack.Integration.Tests/LifeTrack.Integration.Tests.csproj"
+      test_framework: "xUnit 2.9.*; NetArchTest.Rules 1.3.*; coverlet.collector; LifeTrack.Integration.Tests también usa Microsoft.AspNetCore.Mvc.Testing y Microsoft.EntityFrameworkCore.Sqlite."
+      test_layers: "Pruebas de arquitectura para dependencias, controllers, ViewModels, antiforgery y registro de MediatR; las pruebas HTTP de integración están en LifeTrack.Integration.Tests; no se detectó E2E."
+    - path: "tests/LifeTrack.Domain.Tests/LifeTrack.Domain.Tests.csproj"
+      stack: ".NET 10 test project; pruebas unitarias de Domain."
+      test_command: null
+      test_framework: "xUnit 2.9.*; Microsoft.NET.Test.Sdk; coverlet.collector."
+      test_layers: "Unitarias; no se detectaron capas de integración o E2E."
+    - path: "tests/LifeTrack.Application.Tests/LifeTrack.Application.Tests.csproj"
+      stack: ".NET 10 test project; pruebas unitarias de Application con fakes en memoria."
+      test_command: null
+      test_framework: "xUnit 2.9.*; Microsoft.NET.Test.Sdk; coverlet.collector."
+      test_layers: "Unitarias; no se detectaron capas de integración o E2E."
+    - path: "tests/LifeTrack.Architecture.Tests/LifeTrack.Architecture.Tests.csproj"
+      stack: ".NET 10 test project; reglas de arquitectura con NetArchTest.Rules."
+      test_command: null
+      test_framework: "xUnit 2.9.*; Microsoft.NET.Test.Sdk; NetArchTest.Rules 1.3.*; coverlet.collector."
+      test_layers: "Arquitectura; no se detectaron capas de integración o E2E."
+    - path: "tests/LifeTrack.Integration.Tests/LifeTrack.Integration.Tests.csproj"
+      stack: ".NET 10 test project; integración HTTP de ASP.NET Core MVC con SQLite en memoria."
+      test_command: null
+      test_framework: "xUnit 2.9.*; Microsoft.NET.Test.Sdk; Microsoft.AspNetCore.Mvc.Testing; Microsoft.EntityFrameworkCore.Sqlite; coverlet.collector."
+      test_layers: "Integración HTTP con WebApplicationFactory y SQLite; no se detectaron pruebas E2E."
+  coverage:
+    status: "Disponible en los cuatro proyectos de pruebas mediante coverlet.collector; el workflow CI recoge cobertura en Release."
+    command: "dotnet test -c Release --no-build --collect:\"XPlat Code Coverage\""
+    threshold: 0
+    reporting: "No se detectó publicación de informes ni umbral mínimo configurado en CI."
+  quality_tools:
+    linter: "No hay un linter independiente; Directory.Build.props habilita AnalysisLevel latest y CI trata warnings como errores."
+    type_checker: "Compilador de .NET mediante dotnet build -c Release --no-restore."
+    formatter: "dotnet format --verify-no-changes --no-restore."
+  test_strategy: "Probar fallos silenciosos, brechas de seguridad e incidencias regresivas; priorizar pruebas unitarias deterministas y añadir integración solo ante riesgo justificado."
+  strict_tdd_reason: "Se conserva strict_tdd: false, configurado explícitamente antes de esta inicialización. Aunque dotnet test en la raíz ejecuta LifeTrack.sln y cubre sus ocho proyectos, no se cambia la política existente de TDD estricto."
+
+rules:
+  proposal:
+    - "Redactar la propuesta en español y respetar docs/01-especificacion.md como fuente funcional de verdad."
+    - "Incluir plan de reversión para cambios de riesgo."
+  specs:
+    - "Redactar las especificaciones en español y expresar escenarios con Dado/Cuando/Entonces."
+    - "Usar MUST, SHALL, SHOULD o MAY cuando sea necesario precisar la obligatoriedad."
+  design:
+    - "Documentar decisiones y razones de arquitectura; respetar docs/02-arquitectura.md y AGENTS.md."
+    - "Usar diagramas de secuencia para flujos complejos."
+  tasks:
+    - "Agrupar tareas por fase con numeración jerárquica y verificaciones observables."
+    - "Mantener las tareas completables en una sesión y dentro del presupuesto de revisión de 400 líneas."
+  apply:
+    guidelines:
+      - "Seguir los patrones existentes y leer las instrucciones AGENTS.md pertinentes antes de cambiar código."
+      - "No añadir paquetes NuGet sin aprobación; no modificar ni debilitar los tests de arquitectura."
+      - "Aplicar el criterio de riesgo de docs/04-calidad-y-testing.md para decidir qué probar."
+    tdd: false
+    test_command: "dotnet test"
+    test_command_status: "Ejecutable desde LifeTrack contra LifeTrack.sln; strict_tdd permanece desactivado porque se conserva el valor false configurado explícitamente."
+  verify:
+    test_command: "dotnet test"
+    build_command: "dotnet build -c Release"
+    formatter_command: "dotnet format --verify-no-changes"
+    coverage_threshold: 0
+  archive:
+    - "Advertir antes de integrar deltas destructivos y conservar el historial de cambios archivados."

@@ -1,0 +1,39 @@
+@model LifeTrack.Web.ViewModels.Account.LoginViewModel
+
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<section class="app-auth" aria-labelledby="login-title">
+    <div class="app-auth__shell">
+        <div class="app-auth__card">
+            <header class="app-auth__header">
+                <p class="app-auth__eyebrow">Bienvenido de nuevo</p>
+                <h1 id="login-title">Iniciar sesión</h1>
+                <p class="app-auth__intro">Retoma el control de tus finanzas y hábitos.</p>
+            </header>
+        <form class="app-auth__form" method="post" asp-action="Login">
+            <input asp-for="ReturnUrl" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+            <div class="app-form-field">
+                <label asp-for="Email" class="form-label">Correo electrónico</label>
+                <input asp-for="Email" class="form-control" type="email" autocomplete="email" aria-describedby="Email-error" required />
+                <span asp-validation-for="Email" id="Email-error" class="field-validation-error"></span>
+            </div>
+            <div class="app-form-field">
+                <label asp-for="Password" class="form-label">Contraseña</label>
+                <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" aria-describedby="Password-error" required />
+                <span asp-validation-for="Password" id="Password-error" class="field-validation-error"></span>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div id="login-error" class="app-alert app-alert--error" role="alert" aria-live="assertive">
+                    <span>@Model.ErrorMessage</span>
+                </div>
+            }
+            <button class="btn btn-primary app-auth__submit" type="submit">Iniciar sesión</button>
+            <p class="app-auth__switch">¿Aún no tienes una cuenta? <a asp-controller="Account" asp-action="Register">Crear cuenta</a></p>
+        </form>
+        </div>
+    </div>
+</section>

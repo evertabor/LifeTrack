@@ -1,0 +1,18 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+*.suo
+TestResults/
+coverage*/
+*.log
+# Secrets and local configuration: NEVER commit
+.env
+appsettings.*.local.json
+secrets.json
+*.pfx
+*.publish.xml
+publish/
+.atl/
+.codegraph/

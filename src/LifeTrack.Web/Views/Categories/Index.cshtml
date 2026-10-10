@@ -1,0 +1,36 @@
+@model LifeTrack.Web.ViewModels.Categories.CategoryListViewModel
+
+@{
+    ViewData["Title"] = "Categorías";
+}
+
+<section class="categories-index" aria-labelledby="categories-title">
+    <header class="categories-index__header">
+        <h1 id="categories-title">Categorías</h1>
+    </header>
+
+    @if (Model.HasSuccessMessage)
+    {
+        <div class="app-alert app-alert--success" role="status">@Model.SuccessMessage</div>
+    }
+
+    <partial name="Partials/_CategoryForm" model="new LifeTrack.Web.ViewModels.Categories.CategoryFormViewModel()" />
+
+    @if (Model.HasCategories)
+    {
+        <ul class="categories-list" aria-label="Lista de categorías">
+            @foreach (var category in Model.Categories)
+            {
+                <li class="app-card categories-list__item">
+                    <span class="categories-list__name">@category.Name</span>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <div class="app-card categories-empty">
+            <p class="categories-empty__text">Aún no tienes categorías. Crea la primera más arriba.</p>
+        </div>
+    }
+</section>

@@ -1,0 +1,39 @@
+@model LifeTrack.Web.ViewModels.Account.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Crear cuenta";
+}
+
+<section class="app-auth" aria-labelledby="register-title">
+    <div class="app-auth__shell">
+        <div class="app-auth__card">
+            <header class="app-auth__header">
+                <p class="app-auth__eyebrow">Empieza hoy</p>
+                <h1 id="register-title">Crear cuenta</h1>
+                <p class="app-auth__intro">Empieza a organizar tus finanzas y hábitos en un solo lugar.</p>
+            </header>
+        <form class="app-auth__form" method="post" asp-action="Register">
+            <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+            <div class="app-form-field">
+                <label asp-for="Email" class="form-label">Correo electrónico</label>
+                <input asp-for="Email" class="form-control" type="email" autocomplete="email" aria-describedby="Email-error" required />
+                <span asp-validation-for="Email" id="Email-error" class="field-validation-error"></span>
+            </div>
+            <div class="app-form-field">
+                <label asp-for="Password" class="form-label">Contraseña</label>
+                <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" aria-describedby="Password-help Password-error" minlength="12" required />
+                <div id="Password-help" class="form-text">Usa al menos 12 caracteres.</div>
+                <span asp-validation-for="Password" id="Password-error" class="field-validation-error"></span>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div id="register-error" class="app-alert app-alert--error" role="alert" aria-live="assertive">
+                    <span>@Model.ErrorMessage</span>
+                </div>
+            }
+            <button class="btn btn-primary app-auth__submit" type="submit">Crear cuenta</button>
+            <p class="app-auth__switch">¿Ya tienes una cuenta? <a asp-controller="Account" asp-action="Login">Iniciar sesión</a></p>
+        </form>
+        </div>
+    </div>
+</section>

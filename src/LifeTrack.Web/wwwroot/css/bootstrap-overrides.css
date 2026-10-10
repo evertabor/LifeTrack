@@ -1,0 +1,33 @@
+:root {
+  --bs-primary: var(--app-color-primary-700);
+  --bs-primary-rgb: var(--app-color-primary-700-rgb);
+  --bs-body-font-family: var(--app-font-family);
+  --bs-body-font-size: var(--app-font-size-base);
+  --bs-body-line-height: var(--app-line-height-body);
+  --bs-body-color: var(--app-color-text-primary);
+  --bs-body-bg: var(--app-color-surface-page);
+  --bs-border-color: var(--app-color-border);
+  --bs-border-radius: var(--app-radius-md);
+  --bs-border-radius-lg: var(--app-radius-lg);
+  --bs-link-color-rgb: var(--app-color-primary-700-rgb);
+  --bs-link-hover-color-rgb: var(--app-color-primary-900-rgb);
+  --bs-focus-ring-color: var(--app-color-focus-ring);
+  --bs-form-invalid-color: var(--app-color-danger-700);
+  --bs-form-invalid-border-color: var(--app-color-danger-700);
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--app-color-primary-700);
+  --bs-btn-border-color: var(--app-color-primary-700);
+  --bs-btn-color: var(--app-color-on-primary);
+  --bs-btn-hover-bg: var(--app-color-primary-800);
+  --bs-btn-hover-border-color: var(--app-color-primary-800);
+  --bs-btn-hover-color: var(--app-color-on-primary);
+  --bs-btn-active-bg: var(--app-color-primary-900);
+  --bs-btn-active-border-color: var(--app-color-primary-900);
+  --bs-btn-active-color: var(--app-color-on-primary);
+}
+
+.btn {
+  min-height: var(--app-control-min-size);
+}
