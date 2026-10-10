@@ -23,8 +23,8 @@ consuma tiempo de CI y superficie de mantenimiento en un proyecto que debe salir
   `Domain` ni de DTOs de `Application`.
 - **Cero lógica en las vistas.** Sin ternarios, sin declaraciones de variables, sin llamadas que
   calculen o formateen. `@if` y `@else` solo para elegir qué se renderizar.
-- Un **único layout responsive**, aplicado por `_ViewStart.cshtml`. Sin layout paralelo de escritorio
-  y móvil.
+- Dos layouts responsive con responsabilidades separadas: un layout público por defecto y un shell
+  autenticado seleccionado por `_ViewStart.cshtml` anidados. No se decide por User-Agent.
 - Rutas por atributo (`[Route]`), en inglés.
 - Autenticación por cookie con **ASP.NET Core Identity** y su UI por defecto, que sigue siendo Razor
   Pages y es la única parte del proyecto que usa esa tecnología.
@@ -39,8 +39,8 @@ consuma tiempo de CI y superficie de mantenimiento en un proyecto que debe salir
   por plantillas.
 - (+) Parciales y ViewComponents con sitio fijo: cada pantalla se localiza con su controller, su
   modelo, su vista y sus parciales.
-- (+) Un único layout y CSS propio: sin cadena de herramientas de JS, sin `node_modules`, sin paso de
-  build en CI, y sin procesar CSS con un tercero.
+- (+) Dos layouts y CSS propio: la navegación privada queda fuera de las vistas públicas sin cadena de
+  herramientas de JS, sin `node_modules`, sin paso de build en CI y sin procesar CSS con un tercero.
 - (+) Un solo despliegue; codificación de salida de Razor; sin gestión de tokens en el navegador.
 - (−) Anti-forgery deja de ser automático y pasa a ser una responsabilidad explícita. Se mitiga con el
   filtro global, los tag Helpers en todos los formularios y un test de arquitectura que falla si el

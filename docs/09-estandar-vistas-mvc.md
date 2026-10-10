@@ -21,7 +21,7 @@ src/LifeTrack.Web/
 │   └── Shared/
 ├── Views/
 │   ├── _ViewImports.cshtml
-│   ├── _ViewStart.cshtml
+│   ├── _ViewStart.cshtml         # Layout público por defecto
 │   ├── Dashboard/
 │   │   ├── Index.cshtml
 │   │   └── Partials/
@@ -38,8 +38,9 @@ src/LifeTrack.Web/
 │   │   └── Partials/
 │   ├── Error/
 │   └── Shared/
-│       ├── _Layout.cshtml
-│       ├── Partials/         # Header, footer, _LoginPartial
+│       ├── _Layout.cshtml         # Layout público por defecto
+│       ├── _AuthenticatedLayout.cshtml
+│       ├── Partials/              # Shells y bloques compartidos
 │       └── Components/       # ViewComponents reutilizables
 ├── Services/                 # CurrentUserService. Solo presentación
 ├── TagHelpers/               # Componentes Razor propios
@@ -274,12 +275,14 @@ no abre bucles anidados y no formatea importes.
   color según la racha, un badge de presupuesto según el porcentaje. Esa decisión vive en la clase,
   nunca en la vista.
 
-## 8. Layout
+## 8. Layouts
 
-**Un único layout responsive**: `Views/Shared/_Layout.cshtml`.
+Hay dos layouts con responsabilidades separadas:
 
-`Views/_ViewStart.cshtml` lo aplica a todas las vistas, así que ninguna vista repite el HTML del
-`html`, `head`, header ni footer.
+- `Views/Shared/_Layout.cshtml` es el layout público por defecto para Account, Error y vistas anónimas. No contiene navegación privada.
+- `Views/Shared/_AuthenticatedLayout.cshtml` es el shell de las áreas autenticadas. Incluye skip link, sidebar, topbar, contenido y footer mediante parciales de `Views/Shared/Partials/`.
+
+`Views/_ViewStart.cshtml` conserva `_Layout` como valor predeterminado. Cada área autenticada tiene un `_ViewStart.cshtml` anidado con `Layout = "_AuthenticatedLayout"`; así las vistas públicas no heredan navegación privada y no se decide por `User-Agent`.
 
 ```html
 <!DOCTYPE html>
@@ -291,19 +294,17 @@ no abre bucles anidados y no formatea importes.
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
-    <partial name="_Header" />
+    <partial name="_PublicHeader" />
     <main id="main-content" class="app-main">
         @RenderBody()
     </main>
-    <partial name="_Footer" />
-    <script src="~/js/shared/toast.js" defer></script>
+    <partial name="_AppFooter" />
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
 ```
 
-**Prohibido** un segundo layout, y prohibido decidir por `User-Agent` en `_ViewStart.cshtml`. La
-adaptación a móvil es `mobile-first` con media queries en `wwwroot/css/`, no una segunda plantilla.
+La adaptación a móvil es `mobile-first` con media queries en `wwwroot/css/`. El shell autenticado convierte la sidebar en un cajón móvil operable por teclado; no se duplica la navegación en otra plantilla.
 
 ## 9. Formularios y anti-forgery
 
@@ -362,7 +363,7 @@ Siguen el estándar de JavaScript: prefijo de la feature y nunca un literal suel
 - Saltarse `Application` desde un controller.
 - `@Html.Raw` con datos de usuario, y `<script>` o `<style>` en línea.
 - Rutas convencionales `{controller}/{action}`; usa `[Route]`.
-- Un segundo layout, o decisión por `User-Agent`.
+- Un layout público que muestre navegación privada, aplicar el shell autenticado a Account, o decidir el layout por `User-Agent`.
 - `[IgnoreAntiforgeryToken]` fuera de la página de error.
 - Vistas propias dentro de `Pages/`.
 - Cualquier comentario en un `.cshtml`: `@* *@`, `<!-- -->`, `TODO` o HTML comentado.

@@ -2,19 +2,19 @@
 
 > Este documento define el **diseño visual objetivo** de LifeTrack. No afirma que las pantallas o los componentes descritos ya estén implementados. Antes de crear o cambiar una vista, comprueba el alcance funcional y las convenciones del proyecto. Si una decisión visual no está definida aquí o en una fuente de mayor prioridad, no la inventes: reutiliza lo existente o pregunta.
 
-**Estado:** guía de diseño objetivo; las decisiones pendientes están al final.
+**Estado:** shell visual aprobada e implementada de forma estructural; las pantallas funcionales y las decisiones pendientes siguen al final.
 
 **Base técnica comprobada:** ASP.NET Core MVC con Razor; Bootstrap **5.3.3** estático y local en `wwwroot/lib`; CSS propio con variables. El JavaScript nuevo debe seguir `docs/08-estandar-javascript.md`.
 
 **Idioma:** identificadores, clases CSS y código en inglés. Textos visibles y documentación en español.
 
-### Estado de la interfaz comprobado al crear esta guía
+### Estado de implementación comprobado
 
-- `Views/Shared/_Layout.cshtml` todavía usa una estructura de plantilla, enlaces `Home` y `Privacy`, y `lang="en"`. Carga Bootstrap local, `site.css` y el CSS aislado generado por Razor.
-- Hay vistas de acceso, registro, cierre de sesión y error. Las vistas de Dashboard, Categories, Transactions y Habits siguen siendo objetivo de `docs/01-especificacion.md`; sus carpetas actuales no contienen pantallas implementadas.
-- `site.css` y `Views/Shared/_Layout.cshtml.css` aún contienen estilos y colores de la plantilla. `site.css` también fija `html` a 14px por debajo de 768px; es un desajuste actual, no el objetivo de esta guía (véase la sección 5). La regla de tokens es el objetivo para el CSS propio al adoptarla; no significa que los estilos actuales ya cumplan esa regla.
-- `wwwroot/js/site.js` sigue siendo el archivo de plantilla sin funcionalidad y el layout carga los scripts locales sin `defer`. No son ejemplos de cumplimiento: `docs/08-estandar-javascript.md` exige IIFE y `defer` para los scripts.
-- Los archivos `tokens.css`, `bootstrap-overrides.css` y `components.css` descritos más adelante son **propuestos** y aún no existen. El layout actual tampoco carga esos archivos.
+- Existen layouts separados: `_Layout.cshtml` para páginas públicas y `_AuthenticatedLayout.cshtml` para áreas autenticadas. `_ViewStart.cshtml` conserva el layout público por defecto y los `_ViewStart.cshtml` anidados seleccionan el shell autenticado.
+- El shell autenticado incluye skip link, navegación lateral fija en escritorio, cajón móvil, topbar, contenido principal y pie. Sus bloques viven en `Views/Shared/Partials/`.
+- La navegación solo enlaza a `Categories`, el área autorizada que dispone actualmente de controller y vista. Dashboard, Transactions y Habits permanecen fuera de la navegación hasta que sus pantallas existan.
+- `tokens.css`, `bootstrap-overrides.css`, `components.css` y `site.css` existen y se cargan después de Bootstrap. No se han añadido assets externos, fuentes, iconos ni paquetes.
+- `site.js` contiene únicamente el comportamiento accesible del cajón móvil y se carga con `defer`; Bootstrap y jQuery siguen siendo assets locales existentes.
 - La especificación establece una sola moneda y formato numérico de dos decimales, pero no identifica el símbolo. Los ejemplos de importes de esta guía no fijan una moneda ni un símbolo.
 
 Actualiza este resumen cuando la interfaz implementada cambie de forma significativa.
@@ -233,7 +233,7 @@ Usa solo estas parejas texto/fondo. Valida cualquier combinación nueva antes de
 - Espaciado entre secciones: `--app-space-5` o `--app-space-6`. Espaciado interno de tarjetas: `--app-space-4` o `--app-space-5`.
 - Títulos de página, filtros, acción principal y contenido se alinean igual en todas las pantallas.
 
-### Marco de navegación objetivo
+### Marco de navegación adoptado
 
 | Ventana gráfica | Comportamiento objetivo |
 |---|---|
@@ -243,7 +243,11 @@ Usa solo estas parejas texto/fondo. Valida cualquier combinación nueva antes de
 - Separa la navegación de producto (Resumen (`Dashboard`), movimientos (`Transactions`), categorías (`Categories`) y hábitos (`Habits`)) de las acciones de cuenta que estén implementadas, como cerrar sesión. La eliminación de cuenta solo aparece si se implementa RF-A04.
 - Todo destino esencial debe ser alcanzable en móvil.
 - Incluye un enlace “Saltar al contenido” como primer elemento enfocable.
-- Este marco es un objetivo de diseño; no describe el layout de plantilla que hay actualmente.
+- La estructura está inspirada en la distribución de Gentelella, no en su código, assets, colores, fuentes o dependencias. LifeTrack conserva sus tokens y su identidad visual.
+- El layout público no muestra navegación privada. Login, registro, logout y error usan ese layout; las áreas autenticadas usan el shell privado.
+- Los parciales de `Views/Shared/Partials/` se limitan a estructura compartida: skip link, navegación, topbar y footer. No contienen reglas de negocio ni consultas.
+- El shell ofrece hooks estructurales para breadcrumb y título de página mediante `ViewData["Breadcrumb"]` y `ViewData["Title"]`; si una pantalla no los establece, no se inventa contenido.
+- El cajón móvil se puede abrir y cerrar con teclado, mantiene un control visible de cierre y respeta `prefers-reduced-motion`. El contenido conserva un único `main` y el foco es visible.
 
 ### Tarjetas
 

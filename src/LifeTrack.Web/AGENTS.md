@@ -38,7 +38,7 @@ Norma completa en `docs/09-estandar-vistas-mvc.md`.
 - Todo texto visible en español, identificadores en inglés. HTML semántico, `<label for>` en cada campo, mensajes de validación junto al campo, navegable por teclado, *mobile-first*.
 - Codificación por defecto de Razor. **Prohibido `Html.Raw`** con datos de usuario y `<script>`/`style` en línea (la CSP bloquea scripts en línea). Librerías JS/CSS auto-alojadas en `wwwroot/lib`, no desde CDN.
 - Formularios con tag helpers (`asp-for`, `asp-action`, `asp-route-*`) para que se genere el token anti-forgery. No uses `[IgnoreAntiforgeryToken]` salvo en la página de error.
-- **Un único layout responsive** en `Views/Shared/_Layout.cshtml`, aplicado por `Views/_ViewStart.cshtml`. Sin segundo layout y sin decidir por `User-Agent`.
+- **Dos layouts con responsabilidades separadas**: `Views/Shared/_Layout.cshtml` es el layout público por defecto y `Views/Shared/_AuthenticatedLayout.cshtml` es el shell de las áreas autenticadas. Los `_ViewStart.cshtml` anidados seleccionan el segundo layout; nunca se decide por `User-Agent`.
 - Clases CSS y atributos `data-*` con prefijo de feature (`app-` para componentes compartidos), según `docs/08-estandar-javascript.md`.
 - Ninguna entidad de `Domain` en una vista, un parcial o un `ViewModel`.
 - La carpeta `Pages/` no se usa: solo aparece cuando la UI scaffolded de Identity se añade al repositorio.
@@ -58,4 +58,4 @@ Identity con contraseña ≥ 12 y bloqueo, cookie `HttpOnly`/`Secure`/`SameSite`
 **`AutoValidateAntiforgeryToken` registrado como filtro global.** En MVC el anti-forgery no es automático: sin ese filtro cualquier POST quedaría sin token. `LifeTrack.Architecture.Tests` verifica que sigue registrado, y está prohibido desactivarlo o excluir una acción para "hacerla funcionar".
 
 ## Controllers y vistas previstas
-`DashboardController` + `Views/Dashboard/Index.cshtml`, `CategoriesController` + `Views/Categories/{Index,Edit}`, `TransactionsController` + `Views/Transactions/{Index,Edit}`, `HabitsController` + `Views/Habits/Index`, `AccountController` para registro, acceso y borrado de cuenta. Compartidos: `Views/Shared/_Layout.cshtml`, `Views/Shared/Partials/{_Header,_Footer,_LoginPartial}`, `Views/Shared/Components/` y `Views/Error/`.
+`DashboardController` + `Views/Dashboard/Index.cshtml`, `CategoriesController` + `Views/Categories/{Index,Edit}`, `TransactionsController` + `Views/Transactions/{Index,Edit}`, `HabitsController` + `Views/Habits/Index`, `AccountController` para registro, acceso y borrado de cuenta. Compartidos: `Views/Shared/{_Layout,_AuthenticatedLayout}.cshtml`, `Views/Shared/Partials/`, `Views/Shared/Components/` y `Views/Error/`.
