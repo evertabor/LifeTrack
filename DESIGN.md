@@ -2,7 +2,7 @@
 
 > Este documento define el **diseño visual objetivo** de LifeTrack. No afirma que las pantallas o los componentes descritos ya estén implementados. Antes de crear o cambiar una vista, comprueba el alcance funcional y las convenciones del proyecto. Si una decisión visual no está definida aquí o en una fuente de mayor prioridad, no la inventes: reutiliza lo existente o pregunta.
 
-**Estado:** shell visual aprobada e implementada de forma estructural; las pantallas funcionales y las decisiones pendientes siguen al final.
+**Estado:** shell visual autenticada y pantalla de categorías aprobadas como composición de dashboard; las pantallas funcionales restantes siguen al final.
 
 **Base técnica comprobada:** ASP.NET Core MVC con Razor; Bootstrap **5.3.3** estático y local en `wwwroot/lib`; CSS propio con variables. El JavaScript nuevo debe seguir `docs/08-estandar-javascript.md`.
 
@@ -14,7 +14,7 @@
 - El shell autenticado incluye skip link, navegación lateral fija en escritorio, cajón móvil, topbar, contenido principal y pie. Sus bloques viven en `Views/Shared/Partials/`.
 - La navegación solo enlaza a `Categories`, el área autorizada que dispone actualmente de controller y vista. Dashboard, Transactions y Habits permanecen fuera de la navegación hasta que sus pantallas existan.
 - `tokens.css`, `bootstrap-overrides.css`, `components.css` y `site.css` existen y se cargan después de Bootstrap. No se han añadido assets externos, fuentes, iconos ni paquetes.
-- `site.js` contiene únicamente el comportamiento accesible del cajón móvil y se carga con `defer`; Bootstrap y jQuery siguen siendo assets locales existentes.
+- `site.js` contiene el comportamiento accesible del cajón móvil y el selector persistente de tema; Bootstrap y jQuery siguen siendo assets locales existentes.
 - La especificación establece una sola moneda y formato numérico de dos decimales, pero no identifica el símbolo. Los ejemplos de importes de esta guía no fijan una moneda ni un símbolo.
 
 Actualiza este resumen cuando la interfaz implementada cambie de forma significativa.
@@ -82,7 +82,7 @@ Si dos fuentes aplicables entran en conflicto, no uses esta lista para ignorar u
 - No pongas lógica de formato ni de negocio en la vista: fechas, importes, porcentajes y estados llegan preparados desde el `ViewModel`.
 - No enganches JavaScript a clases de estilo. Sigue los bloques de constantes de `docs/08-estandar-javascript.md` para selectores, clases y claves `data-*`.
 - No muestres un hábito no cumplido con estilo de error (rojo, alerta o tachado).
-- No crees tema oscuro ni lo insinúes con `prefers-color-scheme`. Solo existe el tema claro.
+- No derives el tema de `prefers-color-scheme`: el valor inicial es claro y solo cambia por la elección persistida del usuario.
 
 ---
 
@@ -181,6 +181,23 @@ Los ratios son verificaciones de estas parejas concretas, no una garantía para 
 
 ---
 
+## 3.1 Temas claro y oscuro
+
+LifeTrack ofrece dos temas explícitos: claro por defecto y oscuro cuando el usuario lo selecciona. El tema no cambia la identidad cromática: conserva el azul como color de confianza y el naranja como acento, pero adapta superficies, bordes y texto para mantener jerarquía y contraste.
+
+| Decisión | Regla |
+|---|---|
+| Fuente de verdad | `tokens.css` contiene los valores base y el bloque `[data-theme="dark"]` contiene las sustituciones oscuras. |
+| Activación | `site.js` escribe `data-theme` en `<html>` y actualiza la etiqueta accesible del control. |
+| Persistencia | La preferencia se guarda en `localStorage` con una clave propia de LifeTrack; cualquier valor desconocido vuelve a claro. |
+| Contraste | Cada pareja de texto, superficie, control y foco se valida contra WCAG 2.2 AA en ambos temas. El color nunca es el único indicador. |
+| Preferencia del sistema | No se consulta `prefers-color-scheme`, porque la elección explícita y persistida del usuario tiene prioridad. |
+| Alcance | El mismo conjunto de tokens sirve para sidebar, topbar, tarjetas, tablas, formularios y estados. No se escriben colores de tema en componentes. |
+
+El cambio de tema es una mejora de presentación y no altera rutas, datos, formularios ni reglas de negocio. Los controles visuales sin comportamiento de producto tienen una etiqueta honesta y no simulan una operación de backend.
+
+---
+
 ## 4. Combinaciones de color permitidas
 
 Usa solo estas parejas texto/fondo. Valida cualquier combinación nueva antes de incorporarla.
@@ -244,6 +261,8 @@ Usa solo estas parejas texto/fondo. Valida cualquier combinación nueva antes de
 - Todo destino esencial debe ser alcanzable en móvil.
 - Incluye un enlace “Saltar al contenido” como primer elemento enfocable.
 - La estructura está inspirada en la distribución de Gentelella, no en su código, assets, colores, fuentes o dependencias. LifeTrack conserva sus tokens y su identidad visual.
+- La shell autenticada combina sidebar oscura, marca y navegación agrupada; topbar clara con menú, migas, búsqueda visual, ayuda, tema, notificaciones y avatar; fondo gris suave y contenedor compacto.
+- Las pantallas de datos priorizan un encabezado de página con eyebrow, un único `h1`, acción primaria y una tarjeta blanca elevada con subtítulo, toolbar, tabla semántica densa y paginación solo cuando el caso de uso la soporte.
 - El layout público no muestra navegación privada. Login, registro, logout y error usan ese layout; las áreas autenticadas usan el shell privado.
 - Los parciales de `Views/Shared/Partials/` se limitan a estructura compartida: skip link, navegación, topbar y footer. No contienen reglas de negocio ni consultas.
 - El shell ofrece hooks estructurales para breadcrumb y título de página mediante `ViewData["Breadcrumb"]` y `ViewData["Title"]`; si una pantalla no los establece, no se inventa contenido.
@@ -272,7 +291,7 @@ La integración siguiente es una **propuesta para Bootstrap 5.3.3**, la versión
 
 ### Archivos objetivo
 
-Estos archivos aún no existen; representan la estructura visual propuesta:
+Estos archivos forman la estructura visual implementada:
 
 ```
 src/LifeTrack.Web/wwwroot/css/
@@ -858,4 +877,4 @@ Este bloque es el único uso permitido de `!important`, por ser una medida está
 | Ancho de las barras de progreso sin `style="..."` | Pendiente de elegir entre clases preparadas por el `ViewModel` y JavaScript; si afecta a la arquitectura, registrar un ADR |
 | Símbolo de moneda | No especificado en `docs/01-especificacion.md`; no lo presupongas en la interfaz |
 | Versión de Bootstrap | El CSS local comprobado es 5.3.3; verifica nuevamente variables y estilos si cambia |
-| Tema oscuro | Fuera de alcance. Si se añade, define y valida un conjunto completo de tokens; no inviertas mecánicamente la paleta clara |
+| Tema oscuro | Adoptado. Se mantiene mediante overrides completos de tokens en `tokens.css`, persistencia local y control accesible en la topbar |
