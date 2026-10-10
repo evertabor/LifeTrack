@@ -1,0 +1,142 @@
+@model LifeTrack.Web.ViewModels.Transactions.TransactionListViewModel
+
+@{
+    ViewData["Title"] = "Movimientos";
+    ViewData["Breadcrumb"] = "Finanzas / Movimientos";
+}
+
+<section class="transactions-index" aria-labelledby="transactions-title">
+    <header class="transactions-index__header">
+        <p class="transactions-index__pretitle">Finanzas</p>
+        <div class="transactions-index__heading">
+            <div>
+                <h1 id="transactions-title">Movimientos</h1>
+                <p class="transactions-index__description">Registra tus ingresos y gastos y consulta el resumen del mes.</p>
+            </div>
+            <button class="btn btn-primary transactions-index__action" type="button" data-modal-open="transaction-create-modal" aria-controls="transaction-create-modal">Registrar movimiento</button>
+        </div>
+    </header>
+
+    @if (Model.HasSuccessMessage)
+    {
+        <div class="app-alert app-alert--success" role="status">@Model.SuccessMessage</div>
+    }
+
+    <section class="transactions-filter" aria-labelledby="transactions-filter-title">
+        <h2 id="transactions-filter-title" class="transactions-filter__title">Filtro del mes</h2>
+        <form class="transactions-filter__form" method="get" asp-controller="Transactions" asp-action="Index">
+            <div class="app-form-field transactions-filter__field">
+                <label class="form-label" for="transactions-filter-year">Año</label>
+                <input id="transactions-filter-year" name="year" class="form-control" type="number" value="@Model.Year" min="2000" max="2100" required />
+            </div>
+            <div class="app-form-field transactions-filter__field">
+                <label class="form-label" for="transactions-filter-month">Mes</label>
+                <input id="transactions-filter-month" name="month" class="form-control" type="number" value="@Model.Month" min="1" max="12" required />
+            </div>
+            <div class="app-form-field transactions-filter__field">
+                <label class="form-label" for="transactions-filter-category">Categoría</label>
+                <select id="transactions-filter-category" name="categoryId" class="form-select">
+                    <option value="">Todas las categorías</option>
+                    @foreach (var option in Model.CategoryOptions)
+                    {
+                        @if (option.IsSelected)
+                        {
+                            <option value="@option.Id" selected>@option.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@option.Id">@option.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-outline-secondary transactions-filter__submit">Filtrar</button>
+        </form>
+    </section>
+
+    <section class="transactions-summary" aria-labelledby="transactions-summary-title">
+        <h2 id="transactions-summary-title" class="transactions-summary__title">Resumen de @Model.MonthLabel</h2>
+        <div class="transactions-summary__grid">
+            <article class="transactions-metric">
+                <p class="transactions-metric__label">Ingresos</p>
+                <p class="transactions-metric__value app-amount app-amount--income">@Model.TotalIncomeText</p>
+                <p class="transactions-metric__context">@Model.MonthLabel</p>
+            </article>
+            <article class="transactions-metric">
+                <p class="transactions-metric__label">Gastos</p>
+                <p class="transactions-metric__value app-amount app-amount--expense">@Model.TotalExpenseText</p>
+                <p class="transactions-metric__context">@Model.MonthLabel</p>
+            </article>
+            <article class="transactions-metric">
+                <p class="transactions-metric__label">Balance</p>
+                <p class="transactions-metric__value app-amount">@Model.BalanceText</p>
+                <p class="transactions-metric__context">@Model.MonthLabel</p>
+            </article>
+        </div>
+    </section>
+
+    @if (Model.HasExpenseByCategory)
+    {
+        <section class="transactions-panel" aria-labelledby="transactions-by-category-title">
+            <h2 id="transactions-by-category-title" class="transactions-panel__title">Gasto por categoría</h2>
+            <div class="transactions-table-wrapper">
+                <table class="transactions-table">
+                    <caption class="visually-hidden">Gasto por categoría</caption>
+                    <thead>
+                        <tr><th scope="col">Categoría</th><th scope="col" class="text-end">Total</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var group in Model.ExpenseByCategory)
+                        {
+                            <tr>
+                                <td data-transactions-label="Categoría">@group.CategoryName</td>
+                                <td data-transactions-label="Total" class="text-end app-amount app-amount--expense">@group.TotalText</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
+    <section class="transactions-panel" aria-labelledby="transactions-list-title">
+        <h2 id="transactions-list-title" class="transactions-panel__title">Movimientos del mes</h2>
+        @if (Model.HasTransactions)
+        {
+            <div class="transactions-table-wrapper">
+                <table class="transactions-table">
+                    <caption class="visually-hidden">Movimientos del mes</caption>
+                    <thead>
+                        <tr><th scope="col">Fecha</th><th scope="col">Categoría</th><th scope="col">Tipo</th><th scope="col">Descripción</th><th scope="col" class="text-end">Importe</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var transaction in Model.Transactions)
+                        {
+                            <tr>
+                                <td data-transactions-label="Fecha">@transaction.DateText</td>
+                                <td data-transactions-label="Categoría">@transaction.CategoryName</td>
+                                <td data-transactions-label="Tipo">@transaction.TypeLabel</td>
+                                <td data-transactions-label="Descripción">@transaction.Description</td>
+                                <td data-transactions-label="Importe" class="text-end @transaction.AmountCssClass">@transaction.AmountText</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="transactions-empty">
+                <h3 class="transactions-empty__title">Sin movimientos este mes</h3>
+                <p class="transactions-empty__text">Registra tu primer movimiento para empezar el resumen.</p>
+                <button class="btn btn-primary transactions-empty__action" type="button" data-modal-open="transaction-create-modal" aria-controls="transaction-create-modal">Registrar movimiento</button>
+            </div>
+        }
+    </section>
+
+    <partial name="Partials/_TransactionForm" model="Model" />
+</section>
+
+@section Scripts {
+    <script src="~/js/pages/transactions.js" asp-append-version="true" defer></script>
+}

@@ -12,7 +12,7 @@
 
 - Existen layouts separados: `_Layout.cshtml` para páginas públicas y `_AuthenticatedLayout.cshtml` para áreas autenticadas. `_ViewStart.cshtml` conserva el layout público por defecto y los `_ViewStart.cshtml` anidados seleccionan el shell autenticado.
 - El shell autenticado incluye skip link, navegación lateral fija en escritorio, cajón móvil, topbar, contenido principal y pie. Sus bloques viven en `Views/Shared/Partials/`.
-- La navegación solo enlaza a `Categories`, el área autorizada que dispone actualmente de controller y vista. Dashboard, Transactions y Habits permanecen fuera de la navegación hasta que sus pantallas existan.
+- La navegación enlaza a `Transactions` y `Categories`, las áreas que disponen actualmente de controller y vista. Dashboard y Habits permanecen fuera de la navegación hasta que sus pantallas existan.
 - `tokens.css`, `bootstrap-overrides.css`, `components.css` y `site.css` existen y se cargan después de Bootstrap. No se han añadido assets externos, fuentes, iconos ni paquetes.
 - `site.js` contiene el comportamiento accesible del cajón móvil y el selector persistente de tema; Bootstrap y jQuery siguen siendo assets locales existentes.
 - La especificación establece una sola moneda y formato numérico de dos decimales, pero no identifica el símbolo. Los ejemplos de importes de esta guía no fijan una moneda ni un símbolo.

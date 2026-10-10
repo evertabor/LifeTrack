@@ -95,6 +95,19 @@
   padding: var(--app-space-3) var(--app-space-4);
 }
 
+.app-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--app-font-weight-medium);
+}
+
+.app-amount--income {
+  color: var(--app-color-success-700);
+}
+
+.app-amount--expense {
+  color: var(--app-color-text-primary);
+}
+
 .app-alert--error {
   background: var(--app-color-danger-100);
   color: var(--app-color-danger-700);
@@ -430,6 +443,268 @@
 
   .categories-index__action,
   .categories-panel__search {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+.transactions-index {
+  display: grid;
+  gap: var(--app-space-5);
+  max-width: var(--app-container-max);
+}
+
+.transactions-index__header {
+  display: grid;
+  gap: var(--app-space-2);
+  margin-bottom: var(--app-space-2);
+}
+
+.transactions-index__pretitle,
+.transactions-form__eyebrow {
+  color: var(--app-color-primary-700);
+  font-size: var(--app-font-size-small);
+  font-weight: var(--app-font-weight-bold);
+  letter-spacing: 0.08em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.transactions-index__pretitle {
+  align-items: center;
+  display: flex;
+  gap: var(--app-space-2);
+}
+
+.transactions-index__heading {
+  align-items: end;
+  display: flex;
+  gap: var(--app-space-4);
+  justify-content: space-between;
+}
+
+.transactions-index__heading h1 {
+  font-size: var(--app-font-size-h1);
+  line-height: var(--app-line-height-heading);
+  margin: 0;
+}
+
+.transactions-index__description {
+  color: var(--app-color-text-secondary);
+  margin: var(--app-space-2) 0 0;
+  max-width: 42rem;
+}
+
+.transactions-index__action {
+  white-space: nowrap;
+}
+
+.transactions-filter,
+.transactions-summary,
+.transactions-panel,
+.transactions-form {
+  background: var(--app-color-surface);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--app-shadow-raised);
+  min-width: 0;
+}
+
+.transactions-filter,
+.transactions-summary,
+.transactions-panel {
+  padding: var(--app-space-5);
+}
+
+.transactions-filter__title,
+.transactions-summary__title,
+.transactions-panel__title {
+  font-size: var(--app-font-size-h3);
+  margin: 0 0 var(--app-space-4);
+  text-transform: capitalize;
+}
+
+.transactions-filter__form {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-space-3);
+}
+
+.transactions-filter__field {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.transactions-filter__submit {
+  min-height: var(--app-control-min-size);
+}
+
+.transactions-summary__grid {
+  display: grid;
+  gap: var(--app-space-4);
+  grid-template-columns: 1fr;
+}
+
+.transactions-metric__label {
+  color: var(--app-color-text-secondary);
+  font-size: var(--app-font-size-small);
+  font-weight: var(--app-font-weight-medium);
+  margin: 0;
+}
+
+.transactions-metric__value {
+  font-size: var(--app-font-size-h2);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--app-font-weight-bold);
+  margin: var(--app-space-1) 0;
+}
+
+.transactions-metric__context {
+  color: var(--app-color-text-secondary);
+  font-size: var(--app-font-size-small);
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.transactions-form {
+  align-content: start;
+  display: grid;
+  gap: var(--app-space-4);
+}
+
+.transactions-form__intro {
+  display: grid;
+  gap: var(--app-space-2);
+}
+
+.transactions-form__title {
+  font-size: var(--app-font-size-h3);
+  font-weight: var(--app-font-weight-bold);
+  margin: 0;
+}
+
+.transactions-form__description {
+  color: var(--app-color-text-secondary);
+  margin: 0;
+}
+
+.transactions-table-wrapper {
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-md);
+  overflow-x: auto;
+}
+
+.transactions-table {
+  border-collapse: collapse;
+  min-width: 20rem;
+  width: 100%;
+}
+
+.transactions-table th {
+  background: var(--app-color-surface-muted);
+  color: var(--app-color-text-secondary);
+  font-size: var(--app-font-size-small);
+  font-weight: var(--app-font-weight-bold);
+  padding: var(--app-space-3) var(--app-space-4);
+  text-align: left;
+}
+
+.transactions-table td {
+  border-bottom: 1px solid var(--app-color-border);
+  color: var(--app-color-text-primary);
+  padding: var(--app-space-4);
+}
+
+.transactions-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.transactions-empty {
+  align-items: center;
+  background: var(--app-color-surface-muted);
+  border: 1px dashed var(--app-color-border);
+  border-radius: var(--app-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-2);
+  padding: var(--app-space-7) var(--app-space-5);
+  text-align: center;
+}
+
+.transactions-empty__title {
+  font-size: var(--app-font-size-h3);
+  margin: 0;
+}
+
+.transactions-empty__text {
+  color: var(--app-color-text-secondary);
+  margin: 0;
+}
+
+.transactions-empty__action {
+  margin-bottom: var(--app-space-2);
+}
+
+@media (min-width: 768px) {
+  .transactions-filter,
+  .transactions-summary,
+  .transactions-panel {
+    padding: var(--app-space-6);
+  }
+
+  .transactions-summary__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767.98px) {
+  .transactions-table thead {
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    width: 1px;
+    clip: rect(0 0 0 0);
+  }
+
+  .transactions-table tr {
+    border-bottom: 1px solid var(--app-color-border);
+    display: block;
+    padding: var(--app-space-3) 0;
+  }
+
+  .transactions-table tr:last-child {
+    border-bottom: 0;
+  }
+
+  .transactions-table td {
+    border: 0;
+    display: flex;
+    gap: var(--app-space-3);
+    justify-content: space-between;
+    padding: var(--app-space-1) var(--app-space-4);
+  }
+
+  .transactions-table td::before {
+    color: var(--app-color-text-secondary);
+    content: attr(data-transactions-label);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .transactions-index__heading {
+    align-items: start;
+    flex-direction: column;
+    gap: var(--app-space-2);
+  }
+
+  .transactions-filter__form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .transactions-index__action,
+  .transactions-filter__field {
     max-width: none;
     width: 100%;
   }

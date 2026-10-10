@@ -12,6 +12,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
 
     public DbSet<Category> Categories => Set<Category>();
 
+    public DbSet<Transaction> Transactions => Set<Transaction>();
+
     public new async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
         await base.SaveChangesAsync(cancellationToken);
 
