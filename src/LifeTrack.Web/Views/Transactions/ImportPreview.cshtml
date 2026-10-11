@@ -69,7 +69,7 @@
         <section class="transactions-panel" aria-labelledby="transactions-import-confirm-title">
             <h2 id="transactions-import-confirm-title" class="transactions-panel__title">Confirmar importación</h2>
             <p class="transactions-budgets__empty">Solo se guardarán las filas válidas. Esta acción no se puede deshacer.</p>
-            <form method="post" asp-controller="Transactions" asp-action="ConfirmImport" data-app-validate novalidate aria-labelledby="transactions-import-confirm-title">
+            <form method="post" asp-controller="TransactionImports" asp-action="ConfirmImport" data-app-validate novalidate aria-labelledby="transactions-import-confirm-title">
                 <input type="hidden" name="csvContent" value="@Model.CsvContent" />
                 <div class="transactions-edit__actions">
                     <a class="btn btn-secondary" asp-controller="Transactions" asp-action="Index">Cancelar</a>

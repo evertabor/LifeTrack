@@ -11,7 +11,7 @@ Reglas generales en `/AGENTS.md`. Esta capa es un **adaptador HTTP**: traduce pe
 - `Extensions/` contiene la configuración de la aplicación. **No** registra rutas a mano: van por atributo.
 
 ## Controllers (delgados)
-- **Uno por área**: `DashboardController`, `CategoriesController`, `TransactionsController`, `HabitsController`, `AccountController`. Nombres en inglés y en **plural**.
+- **Uno por área**: `DashboardController`, `CategoriesController`, `TransactionsController`, `BudgetsController`, `TransactionImportsController`, `HabitsController`, `AccountController`. Nombres en inglés y en **plural**. `BudgetsController` y `TransactionImportsController` conservan las rutas `/transactions/budgets` y `/transactions/import…` para no romper URLs existentes; la sección activa del menú la resuelve `ActiveSectionFilter` con una tabla de equivalencias hacia `Transactions`. El render compartido del tablero de movimientos vive en la base abstracta `TransactionsSectionController`.
 - Inyectan **`ISender`** (MediatR) y **`ILogger<TController>`**. **Nunca** un handler concreto, ni `DbContext`, ni repositorios, ni `UserManager` para datos de negocio. Con `ISender` el número de dependencias del controller no crece con el número de acciones.
 - Su trabajo es: recibir la petición, enviar el contrato del caso de uso con `await sender.Send(new <Verbo><Sustantivo>Command/Query(...), cancellationToken)`, mapear el resultado a un `ViewModel` y devolver la vista.
 - Enlazan formularios a un **`InputModel`** con DataAnnotations (`[BindProperty]`), jamás a entidades. El `InputModel` valida **presencia y formato** (`[Required]`), no invariantes de negocio: esas las valida el dominio y su mensaje vuelve ya traducido como `BusinessRuleException`.

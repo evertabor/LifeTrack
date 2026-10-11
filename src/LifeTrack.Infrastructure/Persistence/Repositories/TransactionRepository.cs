@@ -19,6 +19,12 @@ public sealed class TransactionRepository(
             .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId, cancellationToken);
     }
 
+    public async Task<bool> ExistsForCategoryAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken)
+    {
+        return await context.Transactions
+            .AnyAsync(t => t.CategoryId == categoryId && t.UserId == userId, cancellationToken);
+    }
+
     public Task RemoveAsync(Transaction transaction, CancellationToken cancellationToken)
     {
         context.Transactions.Remove(transaction);

@@ -1,4 +1,5 @@
 using LifeTrack.Application.Identity;
+using LifeTrack.Domain.Common;
 using LifeTrack.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,14 @@ public sealed class AccountService(
     public async Task<AccountOperationResult> RegisterAsync(string email, string password, string? displayName, string? phoneNumber, CancellationToken cancellationToken)
     {
         var user = ApplicationUser.Create(email);
-        user.UpdateProfile(displayName, phoneNumber);
+        try
+        {
+            user.UpdateProfile(displayName, phoneNumber);
+        }
+        catch (DomainException ex)
+        {
+            return new AccountOperationResult(false, new[] { ex.Message });
+        }
         var result = await userManager.CreateAsync(user, password);
         if (result.Succeeded)
         {
@@ -50,11 +58,14 @@ public sealed class AccountService(
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
             return new AccountOperationResult(false, new[] { "No se encontró el perfil." });
-        if (displayName?.Trim().Length > ApplicationUser.DisplayNameMaxLength)
-            return new AccountOperationResult(false, new[] { $"El nombre no puede superar los {ApplicationUser.DisplayNameMaxLength} caracteres." });
-        if (phoneNumber?.Trim().Length > ApplicationUser.PhoneNumberMaxLength)
-            return new AccountOperationResult(false, new[] { $"El teléfono no puede superar los {ApplicationUser.PhoneNumberMaxLength} caracteres." });
-        user.UpdateProfile(displayName, phoneNumber);
+        try
+        {
+            user.UpdateProfile(displayName, phoneNumber);
+        }
+        catch (DomainException ex)
+        {
+            return new AccountOperationResult(false, new[] { ex.Message });
+        }
         var result = await userManager.UpdateAsync(user);
         if (result.Succeeded)
         {

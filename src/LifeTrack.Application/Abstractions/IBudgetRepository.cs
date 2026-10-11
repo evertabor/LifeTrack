@@ -8,5 +8,7 @@ public interface IBudgetRepository
 
     Task<Budget?> GetAsync(Guid categoryId, Guid userId, int year, int month, CancellationToken cancellationToken);
 
+    Task<bool> ExistsForCategoryAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<Budget>> ListByPeriodAsync(Guid userId, int year, int month, CancellationToken cancellationToken);
 }

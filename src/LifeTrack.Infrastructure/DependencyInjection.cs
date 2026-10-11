@@ -15,12 +15,14 @@ public static class DependencyInjection
 {
     private const int MinPasswordLength = 12;
     private const int MaxFailedAccessAttempts = 5;
-    private const int LockoutMinutes = 5;
+    private const int LockoutMinutes = 15;
 
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"),
+                sql => sql.EnableRetryOnFailure()));
 
         services.AddIdentityCore<ApplicationUser>(options =>
         {

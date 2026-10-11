@@ -21,6 +21,11 @@ public sealed class PreviewTransactionsHandler(
             throw new BusinessRuleException("El archivo está vacío.");
         }
 
+        if (System.Text.Encoding.UTF8.GetByteCount(request.Content) > TransactionCsvParser.MaxContentBytes)
+        {
+            throw new BusinessRuleException("El archivo supera el máximo de 1 MB.");
+        }
+
         var rows = TransactionCsvParser.ParseRows(request.Content);
 
         if (rows.Count == 0)

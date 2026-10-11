@@ -8,6 +8,8 @@ public interface ITransactionRepository
 
     Task<Transaction?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken);
 
+    Task<bool> ExistsForCategoryAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken);
+
     Task RemoveAsync(Transaction transaction, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<Transaction>> ListByPeriodAsync(

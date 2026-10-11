@@ -99,6 +99,10 @@ public sealed class CategoriesController(
             await sender.Send(new DeleteCategoryCommand(id), ct);
             TempData["Message"] = "Categoría eliminada.";
         }
+        catch (BusinessRuleException ex)
+        {
+            TempData["Message"] = ex.Message;
+        }
         catch (ResourceNotFoundException ex)
         {
             logger.LogWarning("Unexpected resource not found during category deletion: {Message}", ex.Message);

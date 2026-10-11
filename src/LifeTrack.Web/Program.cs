@@ -31,7 +31,7 @@ builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login";
+    options.LoginPath = "/account/login";
     options.AccessDeniedPath = "/Error";
     options.ExpireTimeSpan = TimeSpan.FromHours(CookieLifetimeHours);
     options.Cookie.HttpOnly = true;
@@ -91,7 +91,9 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .ExcludeFromDescription()
     .AllowAnonymous();
 
-app.MapGet("/", () => Results.Redirect("/transactions"));
+app.MapGet("/", (HttpContext context) => Results.Redirect(
+    context.User.Identity?.IsAuthenticated == true ? "/transactions" : "/account/login"))
+    .AllowAnonymous();
 
 app.MapControllers();
 

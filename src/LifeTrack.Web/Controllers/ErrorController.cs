@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LifeTrack.Web.Controllers;
 
 [AllowAnonymous]
+[IgnoreAntiforgeryToken]
 [Route("Error")]
 public class ErrorController : Controller
 {

@@ -6,6 +6,8 @@ namespace LifeTrack.Application.Finance.Commands.DeleteCategory;
 
 public sealed class DeleteCategoryHandler(
     ICategoryRepository repository,
+    ITransactionRepository transactions,
+    IBudgetRepository budgets,
     IUnitOfWork unitOfWork,
     ICurrentUser currentUser) : IRequestHandler<DeleteCategoryCommand>
 {
@@ -21,6 +23,12 @@ public sealed class DeleteCategoryHandler(
         if (category is null)
         {
             throw new ResourceNotFoundException("La categoría no existe.");
+        }
+
+        if (await transactions.ExistsForCategoryAsync(category.Id, currentUser.UserId.Value, ct)
+            || await budgets.ExistsForCategoryAsync(category.Id, currentUser.UserId.Value, ct))
+        {
+            throw new BusinessRuleException("No se puede eliminar la categoría porque tiene movimientos o presupuestos asociados.");
         }
 
         await repository.RemoveAsync(category, ct);

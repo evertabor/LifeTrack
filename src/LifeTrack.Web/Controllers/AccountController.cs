@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LifeTrack.Web.Controllers;
 
-[Route("Account")]
+[Route("account")]
 public sealed class AccountController(
     ISender sender,
     ILogger<AccountController> logger) : Controller
@@ -81,7 +81,7 @@ public sealed class AccountController(
     public async Task<IActionResult> Logout(CancellationToken ct)
     {
         await sender.Send(new LogoutCommand(), ct);
-        return RedirectToAction("Index", "Categories");
+        return RedirectToAction(nameof(Login));
     }
 
     [HttpGet("Profile")]

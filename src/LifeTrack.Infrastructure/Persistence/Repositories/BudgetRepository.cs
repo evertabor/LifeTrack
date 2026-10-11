@@ -19,6 +19,12 @@ public sealed class BudgetRepository(
             .FirstOrDefaultAsync(b => b.CategoryId == categoryId && b.UserId == userId && b.Year == year && b.Month == month, cancellationToken);
     }
 
+    public async Task<bool> ExistsForCategoryAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken)
+    {
+        return await context.Budgets
+            .AnyAsync(b => b.CategoryId == categoryId && b.UserId == userId, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Budget>> ListByPeriodAsync(Guid userId, int year, int month, CancellationToken cancellationToken)
     {
         return await context.Budgets

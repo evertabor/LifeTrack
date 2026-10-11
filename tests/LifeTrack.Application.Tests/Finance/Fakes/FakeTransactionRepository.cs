@@ -18,6 +18,11 @@ public sealed class FakeTransactionRepository : ITransactionRepository
         return Task.FromResult(_transactions.FirstOrDefault(t => t.Id == id && t.UserId == userId));
     }
 
+    public Task<bool> ExistsForCategoryAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(_transactions.Any(t => t.CategoryId == categoryId && t.UserId == userId));
+    }
+
     public Task RemoveAsync(Transaction transaction, CancellationToken cancellationToken)
     {
         _transactions.Remove(transaction);

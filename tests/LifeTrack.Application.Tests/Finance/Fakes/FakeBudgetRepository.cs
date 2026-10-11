@@ -19,6 +19,11 @@ public sealed class FakeBudgetRepository : IBudgetRepository
             b.CategoryId == categoryId && b.UserId == userId && b.Year == year && b.Month == month));
     }
 
+    public Task<bool> ExistsForCategoryAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(_budgets.Any(b => b.CategoryId == categoryId && b.UserId == userId));
+    }
+
     public Task<IReadOnlyList<Budget>> ListByPeriodAsync(Guid userId, int year, int month, CancellationToken cancellationToken)
     {
         return Task.FromResult<IReadOnlyList<Budget>>(
