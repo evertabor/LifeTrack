@@ -341,6 +341,26 @@ body {
   padding: var(--app-space-2);
 }
 
+.app-theme-icon--dark,
+.app-theme-text--dark {
+  display: none;
+}
+
+.app-theme-text--light,
+.app-theme-text--dark {
+  font-size: var(--app-font-size-small);
+}
+
+[data-theme="dark"] .app-theme-icon--light,
+[data-theme="dark"] .app-theme-text--light {
+  display: none;
+}
+
+[data-theme="dark"] .app-theme-icon--dark,
+[data-theme="dark"] .app-theme-text--dark {
+  display: inline;
+}
+
 .app-topbar__dot {
   background: var(--app-color-accent-700);
   border-radius: 50%;
@@ -512,7 +532,7 @@ button.app-topbar__menu-item {
   }
 
   .app-topbar__menu {
-    color: var(--app-color-primary-800);
+    color: var(--app-color-text-primary);
   }
 }
 

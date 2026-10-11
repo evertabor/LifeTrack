@@ -17,7 +17,7 @@
                 <input type="hidden" asp-for="NewBudget.Month" />
                 <div class="app-form-field">
                     <label asp-for="NewBudget.CategoryId" class="form-label">Categoría</label>
-                    <select asp-for="NewBudget.CategoryId" class="form-select">
+                    <select asp-for="NewBudget.CategoryId" class="form-select" required>
                         <option value="">Selecciona una categoría</option>
                         @foreach (var option in Model.CreateCategoryOptions)
                         {
@@ -35,7 +35,7 @@
                 </div>
                 <div class="app-form-field">
                     <label asp-for="NewBudget.Limit" class="form-label">Límite</label>
-                    <input asp-for="NewBudget.Limit" class="form-control" type="number" step="0.01" min="0.01" inputmode="decimal" autocomplete="off" aria-describedby="transactions-budget-limit-help" />
+                    <input asp-for="NewBudget.Limit" class="form-control" type="number" step="0.01" min="0.01" max="@SetBudgetInputModel.MaxLimit" inputmode="decimal" autocomplete="off" aria-describedby="transactions-budget-limit-help" required />
                     <div id="transactions-budget-limit-help" class="form-text">Importe sin símbolo de moneda.</div>
                     <span asp-validation-for="NewBudget.Limit" class="field-validation-error"></span>
                 </div>
