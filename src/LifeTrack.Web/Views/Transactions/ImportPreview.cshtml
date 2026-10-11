@@ -1,0 +1,92 @@
+@model LifeTrack.Web.ViewModels.Transactions.ImportPreviewViewModel
+
+@{
+    ViewData["Title"] = "Previsualizar importación";
+    ViewData["Breadcrumb"] = "Finanzas / Movimientos";
+}
+
+<section class="transactions-index" aria-labelledby="transactions-import-preview-title">
+    <header class="transactions-index__header">
+        <p class="transactions-index__pretitle">Movimientos</p>
+        <div class="transactions-index__heading">
+            <div>
+                <h1 id="transactions-import-preview-title">Previsualizar importación</h1>
+                <p class="transactions-index__description">@Model.SummaryText</p>
+            </div>
+        </div>
+    </header>
+
+    @if (Model.HasInvalidRows)
+    {
+        <section class="transactions-panel" aria-labelledby="transactions-import-invalid-title">
+            <h2 id="transactions-import-invalid-title" class="transactions-panel__title">Filas inválidas</h2>
+            <div class="transactions-table-wrapper">
+                <table class="transactions-table">
+                    <caption class="visually-hidden">Filas inválidas del archivo</caption>
+                    <thead>
+                        <tr><th scope="col">Línea</th><th scope="col">Error</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.InvalidRows)
+                        {
+                            <tr>
+                                <td data-transactions-label="Línea">@row.LineNumber</td>
+                                <td data-transactions-label="Error">@row.Error</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
+    @if (Model.HasValidRows)
+    {
+        <section class="transactions-panel" aria-labelledby="transactions-import-valid-title">
+            <h2 id="transactions-import-valid-title" class="transactions-panel__title">Filas válidas</h2>
+            <div class="transactions-table-wrapper">
+                <table class="transactions-table">
+                    <caption class="visually-hidden">Filas válidas del archivo</caption>
+                    <thead>
+                        <tr><th scope="col">Fecha</th><th scope="col">Categoría</th><th scope="col">Tipo</th><th scope="col">Descripción</th><th scope="col" class="text-end">Importe</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.ValidRows)
+                        {
+                            <tr>
+                                <td data-transactions-label="Fecha">@row.DateText</td>
+                                <td data-transactions-label="Categoría">@row.CategoryName</td>
+                                <td data-transactions-label="Tipo">@row.TypeLabel</td>
+                                <td data-transactions-label="Descripción">@row.Description</td>
+                                <td data-transactions-label="Importe" class="text-end app-amount">@row.AmountText</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="transactions-panel" aria-labelledby="transactions-import-confirm-title">
+            <h2 id="transactions-import-confirm-title" class="transactions-panel__title">Confirmar importación</h2>
+            <p class="transactions-budgets__empty">Solo se guardarán las filas válidas. Esta acción no se puede deshacer.</p>
+            <form method="post" asp-controller="Transactions" asp-action="ConfirmImport" data-app-validate novalidate aria-labelledby="transactions-import-confirm-title">
+                <input type="hidden" name="csvContent" value="@Model.CsvContent" />
+                <div class="transactions-edit__actions">
+                    <a class="btn btn-secondary" asp-controller="Transactions" asp-action="Index">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Confirmar importación</button>
+                </div>
+            </form>
+        </section>
+    }
+    else
+    {
+        <section class="transactions-panel" aria-labelledby="transactions-import-empty-title">
+            <h2 id="transactions-import-empty-title" class="transactions-panel__title">Sin filas válidas</h2>
+            <div class="transactions-empty">
+                <h3 class="transactions-empty__title">Nada que importar</h3>
+                <p class="transactions-empty__text">Corrige el archivo e inténtalo de nuevo.</p>
+                <a class="btn btn-primary transactions-empty__action" asp-controller="Transactions" asp-action="Index">Volver a movimientos</a>
+            </div>
+        </section>
+    }
+</section>

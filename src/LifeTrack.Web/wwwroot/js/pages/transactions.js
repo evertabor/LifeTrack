@@ -3,13 +3,17 @@ const transactionsPageScript = (function () {
 
     const SELECTORS = {
         CREATE_MODAL: "[data-transactions-create-modal]",
-        VALIDATION_ERROR: ".field-validation-error"
+        BUDGET_MODAL: "[data-transactions-budget-modal]",
+        VALIDATION_ERROR: ".field-validation-error",
+        BUDGET_FILL: "[data-transactions-percent]"
     };
 
     const CSS_CLASSES = {};
 
     const CONSTANTS = {
-        EMPTY: ""
+        EMPTY: "",
+        DATA_PERCENT: "data-transactions-percent",
+        PERCENT_SUFFIX: "%"
     };
 
     function _hasErrors(modal) {
@@ -24,16 +28,30 @@ const transactionsPageScript = (function () {
         return false;
     }
 
-    function _initialize() {
-        const modal = document.querySelector(SELECTORS.CREATE_MODAL);
+    function _renderBudgetBars() {
+        const fills = document.querySelectorAll(SELECTORS.BUDGET_FILL);
 
-        if (!modal) {
-            return;
+        for (let index = 0; index < fills.length; index++) {
+            const percent = Number(fills[index].getAttribute(CONSTANTS.DATA_PERCENT));
+
+            if (Number.isFinite(percent)) {
+                fills[index].style.width = percent + CONSTANTS.PERCENT_SUFFIX;
+            }
         }
+    }
 
-        if (_hasErrors(modal)) {
+    function _openModalWithErrors(selector) {
+        const modal = document.querySelector(selector);
+
+        if (modal && _hasErrors(modal)) {
             Modal.open(modal.id);
         }
+    }
+
+    function _initialize() {
+        _renderBudgetBars();
+        _openModalWithErrors(SELECTORS.CREATE_MODAL);
+        _openModalWithErrors(SELECTORS.BUDGET_MODAL);
     }
 
     _initialize();

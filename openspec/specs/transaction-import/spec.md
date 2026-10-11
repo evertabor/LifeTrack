@@ -40,13 +40,13 @@ The preview MUST list valid rows and invalid rows with the per-row error. Catego
 
 The system SHALL persist only the valid rows upon explicit confirmation, revalidating each one.
 
-If no row is valid, the system MUST import nothing and report it. The confirmed import MUST be idempotent per confirmation (no double import on retry while the preview is unchanged).
+If no row is valid, the system MUST import nothing and report it. Accidental repeats on refresh are prevented by Post/Redirect/Get on confirmation.
 
 #### Scenario: Confirm Imports Valid Rows Only
 
 - GIVEN a preview with two valid rows and one invalid row
 - WHEN the user confirms
-- THEN exactly the two valid movements are stored
+- THEN exactly the two valid movements are stored and the confirmation redirects without resubmitting on refresh (Post/Redirect/Get)
 
 ### Requirement: Unauthenticated Import Is Rejected
 

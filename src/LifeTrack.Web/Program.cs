@@ -1,6 +1,7 @@
 using LifeTrack.Application.Abstractions;
 using LifeTrack.Application.Common;
 using LifeTrack.Infrastructure;
+using LifeTrack.Web.Filters;
 using LifeTrack.Web.Security;
 using LifeTrack.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,11 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews(options => options.Filters.Add<AutoValidateAntiforgeryTokenAttribute>());
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<AutoValidateAntiforgeryTokenAttribute>();
+    options.Filters.Add<ActiveSectionFilter>();
+});
 builder.Services.AddMediatR(options => options.RegisterServicesFromAssembly(typeof(ApplicationAssemblyAnchor).Assembly));
 
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -57,7 +62,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .ExcludeFromDescription()
     .AllowAnonymous();
 
-app.MapGet("/", () => Results.Redirect("/categories"));
+app.MapGet("/", () => Results.Redirect("/transactions"));
 
 app.UseRouting();
 app.UseAuthentication();

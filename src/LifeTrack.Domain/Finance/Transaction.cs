@@ -56,6 +56,40 @@ public sealed class Transaction : Entity
             throw new DomainException("La categoría es obligatoria.");
         }
 
+        var cleanDescription = Validate(type, amount, date, description, today);
+
+        return new Transaction(Guid.NewGuid(), userId, categoryId, type, amount, date, cleanDescription);
+    }
+
+    public void Update(
+        Guid categoryId,
+        TransactionType type,
+        decimal amount,
+        DateOnly date,
+        string? description,
+        DateOnly today)
+    {
+        if (categoryId == Guid.Empty)
+        {
+            throw new DomainException("La categoría es obligatoria.");
+        }
+
+        var cleanDescription = Validate(type, amount, date, description, today);
+
+        CategoryId = categoryId;
+        Type = type;
+        Amount = amount;
+        Date = date;
+        Description = cleanDescription;
+    }
+
+    private static string Validate(
+        TransactionType type,
+        decimal amount,
+        DateOnly date,
+        string? description,
+        DateOnly today)
+    {
         if (!Enum.IsDefined(type))
         {
             throw new DomainException("El tipo de movimiento no es válido.");
@@ -82,6 +116,6 @@ public sealed class Transaction : Entity
             throw new DomainException("La descripción no puede superar 200 caracteres.");
         }
 
-        return new Transaction(Guid.NewGuid(), userId, categoryId, type, amount, date, cleanDescription);
+        return cleanDescription;
     }
 }

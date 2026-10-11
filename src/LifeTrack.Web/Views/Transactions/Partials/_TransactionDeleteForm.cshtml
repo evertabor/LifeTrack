@@ -1,0 +1,20 @@
+@model LifeTrack.Web.ViewModels.Transactions.TransactionRowViewModel
+
+<div class="modal fade transactions-modal" id="@Model.DeleteModalId" tabindex="-1" aria-labelledby="@Model.DeleteModalTitleId" aria-hidden="true" data-app-modal>
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content transactions-form" method="post" asp-controller="Transactions" asp-action="Delete" asp-route-id="@Model.Id" aria-labelledby="@Model.DeleteModalTitleId">
+            <div class="modal-header">
+                <div class="transactions-form__intro">
+                    <p class="transactions-form__eyebrow">Eliminar registro</p>
+                    <h2 id="@Model.DeleteModalTitleId" class="transactions-form__title">Eliminar movimiento</h2>
+                    <p class="transactions-form__description">@Model.DeleteConfirmMessage</p>
+                </div>
+                <button type="button" class="btn-close" data-modal-close aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="btn btn-danger">Eliminar</button>
+            </div>
+        </form>
+    </div>
+</div>

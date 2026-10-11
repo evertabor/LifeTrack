@@ -104,4 +104,56 @@ public class TransactionTests
         Assert.Throws<DomainException>(() =>
             Transaction.Create(UserId, Guid.Empty, TransactionType.Expense, 10m, Today, null, Today));
     }
+
+    [Fact]
+    public void Update_WithValidData_UpdatesFieldsAndKeepsId()
+    {
+        var transaction = CreateValid();
+        var otherCategory = Guid.NewGuid();
+        var id = transaction.Id;
+
+        transaction.Update(otherCategory, TransactionType.Income, 100m, Today, "Sueldo", Today);
+
+        Assert.Equal(id, transaction.Id);
+        Assert.Equal(otherCategory, transaction.CategoryId);
+        Assert.Equal(TransactionType.Income, transaction.Type);
+        Assert.Equal(100m, transaction.Amount);
+        Assert.Equal("Sueldo", transaction.Description);
+    }
+
+    [Fact]
+    public void Update_WithZeroAmount_ThrowsDomainException()
+    {
+        var transaction = CreateValid();
+
+        Assert.Throws<DomainException>(() =>
+            transaction.Update(CategoryId, TransactionType.Expense, 0m, Today, null, Today));
+    }
+
+    [Fact]
+    public void Update_WithFutureDate_ThrowsDomainException()
+    {
+        var transaction = CreateValid();
+
+        Assert.Throws<DomainException>(() =>
+            transaction.Update(CategoryId, TransactionType.Expense, 10m, Today.AddDays(1), null, Today));
+    }
+
+    [Fact]
+    public void Update_With201CharacterDescription_ThrowsDomainException()
+    {
+        var transaction = CreateValid();
+
+        Assert.Throws<DomainException>(() =>
+            transaction.Update(CategoryId, TransactionType.Expense, 10m, Today, new string('a', 201), Today));
+    }
+
+    [Fact]
+    public void Update_WithEmptyCategoryId_ThrowsDomainException()
+    {
+        var transaction = CreateValid();
+
+        Assert.Throws<DomainException>(() =>
+            transaction.Update(Guid.Empty, TransactionType.Expense, 10m, Today, null, Today));
+    }
 }

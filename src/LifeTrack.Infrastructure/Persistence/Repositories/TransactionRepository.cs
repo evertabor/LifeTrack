@@ -13,6 +13,18 @@ public sealed class TransactionRepository(
         await context.Transactions.AddAsync(transaction, cancellationToken);
     }
 
+    public async Task<Transaction?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken)
+    {
+        return await context.Transactions
+            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId, cancellationToken);
+    }
+
+    public Task RemoveAsync(Transaction transaction, CancellationToken cancellationToken)
+    {
+        context.Transactions.Remove(transaction);
+        return Task.CompletedTask;
+    }
+
     public async Task<IReadOnlyList<Transaction>> ListByPeriodAsync(
         Guid userId,
         DateOnly from,

@@ -1,0 +1,71 @@
+using LifeTrack.Application.Abstractions;
+using LifeTrack.Application.Common;
+using LifeTrack.Domain.Finance;
+using MediatR;
+
+namespace LifeTrack.Application.Finance.Commands.ImportTransactions;
+
+public sealed class ConfirmTransactionImportHandler(
+    ITransactionRepository transactions,
+    ICategoryRepository categories,
+    IUnitOfWork unitOfWork,
+    ICurrentUser currentUser,
+    TimeProvider timeProvider) : IRequestHandler<ConfirmTransactionImportCommand, int>
+{
+    public async Task<int> Handle(ConfirmTransactionImportCommand request, CancellationToken ct)
+    {
+        if (currentUser.UserId is null)
+        {
+            throw new BusinessRuleException("No se puede confirmar una importación sin usuario autenticado.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Content))
+        {
+            throw new BusinessRuleException("El archivo está vacío.");
+        }
+
+        var rows = TransactionCsvParser.ParseRows(request.Content);
+
+        if (rows.Count == 0 || rows.Count > TransactionCsvParser.MaxRows)
+        {
+            throw new BusinessRuleException("El archivo no contiene movimientos válidos para importar.");
+        }
+
+        var userId = currentUser.UserId.Value;
+        var names = (await categories.ListAsync(userId, ct))
+            .ToDictionary(c => c.Name.Trim(), c => c.Id, StringComparer.OrdinalIgnoreCase);
+        var today = timeProvider.Today();
+
+        var imported = 0;
+        var lineNumber = 0;
+
+        foreach (var fields in rows)
+        {
+            lineNumber++;
+            var row = ImportRowValidator.Validate(lineNumber, fields, names, userId, today);
+
+            if (!row.IsValid || row.Date is null)
+            {
+                continue;
+            }
+
+            await transactions.AddAsync(Transaction.Create(
+                userId,
+                names[row.CategoryName.Trim()],
+                row.IsIncome ? TransactionType.Income : TransactionType.Expense,
+                row.Amount,
+                row.Date.Value,
+                row.Description,
+                today), ct);
+            imported++;
+        }
+
+        if (imported == 0)
+        {
+            throw new BusinessRuleException("No hay filas válidas para importar.");
+        }
+
+        await unitOfWork.SaveChangesAsync(ct);
+        return imported;
+    }
+}

@@ -13,6 +13,17 @@ public sealed class FakeTransactionRepository : ITransactionRepository
         return Task.CompletedTask;
     }
 
+    public Task<Transaction?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(_transactions.FirstOrDefault(t => t.Id == id && t.UserId == userId));
+    }
+
+    public Task RemoveAsync(Transaction transaction, CancellationToken cancellationToken)
+    {
+        _transactions.Remove(transaction);
+        return Task.CompletedTask;
+    }
+
     public Task<IReadOnlyList<Transaction>> ListByPeriodAsync(
         Guid userId,
         DateOnly from,

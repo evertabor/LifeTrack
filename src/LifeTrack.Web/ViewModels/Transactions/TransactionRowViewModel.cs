@@ -15,6 +15,11 @@ public sealed record TransactionRowViewModel
     public string DateText { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
     public bool IsIncome { get; init; }
+    public string EditLabel { get; init; } = string.Empty;
+    public string DeleteLabel { get; init; } = string.Empty;
+    public string DeleteModalId { get; init; } = string.Empty;
+    public string DeleteModalTitleId { get; init; } = string.Empty;
+    public string DeleteConfirmMessage { get; init; } = string.Empty;
 
     public static TransactionRowViewModel From(TransactionSummary summary) =>
         new()
@@ -28,6 +33,11 @@ public sealed record TransactionRowViewModel
             AmountCssClass = summary.IsIncome ? "app-amount app-amount--income" : "app-amount app-amount--expense",
             DateText = summary.Date.ToString("dd/MM/yyyy"),
             Description = summary.Description,
-            IsIncome = summary.IsIncome
+            IsIncome = summary.IsIncome,
+            EditLabel = "Editar movimiento",
+            DeleteLabel = "Eliminar movimiento",
+            DeleteModalId = $"transaction-delete-modal-{summary.Id:D}",
+            DeleteModalTitleId = $"transaction-delete-modal-title-{summary.Id:D}",
+            DeleteConfirmMessage = "¿Eliminar este movimiento? Esta acción no se puede deshacer."
         };
 }

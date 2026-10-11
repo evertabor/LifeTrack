@@ -1,4 +1,5 @@
 using System.Globalization;
+using LifeTrack.Application.Finance.Commands.GetBudgetStatus;
 using LifeTrack.Application.Finance.Commands.ListCategories;
 using LifeTrack.Application.Finance.Commands.ListMonthlyTransactions;
 
@@ -48,6 +49,8 @@ public sealed record TransactionListViewModel
     public IReadOnlyList<TransactionCategoryOption> CreateCategoryOptions { get; init; } = [];
     public Guid? SelectedCategoryId { get; init; }
     public CreateTransactionInputModel NewTransaction { get; init; } = new();
+    public SetBudgetInputModel NewBudget { get; init; } = new();
+    public IReadOnlyList<BudgetStatusViewModel> Budgets { get; init; } = [];
     public string? SuccessMessage { get; init; }
     public bool IsIncomeSelected { get; init; }
     public bool IsExpenseSelected { get; init; } = true;
@@ -57,12 +60,15 @@ public sealed record TransactionListViewModel
     public bool IsEmpty => Transactions.Count == 0;
     public bool HasCategories => CategoryOptions.Count > 0;
     public bool HasExpenseByCategory => ExpenseByCategory.Count > 0;
+    public bool HasBudgets => Budgets.Count > 0;
 
     public static TransactionListViewModel From(
         MonthlyTransactionsResult result,
         IReadOnlyList<CategorySummary> categories,
+        IReadOnlyList<BudgetStatusDto> budgets,
         string? message,
         CreateTransactionInputModel? newTransaction = null,
+        SetBudgetInputModel? newBudget = null,
         Guid? selectedCategoryId = null)
     {
         var current = newTransaction ?? new();
@@ -80,6 +86,8 @@ public sealed record TransactionListViewModel
             CreateCategoryOptions = categories.Select(c => TransactionCategoryOption.From(c, current.CategoryId == Guid.Empty ? null : current.CategoryId)).ToList(),
             SelectedCategoryId = selectedCategoryId,
             NewTransaction = current,
+            NewBudget = newBudget ?? new() { Year = result.Year, Month = result.Month },
+            Budgets = budgets.Select(BudgetStatusViewModel.From).ToList(),
             SuccessMessage = message,
             IsIncomeSelected = current.Type,
             IsExpenseSelected = !current.Type

@@ -24,11 +24,11 @@ The domain factory MUST reject zero or negative limits, limits above 1.000.000.0
 - WHEN the user sets limit 0
 - THEN a `DomainException` is raised and nothing is saved
 
-#### Scenario: Set Duplicate Budget for Same Period Fails
+#### Scenario: Set Budget Twice Updates the Limit
 
-- GIVEN the user already has a budget for a category and month
-- WHEN the user sets another budget for the same category and month
-- THEN a `BusinessRuleException` is raised and the original is kept
+- GIVEN the user already has a budget of 100 for a category and month
+- WHEN the user sets limit 150 for the same category and month
+- THEN the budget limit becomes 150 and a single budget remains for that period
 
 #### Scenario: Set Budget with Another User's Category Fails
 

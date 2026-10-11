@@ -13,7 +13,11 @@
                 <h1 id="transactions-title">Movimientos</h1>
                 <p class="transactions-index__description">Registra tus ingresos y gastos y consulta el resumen del mes.</p>
             </div>
-            <button class="btn btn-primary transactions-index__action" type="button" data-modal-open="transaction-create-modal" aria-controls="transaction-create-modal">Registrar movimiento</button>
+            <div class="transactions-index__actions">
+                <button class="btn btn-primary transactions-index__action" type="button" data-modal-open="transaction-create-modal" aria-controls="transaction-create-modal">Registrar movimiento</button>
+                <button class="btn btn-outline-secondary transactions-index__action" type="button" data-modal-open="transaction-import-modal" aria-controls="transaction-import-modal">Importar CSV</button>
+                <button class="btn btn-outline-secondary transactions-index__action" type="button" data-modal-open="transaction-budget-modal" aria-controls="transaction-budget-modal">Definir presupuesto</button>
+            </div>
         </div>
     </header>
 
@@ -75,6 +79,32 @@
         </div>
     </section>
 
+    <section class="transactions-panel" aria-labelledby="transactions-budgets-title">
+        <h2 id="transactions-budgets-title" class="transactions-panel__title">Presupuestos de @Model.MonthLabel</h2>
+        @if (Model.HasBudgets)
+        {
+            <div class="transactions-budgets__list">
+                @foreach (var budget in Model.Budgets)
+                {
+                    <div class="@budget.ProgressCssClass">
+                        <div class="app-progress__header">
+                            <span class="app-progress__label">@budget.CategoryName</span>
+                            <span class="app-progress__value app-amount">@budget.UsageText</span>
+                        </div>
+                        <div class="app-progress__track" role="progressbar" aria-label="@budget.AriaLabel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@budget.ProgressBarValue" aria-valuetext="@budget.PercentText">
+                            <div class="app-progress__fill" data-transactions-percent="@budget.FillPercent"></div>
+                        </div>
+                        <p class="app-progress__status"><span class="@budget.StatusCssClass">@budget.StateText</span></p>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="transactions-budgets__empty">Sin presupuestos este mes. Define el primero para controlar tu gasto por categoría.</p>
+        }
+    </section>
+
     @if (Model.HasExpenseByCategory)
     {
         <section class="transactions-panel" aria-labelledby="transactions-by-category-title">
@@ -107,7 +137,7 @@
                 <table class="transactions-table">
                     <caption class="visually-hidden">Movimientos del mes</caption>
                     <thead>
-                        <tr><th scope="col">Fecha</th><th scope="col">Categoría</th><th scope="col">Tipo</th><th scope="col">Descripción</th><th scope="col" class="text-end">Importe</th></tr>
+                        <tr><th scope="col">Fecha</th><th scope="col">Categoría</th><th scope="col">Tipo</th><th scope="col">Descripción</th><th scope="col" class="text-end">Importe</th><th scope="col">Acciones</th></tr>
                     </thead>
                     <tbody>
                         @foreach (var transaction in Model.Transactions)
@@ -118,11 +148,21 @@
                                 <td data-transactions-label="Tipo">@transaction.TypeLabel</td>
                                 <td data-transactions-label="Descripción">@transaction.Description</td>
                                 <td data-transactions-label="Importe" class="text-end @transaction.AmountCssClass">@transaction.AmountText</td>
+                                <td>
+                                    <span class="transactions-table__actions">
+                                        <a class="btn btn-sm btn-secondary" asp-controller="Transactions" asp-action="Edit" asp-route-id="@transaction.Id" aria-label="@transaction.EditLabel"><span aria-hidden="true">✎</span></a>
+                                        <button class="btn btn-sm btn-danger" type="button" data-modal-open="@transaction.DeleteModalId" aria-controls="@transaction.DeleteModalId" aria-label="@transaction.DeleteLabel"><span aria-hidden="true">🗑</span></button>
+                                    </span>
+                                </td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
+            @foreach (var transaction in Model.Transactions)
+            {
+                <partial name="Partials/_TransactionDeleteForm" model="transaction" />
+            }
         }
         else
         {
@@ -130,11 +170,15 @@
                 <h3 class="transactions-empty__title">Sin movimientos este mes</h3>
                 <p class="transactions-empty__text">Registra tu primer movimiento para empezar el resumen.</p>
                 <button class="btn btn-primary transactions-empty__action" type="button" data-modal-open="transaction-create-modal" aria-controls="transaction-create-modal">Registrar movimiento</button>
+                <button class="btn btn-outline-secondary transactions-empty__action" type="button" data-modal-open="transaction-import-modal" aria-controls="transaction-import-modal">Importar CSV</button>
+                <button class="btn btn-outline-secondary transactions-empty__action" type="button" data-modal-open="transaction-budget-modal" aria-controls="transaction-budget-modal">Definir presupuesto</button>
             </div>
         }
     </section>
 
     <partial name="Partials/_TransactionForm" model="Model" />
+    <partial name="Partials/_TransactionImportForm" model="Model" />
+    <partial name="Partials/_TransactionBudgetForm" model="Model" />
 </section>
 
 @section Scripts {

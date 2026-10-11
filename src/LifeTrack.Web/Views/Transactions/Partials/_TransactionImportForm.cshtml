@@ -1,0 +1,27 @@
+@model LifeTrack.Web.ViewModels.Transactions.TransactionListViewModel
+
+<div class="modal fade transactions-modal" id="transaction-import-modal" tabindex="-1" aria-labelledby="transaction-import-modal-title" aria-hidden="true" data-app-modal>
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content transactions-form" method="post" asp-controller="Transactions" asp-action="Import" enctype="multipart/form-data" aria-labelledby="transaction-import-modal-title" data-app-validate novalidate>
+            <div class="modal-header">
+                <div class="transactions-form__intro">
+                    <p class="transactions-form__eyebrow">Importar registros</p>
+                    <h2 id="transaction-import-modal-title" class="transactions-form__title">Importar desde CSV</h2>
+                    <p class="transactions-form__description">Sube un archivo .csv con columnas fecha, categoría, tipo, importe y descripción para previsualizarlo antes de importar.</p>
+                </div>
+                <button type="button" class="btn-close" data-modal-close aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="app-form-field">
+                    <label class="form-label" for="transactions-import-file">Archivo CSV</label>
+                    <input id="transactions-import-file" name="file" class="form-control" type="file" accept=".csv" required aria-describedby="transactions-import-file-help" />
+                    <div id="transactions-import-file-help" class="form-text">Máximo 1 MB y 500 filas.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="btn btn-primary">Previsualizar</button>
+            </div>
+        </form>
+    </div>
+</div>

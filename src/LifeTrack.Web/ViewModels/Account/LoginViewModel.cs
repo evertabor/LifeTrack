@@ -12,8 +12,6 @@ public sealed record LoginViewModel
     [Required]
     public string Password { get; init; } = string.Empty;
 
-    public string? ReturnUrl { get; init; }
-
     public string? ErrorMessage { get; init; }
 
     public sealed record DisplayModel(string Email, string? ReturnUrl, string? ErrorMessage)

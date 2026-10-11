@@ -28,7 +28,7 @@ public sealed class AccountController(
         {
             var result = await sender.Send(new RegisterAccountCommand(model.Email, model.Password), ct);
             if (result.Succeeded)
-                return RedirectToAction("Index", "Categories");
+                return RedirectToAction("Index", "Transactions");
 
             return View(new RegisterViewModel { Email = model.Email, ErrorMessage = string.Join(" ", result.Errors ?? Array.Empty<string>()) });
         }
@@ -45,8 +45,8 @@ public sealed class AccountController(
     }
 
     [HttpGet("Login")]
-    public IActionResult Login([FromQuery] string? returnUrl) =>
-        View(new LoginViewModel { ReturnUrl = returnUrl });
+    public IActionResult Login() =>
+        View(new LoginViewModel());
 
     [HttpPost("Login")]
     [ValidateAntiForgeryToken]
@@ -59,19 +59,19 @@ public sealed class AccountController(
         {
             var result = await sender.Send(new LoginCommand(model.Email, model.Password), ct);
             if (result.Succeeded)
-                return RedirectToAction("Index", "Categories");
+                return RedirectToAction("Index", "Transactions");
 
-            return View(new LoginViewModel { Email = model.Email, ReturnUrl = model.ReturnUrl, ErrorMessage = result.ErrorMessage });
+            return View(new LoginViewModel { Email = model.Email, ErrorMessage = result.ErrorMessage });
         }
         catch (BusinessRuleException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
-            return View(new LoginViewModel { Email = model.Email, ReturnUrl = model.ReturnUrl });
+            return View(model);
         }
         catch (ResourceNotFoundException ex)
         {
             logger.LogWarning("Resource not found during login: {Message}", ex.Message);
-            return View(new LoginViewModel { Email = model.Email, ReturnUrl = model.ReturnUrl });
+            return View(model);
         }
     }
 

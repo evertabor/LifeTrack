@@ -6,6 +6,10 @@ public interface ITransactionRepository
 {
     Task AddAsync(Transaction transaction, CancellationToken cancellationToken);
 
+    Task<Transaction?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken);
+
+    Task RemoveAsync(Transaction transaction, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<Transaction>> ListByPeriodAsync(
         Guid userId,
         DateOnly from,
