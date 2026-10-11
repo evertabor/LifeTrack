@@ -118,8 +118,8 @@ public sealed record TransactionListViewModel
             NewBudget = options.NewBudget ?? new() { Year = result.Year, Month = result.Month },
             Budgets = budgets.Select(BudgetStatusViewModel.From).ToList(),
             SuccessMessage = options.Message,
-            IsIncomeSelected = current.Type,
-            IsExpenseSelected = !current.Type
+            IsIncomeSelected = current.Type is true,
+            IsExpenseSelected = current.Type is not true
         };
     }
 }

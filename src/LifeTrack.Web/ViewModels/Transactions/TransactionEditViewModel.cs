@@ -34,7 +34,7 @@ public sealed record TransactionEditViewModel
             CategoryOptions = categories
                 .Select(c => TransactionCategoryOption.From(c, input.CategoryId))
                 .ToList(),
-            IsIncomeSelected = input.Type,
-            IsExpenseSelected = !input.Type
+            IsIncomeSelected = input.Type is true,
+            IsExpenseSelected = input.Type is not true
         };
 }

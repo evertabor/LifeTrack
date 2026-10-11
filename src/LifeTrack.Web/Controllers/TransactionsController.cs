@@ -54,10 +54,11 @@ public sealed class TransactionsController(
         if (ModelState.IsValid)
         {
             var categoryId = input.CategoryId;
+            var type = input.Type;
             var amount = input.Amount;
             var date = input.Date;
 
-            if (categoryId is null || amount is null || date is null)
+            if (categoryId is null || type is null || amount is null || date is null)
             {
                 ModelState.AddModelError(string.Empty, "Revisa los datos del formulario.");
                 return await RenderIndexAsync(new IndexRenderOptions(date ?? timeProvider.Today(), input, null, null), ct);
@@ -66,7 +67,7 @@ public sealed class TransactionsController(
             try
             {
                 await sender.Send(new CreateTransactionCommand(
-                    categoryId.Value, input.Type, amount.Value, date.Value, input.Description), ct);
+                    categoryId.Value, type.Value, amount.Value, date.Value, input.Description), ct);
                 TempData["Message"] = "Movimiento registrado.";
                 return RedirectToAction(nameof(Index), new { year = date.Value.Year, month = date.Value.Month });
             }
@@ -109,10 +110,11 @@ public sealed class TransactionsController(
         if (ModelState.IsValid)
         {
             var categoryId = input.CategoryId;
+            var type = input.Type;
             var amount = input.Amount;
             var date = input.Date;
 
-            if (categoryId is null || amount is null || date is null)
+            if (categoryId is null || type is null || amount is null || date is null)
             {
                 ModelState.AddModelError(string.Empty, "Revisa los datos del formulario.");
             }
@@ -121,7 +123,7 @@ public sealed class TransactionsController(
                 try
                 {
                     await sender.Send(new UpdateTransactionCommand(
-                        id, categoryId.Value, input.Type, amount.Value, date.Value, input.Description), ct);
+                        id, categoryId.Value, type.Value, amount.Value, date.Value, input.Description), ct);
                     TempData["Message"] = "Movimiento actualizado.";
                     return RedirectToAction(nameof(Index), new { year = date.Value.Year, month = date.Value.Month });
                 }

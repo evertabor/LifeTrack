@@ -50,6 +50,14 @@ public class CreateTransactionInputModelValidationTests
 
         Assert.Contains(errors, r => r.MemberNames.Contains("Date"));
     }
+
+    [Fact]
+    public void Validate_MissingType_HasTypeError()
+    {
+        var errors = Validate(ValidInput() with { Type = null });
+
+        Assert.Contains(errors, r => r.MemberNames.Contains("Type"));
+    }
 }
 
 public class EditTransactionInputModelValidationTests
@@ -90,6 +98,14 @@ public class EditTransactionInputModelValidationTests
         var errors = Validate(ValidInput() with { CategoryId = null });
 
         Assert.Contains(errors, r => r.MemberNames.Contains("CategoryId"));
+    }
+
+    [Fact]
+    public void Validate_MissingType_HasTypeError()
+    {
+        var errors = Validate(ValidInput() with { Type = null });
+
+        Assert.Contains(errors, r => r.MemberNames.Contains("Type"));
     }
 }
 

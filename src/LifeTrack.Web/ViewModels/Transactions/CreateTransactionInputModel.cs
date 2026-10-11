@@ -11,7 +11,8 @@ public sealed record CreateTransactionInputModel
     [Required(ErrorMessage = "La categoría es obligatoria.")]
     public Guid? CategoryId { get; init; }
 
-    public bool Type { get; init; }
+    [Required(ErrorMessage = "El tipo es obligatorio.")]
+    public bool? Type { get; init; }
 
     [Required(ErrorMessage = "El importe es obligatorio.")]
     [Range(MinAmount, MaxAmount, ErrorMessage = "El importe debe ser mayor que 0.")]
