@@ -8,7 +8,8 @@ namespace LifeTrack.Application.Finance.Commands.ListMonthlyTransactions;
 public sealed class ListMonthlyTransactionsHandler(
     ITransactionRepository transactions,
     ICategoryRepository categories,
-    ICurrentUser currentUser) : IRequestHandler<ListMonthlyTransactionsQuery, MonthlyTransactionsResult>
+    ICurrentUser currentUser,
+    TimeProvider timeProvider) : IRequestHandler<ListMonthlyTransactionsQuery, MonthlyTransactionsResult>
 {
     public async Task<MonthlyTransactionsResult> Handle(ListMonthlyTransactionsQuery request, CancellationToken ct)
     {
@@ -17,7 +18,11 @@ public sealed class ListMonthlyTransactionsHandler(
             throw new BusinessRuleException("No se puede listar movimientos sin usuario autenticado.");
         }
 
-        if (request.Year is < Budget.MinYear or > Budget.MaxYear || request.Month is < Budget.MinMonth or > Budget.MaxMonth)
+        var today = timeProvider.Today();
+        var year = request.Year ?? today.Year;
+        var month = request.Month ?? today.Month;
+
+        if (year is < Budget.MinYear or > Budget.MaxYear || month is < Budget.MinMonth or > Budget.MaxMonth)
         {
             throw new BusinessRuleException("El periodo solicitado no es válido.");
         }
@@ -33,13 +38,8 @@ public sealed class ListMonthlyTransactionsHandler(
             }
         }
 
-        var from = new DateOnly(request.Year, request.Month, 1);
-        var items = await transactions.ListByPeriodAsync(userId, from, from.AddMonths(1), ct);
-
-        if (request.CategoryId.HasValue)
-        {
-            items = items.Where(t => t.CategoryId == request.CategoryId.Value).ToList();
-        }
+        var from = new DateOnly(year, month, 1);
+        var items = await transactions.ListByPeriodAsync(userId, from, from.AddMonths(1), ct, request.CategoryId);
 
         var names = (await categories.ListAsync(userId, ct)).ToDictionary(c => c.Id, c => c.Name);
 
@@ -68,8 +68,8 @@ public sealed class ListMonthlyTransactionsHandler(
             .ToList();
 
         return new MonthlyTransactionsResult(
-            request.Year,
-            request.Month,
+            year,
+            month,
             items.Where(t => t.Type == TransactionType.Income).Sum(t => t.Amount),
             expenses.Sum(t => t.Amount),
             byCategory,

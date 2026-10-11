@@ -1,4 +1,4 @@
-const formValidationComponent = (function () {
+(function () {
     "use strict";
 
     const SELECTORS = {

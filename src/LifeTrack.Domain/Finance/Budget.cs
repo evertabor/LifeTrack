@@ -2,6 +2,8 @@ using LifeTrack.Domain.Common;
 
 namespace LifeTrack.Domain.Finance;
 
+public sealed record BudgetPeriod(int Year, int Month);
+
 public sealed class Budget : Entity
 {
     public const decimal MaxLimit = 1_000_000_000m;
@@ -11,6 +13,11 @@ public sealed class Budget : Entity
     public const int MaxMonth = 12;
 
     private const int DecimalPlaces = 2;
+
+    private Budget()
+        : base(Guid.Empty)
+    {
+    }
 
     private Budget(
         Guid id,
@@ -41,8 +48,7 @@ public sealed class Budget : Entity
     public static Budget Create(
         Guid userId,
         Guid categoryId,
-        int year,
-        int month,
+        BudgetPeriod period,
         decimal limit)
     {
         if (userId == Guid.Empty)
@@ -55,10 +61,10 @@ public sealed class Budget : Entity
             throw new DomainException("La categoría es obligatoria.");
         }
 
-        ValidatePeriod(year, month);
+        ValidatePeriod(period.Year, period.Month);
         ValidateLimit(limit);
 
-        return new Budget(Guid.NewGuid(), userId, categoryId, year, month, limit);
+        return new Budget(Guid.NewGuid(), userId, categoryId, period.Year, period.Month, limit);
     }
 
     public void ChangeLimit(decimal limit)

@@ -31,7 +31,10 @@ public sealed class SetBudgetHandler(
             if (existing is null)
             {
                 await budgets.AddAsync(Budget.Create(
-                    currentUser.UserId.Value, request.CategoryId, request.Year, request.Month, request.Limit), ct);
+                    currentUser.UserId.Value,
+                    request.CategoryId,
+                    new BudgetPeriod(request.Year, request.Month),
+                    request.Limit), ct);
             }
             else
             {

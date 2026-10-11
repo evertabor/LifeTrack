@@ -1,6 +1,6 @@
 namespace LifeTrack.Web.Security;
 
-public class SecurityHeadersMiddleware(
+public sealed class SecurityHeadersMiddleware(
     RequestDelegate next,
     IConfiguration configuration)
 {

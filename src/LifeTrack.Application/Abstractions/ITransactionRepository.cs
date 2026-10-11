@@ -14,5 +14,6 @@ public interface ITransactionRepository
         Guid userId,
         DateOnly from,
         DateOnly toExclusive,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        Guid? categoryId = null);
 }

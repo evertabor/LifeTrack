@@ -23,6 +23,14 @@ public class CategoryTests
     }
 
     [Fact]
+    public void Create_WithNullName_ThrowsDomainException()
+    {
+        var userId = Guid.NewGuid();
+        var ex = Assert.Throws<DomainException>(() => Category.Create(null, userId));
+        Assert.Contains("obligatorio", ex.Message);
+    }
+
+    [Fact]
     public void Create_WithEmptyString_ThrowsDomainException()
     {
         var userId = Guid.NewGuid();

@@ -15,7 +15,7 @@ public class TransactionTests
         string? description = null,
         TransactionType type = TransactionType.Expense)
     {
-        return Transaction.Create(UserId, CategoryId, type, amount, date ?? Today, description, Today);
+        return Transaction.Create(UserId, new TransactionData(CategoryId, type, amount, date ?? Today, description), Today);
     }
 
     [Fact]
@@ -95,14 +95,14 @@ public class TransactionTests
     public void Create_WithEmptyUserId_ThrowsDomainException()
     {
         Assert.Throws<DomainException>(() =>
-            Transaction.Create(Guid.Empty, CategoryId, TransactionType.Expense, 10m, Today, null, Today));
+            Transaction.Create(Guid.Empty, new TransactionData(CategoryId, TransactionType.Expense, 10m, Today, null), Today));
     }
 
     [Fact]
     public void Create_WithEmptyCategoryId_ThrowsDomainException()
     {
         Assert.Throws<DomainException>(() =>
-            Transaction.Create(UserId, Guid.Empty, TransactionType.Expense, 10m, Today, null, Today));
+            Transaction.Create(UserId, new TransactionData(Guid.Empty, TransactionType.Expense, 10m, Today, null), Today));
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public class TransactionTests
         var otherCategory = Guid.NewGuid();
         var id = transaction.Id;
 
-        transaction.Update(otherCategory, TransactionType.Income, 100m, Today, "Sueldo", Today);
+        transaction.Update(new TransactionData(otherCategory, TransactionType.Income, 100m, Today, "Sueldo"), Today);
 
         Assert.Equal(id, transaction.Id);
         Assert.Equal(otherCategory, transaction.CategoryId);
@@ -127,7 +127,7 @@ public class TransactionTests
         var transaction = CreateValid();
 
         Assert.Throws<DomainException>(() =>
-            transaction.Update(CategoryId, TransactionType.Expense, 0m, Today, null, Today));
+            transaction.Update(new TransactionData(CategoryId, TransactionType.Expense, 0m, Today, null), Today));
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public class TransactionTests
         var transaction = CreateValid();
 
         Assert.Throws<DomainException>(() =>
-            transaction.Update(CategoryId, TransactionType.Expense, 10m, Today.AddDays(1), null, Today));
+            transaction.Update(new TransactionData(CategoryId, TransactionType.Expense, 10m, Today.AddDays(1), null), Today));
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class TransactionTests
         var transaction = CreateValid();
 
         Assert.Throws<DomainException>(() =>
-            transaction.Update(CategoryId, TransactionType.Expense, 10m, Today, new string('a', 201), Today));
+            transaction.Update(new TransactionData(CategoryId, TransactionType.Expense, 10m, Today, new string('a', 201)), Today));
     }
 
     [Fact]
@@ -154,6 +154,6 @@ public class TransactionTests
         var transaction = CreateValid();
 
         Assert.Throws<DomainException>(() =>
-            transaction.Update(Guid.Empty, TransactionType.Expense, 10m, Today, null, Today));
+            transaction.Update(new TransactionData(Guid.Empty, TransactionType.Expense, 10m, Today, null), Today));
     }
 }

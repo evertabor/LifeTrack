@@ -19,7 +19,7 @@ public class GetProfileHandlerTests
         var result = await handler.Handle(new GetProfileQuery(), CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Equal("test@example.com", result!.Email);
+        Assert.Equal("test@example.com", result.Email);
         Assert.Equal("Test User", result.DisplayName);
     }
 

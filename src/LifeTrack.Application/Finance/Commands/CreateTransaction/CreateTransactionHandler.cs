@@ -30,11 +30,12 @@ public sealed class CreateTransactionHandler(
 
             var transaction = Transaction.Create(
                 currentUser.UserId.Value,
-                request.CategoryId,
-                request.IsIncome ? TransactionType.Income : TransactionType.Expense,
-                request.Amount,
-                request.Date,
-                request.Description,
+                new TransactionData(
+                    request.CategoryId,
+                    request.IsIncome ? TransactionType.Income : TransactionType.Expense,
+                    request.Amount,
+                    request.Date,
+                    request.Description),
                 timeProvider.Today());
 
             await transactions.AddAsync(transaction, ct);

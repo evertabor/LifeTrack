@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using LifeTrack.Application.Abstractions;
 using LifeTrack.Application.Common;
 using LifeTrack.Infrastructure;
@@ -17,7 +18,11 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<AutoValidateAntiforgeryTokenAttribute>();
     options.Filters.Add<ActiveSectionFilter>();
 });
-builder.Services.AddMediatR(options => options.RegisterServicesFromAssembly(typeof(ApplicationAssemblyAnchor).Assembly));
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.LicenseKey = builder.Configuration["MediatR:LicenseKey"] ?? string.Empty;
+    cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyAnchor).Assembly);
+});
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -31,7 +36,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromHours(CookieLifetimeHours);
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 builder.Services.AddAuthorization(options =>
@@ -39,6 +44,20 @@ builder.Services.AddAuthorization(options =>
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+            }));
 });
 
 builder.Services.AddHttpContextAccessor();
@@ -49,6 +68,7 @@ var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
@@ -58,7 +78,13 @@ if (!app.Environment.IsEnvironment("Testing"))
 {
     app.UseHttpsRedirection();
 }
+
+app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
 app.UseStaticFiles();
+app.UseRouting();
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .WithTags("Health")
@@ -67,19 +93,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
 
 app.MapGet("/", () => Results.Redirect("/transactions"));
 
-app.UseRouting();
-app.UseAuthentication();
-app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
-app.UseAuthorization();
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-}
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllers();
 
 app.Run();
 

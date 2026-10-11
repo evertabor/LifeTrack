@@ -3,4 +3,4 @@ using MediatR;
 
 namespace LifeTrack.Application.Identity;
 
-public sealed record GetProfileQuery() : IQuery<UserProfileDto?>;
+public sealed record GetProfileQuery() : IQuery<UserProfileDto>;

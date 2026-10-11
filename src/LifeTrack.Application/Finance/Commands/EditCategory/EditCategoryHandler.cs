@@ -26,7 +26,7 @@ public sealed class EditCategoryHandler(
 
         try
         {
-            var normalizedName = request.Name.Trim();
+            var normalizedName = request.Name?.Trim() ?? string.Empty;
 
             if (normalizedName != category.Name &&
                 await repository.ExistsAsync(normalizedName, category.UserId, ct))

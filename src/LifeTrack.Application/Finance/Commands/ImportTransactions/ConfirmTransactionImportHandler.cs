@@ -24,6 +24,11 @@ public sealed class ConfirmTransactionImportHandler(
             throw new BusinessRuleException("El archivo está vacío.");
         }
 
+        if (System.Text.Encoding.UTF8.GetByteCount(request.Content) > TransactionCsvParser.MaxContentBytes)
+        {
+            throw new BusinessRuleException("El archivo supera el máximo de 1 MB.");
+        }
+
         var rows = TransactionCsvParser.ParseRows(request.Content);
 
         if (rows.Count == 0 || rows.Count > TransactionCsvParser.MaxRows)
@@ -42,7 +47,7 @@ public sealed class ConfirmTransactionImportHandler(
         foreach (var fields in rows)
         {
             lineNumber++;
-            var row = ImportRowValidator.Validate(lineNumber, fields, names, userId, today);
+            var row = ImportRowValidator.Validate(new ImportRow(lineNumber, fields), names, userId, today);
 
             if (!row.IsValid || row.Date is null)
             {
@@ -51,11 +56,12 @@ public sealed class ConfirmTransactionImportHandler(
 
             await transactions.AddAsync(Transaction.Create(
                 userId,
-                names[row.CategoryName.Trim()],
-                row.IsIncome ? TransactionType.Income : TransactionType.Expense,
-                row.Amount,
-                row.Date.Value,
-                row.Description,
+                new TransactionData(
+                    names[row.CategoryName.Trim()],
+                    row.IsIncome ? TransactionType.Income : TransactionType.Expense,
+                    row.Amount,
+                    row.Date.Value,
+                    row.Description),
                 today), ct);
             imported++;
         }

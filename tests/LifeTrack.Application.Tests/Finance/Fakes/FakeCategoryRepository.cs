@@ -15,7 +15,8 @@ public sealed class FakeCategoryRepository : ICategoryRepository
 
     public Task<bool> ExistsAsync(string normalizedName, Guid userId, CancellationToken cancellationToken)
     {
-        return Task.FromResult(_categories.Any(c => c.UserId == userId && c.Name == normalizedName));
+        return Task.FromResult(_categories.Any(c =>
+            c.UserId == userId && c.Name.Equals(normalizedName, StringComparison.OrdinalIgnoreCase)));
     }
 
     public Task<Category?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken)

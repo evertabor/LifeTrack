@@ -6,8 +6,14 @@ public sealed class Category : Entity
 {
     public const int NameMaxLength = 50;
 
-    public Guid UserId { get; }
+    public Guid UserId { get; private set; }
     public string Name { get; private set; }
+
+    private Category()
+        : base(Guid.Empty)
+    {
+        Name = string.Empty;
+    }
 
     private Category(Guid id, Guid userId, string name) : base(id)
     {
@@ -15,7 +21,7 @@ public sealed class Category : Entity
         Name = name;
     }
 
-    public static Category Create(string name, Guid userId)
+    public static Category Create(string? name, Guid userId)
     {
         var normalizedName = NormalizeName(name);
         if (string.IsNullOrEmpty(normalizedName))
@@ -29,7 +35,7 @@ public sealed class Category : Entity
         return new Category(Guid.NewGuid(), userId, normalizedName);
     }
 
-    public void EditName(string name)
+    public void EditName(string? name)
     {
         var normalizedName = NormalizeName(name);
         if (string.IsNullOrEmpty(normalizedName))
@@ -43,5 +49,5 @@ public sealed class Category : Entity
         Name = normalizedName;
     }
 
-    private static string NormalizeName(string name) => name.Trim();
+    private static string NormalizeName(string? name) => name?.Trim() ?? string.Empty;
 }

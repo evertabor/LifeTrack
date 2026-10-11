@@ -27,16 +27,12 @@ public sealed class TransactionsController(
     [HttpGet("")]
     public async Task<IActionResult> Index(int? year, int? month, Guid? categoryId, CancellationToken ct)
     {
-        var today = timeProvider.Today();
-        var selectedYear = year ?? today.Year;
-        var selectedMonth = month ?? today.Month;
-
         try
         {
-            var result = await sender.Send(new ListMonthlyTransactionsQuery(selectedYear, selectedMonth, categoryId), ct);
+            var result = await sender.Send(new ListMonthlyTransactionsQuery(year, month, categoryId), ct);
             var categories = await sender.Send(new ListCategoriesQuery(), ct);
-            var budgets = await sender.Send(new GetBudgetStatusQuery(selectedYear, selectedMonth), ct);
-            return View(TransactionListViewModel.From(result, categories, budgets, TempData["Message"] as string, null, null, categoryId));
+            var budgets = await sender.Send(new GetBudgetStatusQuery(result.Year, result.Month), ct);
+            return View(TransactionListViewModel.From(result, categories, budgets, new TransactionListOptions(TempData["Message"] as string, null, null, categoryId)));
         }
         catch (BusinessRuleException ex)
         {
@@ -46,12 +42,11 @@ public sealed class TransactionsController(
         catch (ResourceNotFoundException ex)
         {
             logger.LogWarning("Transaction list requested with unknown category {CategoryId}: {Message}", categoryId, ex.Message);
-            return RedirectToAction(nameof(Index), new { year = selectedYear, month = selectedMonth });
+            return RedirectToAction(nameof(Index));
         }
     }
 
     [HttpPost("create")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
         [FromForm(Name = "NewTransaction")] CreateTransactionInputModel input,
         CancellationToken ct)
@@ -65,7 +60,7 @@ public sealed class TransactionsController(
             if (categoryId is null || amount is null || date is null)
             {
                 ModelState.AddModelError(string.Empty, "Revisa los datos del formulario.");
-                return await RenderIndexAsync(date ?? timeProvider.Today(), input, null, null, ct);
+                return await RenderIndexAsync(new IndexRenderOptions(date ?? timeProvider.Today(), input, null, null), ct);
             }
 
             try
@@ -86,7 +81,7 @@ public sealed class TransactionsController(
             }
         }
 
-        return await RenderIndexAsync(input.Date ?? timeProvider.Today(), input, null, null, ct);
+        return await RenderIndexAsync(new IndexRenderOptions(input.Date ?? timeProvider.Today(), input, null, null), ct);
     }
 
     [HttpGet("{id:guid}/edit")]
@@ -106,7 +101,6 @@ public sealed class TransactionsController(
     }
 
     [HttpPost("{id:guid}/edit")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
         Guid id,
         [FromForm(Name = "Input")] EditTransactionInputModel input,
@@ -148,7 +142,6 @@ public sealed class TransactionsController(
     }
 
     [HttpPost("{id:guid}/delete")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         try
@@ -165,7 +158,6 @@ public sealed class TransactionsController(
     }
 
     [HttpPost("budgets")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> SetBudget(
         [FromForm(Name = "NewBudget")] SetBudgetInputModel input,
         CancellationToken ct)
@@ -201,11 +193,10 @@ public sealed class TransactionsController(
 
         var safeYear = input.Year is >= SetBudgetInputModel.MinYear and <= SetBudgetInputModel.MaxYear ? input.Year : timeProvider.Today().Year;
         var safeMonth = input.Month is >= SetBudgetInputModel.MinMonth and <= SetBudgetInputModel.MaxMonth ? input.Month : timeProvider.Today().Month;
-        return await RenderIndexAsync(new DateOnly(safeYear, safeMonth, 1), null, input, null, ct);
+        return await RenderIndexAsync(new IndexRenderOptions(new DateOnly(safeYear, safeMonth, 1), null, input, null), ct);
     }
 
     [HttpPost("import")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Import(IFormFile? file, CancellationToken ct)
     {
         if (file is null || file.Length == 0)
@@ -245,7 +236,6 @@ public sealed class TransactionsController(
     }
 
     [HttpPost("import/confirm")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ConfirmImport([FromForm] string? csvContent, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(csvContent))
@@ -267,20 +257,20 @@ public sealed class TransactionsController(
         }
     }
 
+    private sealed record IndexRenderOptions(
+        DateOnly Selected,
+        CreateTransactionInputModel? TransactionInput,
+        SetBudgetInputModel? BudgetInput,
+        Guid? CategoryId);
+
     private async Task<IActionResult> RenderIndexAsync(
-        DateOnly selected,
-        CreateTransactionInputModel? transactionInput,
-        SetBudgetInputModel? budgetInput,
-        Guid? categoryId,
+        IndexRenderOptions options,
         CancellationToken ct)
     {
         MonthlyTransactionsResult result;
         try
         {
-            var query = categoryId.HasValue
-                ? new ListMonthlyTransactionsQuery(selected.Year, selected.Month, categoryId)
-                : new ListMonthlyTransactionsQuery(selected.Year, selected.Month);
-            result = await sender.Send(query, ct);
+            result = await sender.Send(new ListMonthlyTransactionsQuery(options.Selected.Year, options.Selected.Month, options.CategoryId), ct);
         }
         catch (BusinessRuleException ex)
         {
@@ -289,12 +279,12 @@ public sealed class TransactionsController(
         }
         catch (ResourceNotFoundException ex)
         {
-            logger.LogWarning("Transaction list requested with unknown category {CategoryId}: {Message}", categoryId, ex.Message);
-            return RedirectToAction(nameof(Index), new { year = selected.Year, month = selected.Month });
+            logger.LogWarning("Transaction list requested with unknown category {CategoryId}: {Message}", options.CategoryId, ex.Message);
+            return RedirectToAction(nameof(Index), new { year = options.Selected.Year, month = options.Selected.Month });
         }
 
         var categories = await sender.Send(new ListCategoriesQuery(), ct);
-        var budgets = await sender.Send(new GetBudgetStatusQuery(selected.Year, selected.Month), ct);
-        return View(nameof(Index), TransactionListViewModel.From(result, categories, budgets, null, transactionInput, budgetInput, categoryId));
+        var budgets = await sender.Send(new GetBudgetStatusQuery(options.Selected.Year, options.Selected.Month), ct);
+        return View(nameof(Index), TransactionListViewModel.From(result, categories, budgets, new TransactionListOptions(null, options.TransactionInput, options.BudgetInput, options.CategoryId)));
     }
 }

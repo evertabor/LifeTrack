@@ -19,7 +19,6 @@ public sealed class AccountController(
 
     [HttpPost("Register")]
     [AllowAnonymous]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model, CancellationToken ct)
     {
         if (!ModelState.IsValid)
@@ -52,7 +51,6 @@ public sealed class AccountController(
 
     [HttpPost("Login")]
     [AllowAnonymous]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model, CancellationToken ct)
     {
         if (!ModelState.IsValid)
@@ -80,7 +78,6 @@ public sealed class AccountController(
 
     [HttpPost("Logout")]
     [AllowAnonymous]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout(CancellationToken ct)
     {
         await sender.Send(new LogoutCommand(), ct);
@@ -103,7 +100,6 @@ public sealed class AccountController(
     }
 
     [HttpPost("Profile")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Profile([FromForm(Name = "Input")] EditProfileInputModel input, CancellationToken ct)
     {
         if (ModelState.IsValid)

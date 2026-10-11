@@ -3,6 +3,7 @@ using LifeTrack.Application.Identity;
 using LifeTrack.Infrastructure.Identity;
 using LifeTrack.Infrastructure.Persistence;
 using LifeTrack.Infrastructure.Persistence.Repositories;
+using LifeTrack.Infrastructure.Time;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -37,7 +38,25 @@ public static class DependencyInjection
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IBudgetRepository, BudgetRepository>();
+        services.AddSingleton<TimeProvider>(CreateZonedTimeProvider(configuration));
 
         return services;
+    }
+
+    private static TimeProvider CreateZonedTimeProvider(IConfiguration configuration)
+    {
+        var timeZoneId = configuration["App:TimeZoneId"];
+
+        if (string.IsNullOrWhiteSpace(timeZoneId))
+        {
+            throw new InvalidOperationException("Missing required configuration 'App:TimeZoneId'.");
+        }
+
+        if (!TimeZoneInfo.TryFindSystemTimeZoneById(timeZoneId, out var zone) || zone is null)
+        {
+            throw new InvalidOperationException($"Unknown time zone '{timeZoneId}' in configuration 'App:TimeZoneId'.");
+        }
+
+        return new ZonedTimeProvider(TimeProvider.System, zone);
     }
 }

@@ -10,7 +10,7 @@ public class TransactionListViewModelTests
     {
         var result = new MonthlyTransactionsResult(2026, 10, 0m, 0m, [], []);
 
-        var viewModel = TransactionListViewModel.From(result, [], [], null);
+        var viewModel = TransactionListViewModel.From(result, [], [], new TransactionListOptions(null));
 
         Assert.Equal(Enumerable.Range(1, 12), viewModel.MonthOptions.Select(o => o.Month));
         Assert.Equal("Octubre", viewModel.MonthOptions.Single(o => o.IsSelected).Name);

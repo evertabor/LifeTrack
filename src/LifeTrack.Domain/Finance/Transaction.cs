@@ -2,12 +2,25 @@ using LifeTrack.Domain.Common;
 
 namespace LifeTrack.Domain.Finance;
 
+public sealed record TransactionData(
+    Guid CategoryId,
+    TransactionType Type,
+    decimal Amount,
+    DateOnly Date,
+    string? Description);
+
 public sealed class Transaction : Entity
 {
     public const int DescriptionMaxLength = 200;
     public const decimal MaxAmount = 1_000_000_000m;
 
     private const int DecimalPlaces = 2;
+
+    private Transaction()
+        : base(Guid.Empty)
+    {
+        Description = string.Empty;
+    }
 
     private Transaction(
         Guid id,
@@ -41,11 +54,7 @@ public sealed class Transaction : Entity
 
     public static Transaction Create(
         Guid userId,
-        Guid categoryId,
-        TransactionType type,
-        decimal amount,
-        DateOnly date,
-        string? description,
+        TransactionData data,
         DateOnly today)
     {
         if (userId == Guid.Empty)
@@ -53,35 +62,31 @@ public sealed class Transaction : Entity
             throw new DomainException("El usuario es obligatorio.");
         }
 
-        if (categoryId == Guid.Empty)
+        if (data.CategoryId == Guid.Empty)
         {
             throw new DomainException("La categoría es obligatoria.");
         }
 
-        var cleanDescription = Validate(type, amount, date, description, today);
+        var cleanDescription = Validate(data.Type, data.Amount, data.Date, data.Description, today);
 
-        return new Transaction(Guid.NewGuid(), userId, categoryId, type, amount, date, cleanDescription);
+        return new Transaction(Guid.NewGuid(), userId, data.CategoryId, data.Type, data.Amount, data.Date, cleanDescription);
     }
 
     public void Update(
-        Guid categoryId,
-        TransactionType type,
-        decimal amount,
-        DateOnly date,
-        string? description,
+        TransactionData data,
         DateOnly today)
     {
-        if (categoryId == Guid.Empty)
+        if (data.CategoryId == Guid.Empty)
         {
             throw new DomainException("La categoría es obligatoria.");
         }
 
-        var cleanDescription = Validate(type, amount, date, description, today);
+        var cleanDescription = Validate(data.Type, data.Amount, data.Date, data.Description, today);
 
-        CategoryId = categoryId;
-        Type = type;
-        Amount = amount;
-        Date = date;
+        CategoryId = data.CategoryId;
+        Type = data.Type;
+        Amount = data.Amount;
+        Date = data.Date;
         Description = cleanDescription;
     }
 

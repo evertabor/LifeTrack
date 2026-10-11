@@ -28,11 +28,13 @@ public sealed class FakeTransactionRepository : ITransactionRepository
         Guid userId,
         DateOnly from,
         DateOnly toExclusive,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Guid? categoryId = null)
     {
         return Task.FromResult<IReadOnlyList<Transaction>>(
             _transactions
-                .Where(t => t.UserId == userId && t.Date >= from && t.Date < toExclusive)
+                .Where(t => t.UserId == userId && t.Date >= from && t.Date < toExclusive
+                    && (!categoryId.HasValue || t.CategoryId == categoryId.Value))
                 .ToList());
     }
 }

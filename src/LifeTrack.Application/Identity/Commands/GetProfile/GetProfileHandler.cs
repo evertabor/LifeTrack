@@ -6,9 +6,9 @@ namespace LifeTrack.Application.Identity;
 
 public sealed class GetProfileHandler(
     IAccountService accountService,
-    ICurrentUser currentUser) : IRequestHandler<GetProfileQuery, UserProfileDto?>
+    ICurrentUser currentUser) : IRequestHandler<GetProfileQuery, UserProfileDto>
 {
-    public async Task<UserProfileDto?> Handle(GetProfileQuery request, CancellationToken cancellationToken)
+    public async Task<UserProfileDto> Handle(GetProfileQuery request, CancellationToken cancellationToken)
     {
         if (currentUser.UserId is null)
         {

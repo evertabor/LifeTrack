@@ -29,10 +29,18 @@ public sealed class TransactionRepository(
         Guid userId,
         DateOnly from,
         DateOnly toExclusive,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Guid? categoryId = null)
     {
-        return await context.Transactions
-            .Where(t => t.UserId == userId && t.Date >= from && t.Date < toExclusive)
+        var query = context.Transactions
+            .Where(t => t.UserId == userId && t.Date >= from && t.Date < toExclusive);
+
+        if (categoryId.HasValue)
+        {
+            query = query.Where(t => t.CategoryId == categoryId.Value);
+        }
+
+        return await query
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }

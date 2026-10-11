@@ -21,11 +21,11 @@ public class ListMonthlyTransactionsHandlerTests
         await categories.AddAsync(food, CancellationToken.None);
         await categories.AddAsync(transport, CancellationToken.None);
         var today = new DateOnly(2026, 10, 31);
-        transactions.AddAsync(Transaction.Create(userId, food.Id, TransactionType.Income, 1000m, new DateOnly(2026, 10, 5), null, today), CancellationToken.None).GetAwaiter().GetResult();
-        transactions.AddAsync(Transaction.Create(userId, food.Id, TransactionType.Expense, 250m, new DateOnly(2026, 10, 6), null, today), CancellationToken.None).GetAwaiter().GetResult();
-        transactions.AddAsync(Transaction.Create(userId, transport.Id, TransactionType.Expense, 150m, October15, null, today), CancellationToken.None).GetAwaiter().GetResult();
-        transactions.AddAsync(Transaction.Create(userId, food.Id, TransactionType.Expense, 500m, new DateOnly(2026, 9, 20), null, today), CancellationToken.None).GetAwaiter().GetResult();
-        var handler = new ListMonthlyTransactionsHandler(transactions, categories, new FakeCurrentUser(userId));
+        transactions.AddAsync(Transaction.Create(userId, new TransactionData(food.Id, TransactionType.Income, 1000m, new DateOnly(2026, 10, 5), null), today), CancellationToken.None).GetAwaiter().GetResult();
+        transactions.AddAsync(Transaction.Create(userId, new TransactionData(food.Id, TransactionType.Expense, 250m, new DateOnly(2026, 10, 6), null), today), CancellationToken.None).GetAwaiter().GetResult();
+        transactions.AddAsync(Transaction.Create(userId, new TransactionData(transport.Id, TransactionType.Expense, 150m, October15, null), today), CancellationToken.None).GetAwaiter().GetResult();
+        transactions.AddAsync(Transaction.Create(userId, new TransactionData(food.Id, TransactionType.Expense, 500m, new DateOnly(2026, 9, 20), null), today), CancellationToken.None).GetAwaiter().GetResult();
+        var handler = new ListMonthlyTransactionsHandler(transactions, categories, new FakeCurrentUser(userId), new FixedTimeProvider(today));
         return (handler, userId, food.Id, transport.Id);
     }
 
@@ -91,7 +91,7 @@ public class ListMonthlyTransactionsHandlerTests
         var categories = new FakeCategoryRepository();
         var foreign = Category.Create("Comida", arranged.UserId);
         await categories.AddAsync(foreign, CancellationToken.None);
-        var handler = new ListMonthlyTransactionsHandler(transactions, categories, new FakeCurrentUser(attacker));
+        var handler = new ListMonthlyTransactionsHandler(transactions, categories, new FakeCurrentUser(attacker), new FixedTimeProvider(new DateOnly(2026, 10, 31)));
 
         await Assert.ThrowsAsync<ResourceNotFoundException>(
             () => handler.Handle(new ListMonthlyTransactionsQuery(2026, 10, foreign.Id), CancellationToken.None));
@@ -107,10 +107,29 @@ public class ListMonthlyTransactionsHandlerTests
     }
 
     [Fact]
+    public async Task Handle_NullPeriod_DefaultsToCurrentMonth()
+    {
+        var userId = Guid.NewGuid();
+        var transactions = new FakeTransactionRepository();
+        var categories = new FakeCategoryRepository();
+        var today = new DateOnly(2026, 10, 31);
+        await transactions.AddAsync(
+            Transaction.Create(userId, new TransactionData(Guid.NewGuid(), TransactionType.Expense, 25m, new DateOnly(2026, 10, 6), null), today),
+            CancellationToken.None);
+        var handler = new ListMonthlyTransactionsHandler(transactions, categories, new FakeCurrentUser(userId), new FixedTimeProvider(today));
+
+        var result = await handler.Handle(new ListMonthlyTransactionsQuery(null, null), CancellationToken.None);
+
+        Assert.Equal(2026, result.Year);
+        Assert.Equal(10, result.Month);
+        Assert.Single(result.Transactions);
+    }
+
+    [Fact]
     public async Task Handle_NoAuthenticatedUser_ThrowsBusinessRuleException()
     {
         var handler = new ListMonthlyTransactionsHandler(
-            new FakeTransactionRepository(), new FakeCategoryRepository(), new FakeCurrentUser(null));
+            new FakeTransactionRepository(), new FakeCategoryRepository(), new FakeCurrentUser(null), new FixedTimeProvider(new DateOnly(2026, 10, 31)));
 
         var ex = await Assert.ThrowsAsync<BusinessRuleException>(
             () => handler.Handle(new ListMonthlyTransactionsQuery(2026, 10), CancellationToken.None));

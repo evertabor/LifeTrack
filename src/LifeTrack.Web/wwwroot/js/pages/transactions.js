@@ -1,4 +1,4 @@
-const transactionsPageScript = (function () {
+(function () {
     "use strict";
 
     const SELECTORS = {

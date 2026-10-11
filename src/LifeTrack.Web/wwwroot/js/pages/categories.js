@@ -1,4 +1,4 @@
-const categoriesPageScript = (function () {
+(function () {
     "use strict";
 
     const SELECTORS = {

@@ -5,6 +5,7 @@ namespace LifeTrack.Application.Finance.Commands.ImportTransactions;
 public static class TransactionCsvParser
 {
     public const int MaxRows = 500;
+    public const int MaxContentBytes = 1024 * 1024;
 
     public static IReadOnlyList<string[]> ParseRows(string content) =>
         new RowReader(content, DetectSeparator(content)).ReadAll();

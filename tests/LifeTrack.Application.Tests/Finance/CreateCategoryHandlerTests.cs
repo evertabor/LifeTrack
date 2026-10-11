@@ -71,6 +71,23 @@ public class CreateCategoryHandlerTests
     }
 
     [Fact]
+    public async Task Handle_DuplicateDifferentCase_ThrowsBusinessRuleException()
+    {
+        var userId = Guid.NewGuid();
+        var repository = new Fakes.FakeCategoryRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var currentUser = new FakeCurrentUser(userId);
+        var existingCategory = Category.Create("Comida", userId);
+        await repository.AddAsync(existingCategory, CancellationToken.None);
+        var handler = new CreateCategoryHandler(repository, unitOfWork, currentUser);
+        var command = new CreateCategoryCommand("COMIDA");
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(
+            () => handler.Handle(command, CancellationToken.None));
+        Assert.Equal("Ya existe una categoría con ese nombre.", ex.Message);
+    }
+
+    [Fact]
     public async Task Handle_UsesCurrentUserId_NeverRequestId()
     {
         var userId = Guid.NewGuid();

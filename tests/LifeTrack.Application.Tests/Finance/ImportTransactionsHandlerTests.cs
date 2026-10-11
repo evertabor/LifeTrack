@@ -152,6 +152,18 @@ public class ConfirmTransactionImportHandlerTests
     }
 
     [Fact]
+    public async Task Handle_OversizedContent_ThrowsBusinessRuleAndSavesNothing()
+    {
+        var arranged = await ArrangeAsync();
+        var content = new string('a', TransactionCsvParser.MaxContentBytes + 1);
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(
+            () => arranged.Handler.Handle(new ConfirmTransactionImportCommand(content), CancellationToken.None));
+        Assert.Contains("1 MB", ex.Message);
+        Assert.Equal(0, arranged.UnitOfWork.SaveCount);
+    }
+
+    [Fact]
     public async Task Handle_NoValidRows_ThrowsBusinessRuleAndSavesNothing()
     {
         var arranged = await ArrangeAsync();

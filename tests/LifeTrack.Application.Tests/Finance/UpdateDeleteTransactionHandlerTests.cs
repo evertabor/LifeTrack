@@ -19,7 +19,7 @@ public class UpdateTransactionHandlerTests
         var unitOfWork = new FakeUnitOfWork();
         var category = Category.Create("Comida", owner);
         categories.AddAsync(category, CancellationToken.None).GetAwaiter().GetResult();
-        var movement = Transaction.Create(owner, category.Id, TransactionType.Expense, 25.50m, Today, "Compra", Today);
+        var movement = Transaction.Create(owner, new TransactionData(category.Id, TransactionType.Expense, 25.50m, Today, "Compra"), Today);
         transactions.AddAsync(movement, CancellationToken.None).GetAwaiter().GetResult();
         var handler = new UpdateTransactionHandler(transactions, categories, unitOfWork, new FakeCurrentUser(owner), new FixedTimeProvider(Today));
         return (handler, transactions, unitOfWork, owner, category.Id, movement);
@@ -121,7 +121,7 @@ public class DeleteTransactionHandlerTests
         var userId = Guid.NewGuid();
         var transactions = new FakeTransactionRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var movement = Transaction.Create(userId, Guid.NewGuid(), TransactionType.Expense, 10m, Today, null, Today);
+        var movement = Transaction.Create(userId, new TransactionData(Guid.NewGuid(), TransactionType.Expense, 10m, Today, null), Today);
         await transactions.AddAsync(movement, CancellationToken.None);
         var handler = new DeleteTransactionHandler(transactions, unitOfWork, new FakeCurrentUser(userId));
 
@@ -137,7 +137,7 @@ public class DeleteTransactionHandlerTests
         var owner = Guid.NewGuid();
         var transactions = new FakeTransactionRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var movement = Transaction.Create(owner, Guid.NewGuid(), TransactionType.Expense, 10m, Today, null, Today);
+        var movement = Transaction.Create(owner, new TransactionData(Guid.NewGuid(), TransactionType.Expense, 10m, Today, null), Today);
         await transactions.AddAsync(movement, CancellationToken.None);
         var handler = new DeleteTransactionHandler(transactions, unitOfWork, new FakeCurrentUser(Guid.NewGuid()));
 

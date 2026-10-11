@@ -36,11 +36,12 @@ public sealed class UpdateTransactionHandler(
             }
 
             transaction.Update(
-                request.CategoryId,
-                request.IsIncome ? TransactionType.Income : TransactionType.Expense,
-                request.Amount,
-                request.Date,
-                request.Description,
+                new TransactionData(
+                    request.CategoryId,
+                    request.IsIncome ? TransactionType.Income : TransactionType.Expense,
+                    request.Amount,
+                    request.Date,
+                    request.Description),
                 timeProvider.Today());
 
             await unitOfWork.SaveChangesAsync(ct);

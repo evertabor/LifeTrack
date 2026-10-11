@@ -87,11 +87,11 @@ public class GetBudgetStatusHandlerTests
         var categories = new FakeCategoryRepository();
         var food = Category.Create("Comida", userId);
         await categories.AddAsync(food, CancellationToken.None);
-        budgets.AddAsync(Budget.Create(userId, food.Id, 2026, 10, 100m), CancellationToken.None).GetAwaiter().GetResult();
+        budgets.AddAsync(Budget.Create(userId, food.Id, new BudgetPeriod(2026, 10), 100m), CancellationToken.None).GetAwaiter().GetResult();
         var today = new DateOnly(2026, 10, 31);
         if (foodSpent > 0)
         {
-            transactions.AddAsync(Transaction.Create(userId, food.Id, TransactionType.Expense, foodSpent, new DateOnly(2026, 10, 6), null, today), CancellationToken.None).GetAwaiter().GetResult();
+            transactions.AddAsync(Transaction.Create(userId, new TransactionData(food.Id, TransactionType.Expense, foodSpent, new DateOnly(2026, 10, 6), null), today), CancellationToken.None).GetAwaiter().GetResult();
         }
 
         var handler = new GetBudgetStatusHandler(budgets, transactions, categories, new FakeCurrentUser(userId));

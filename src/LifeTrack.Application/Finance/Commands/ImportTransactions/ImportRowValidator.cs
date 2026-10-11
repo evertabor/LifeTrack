@@ -5,6 +5,8 @@ using LifeTrack.Domain.Finance;
 
 namespace LifeTrack.Application.Finance.Commands.ImportTransactions;
 
+public sealed record ImportRow(int LineNumber, string[] Fields);
+
 public static class ImportRowValidator
 {
     private static readonly CultureInfo Spanish = new("es-ES");
@@ -12,12 +14,13 @@ public static class ImportRowValidator
     private const int ColumnCount = 5;
 
     public static ImportPreviewRowDto Validate(
-        int lineNumber,
-        string[] fields,
+        ImportRow row,
         IReadOnlyDictionary<string, Guid> categoriesByName,
         Guid userId,
         DateOnly today)
     {
+        var lineNumber = row.LineNumber;
+        var fields = row.Fields;
         if (fields.Length != ColumnCount)
         {
             return Invalid(lineNumber, $"La fila debe tener {ColumnCount} columnas: fecha, categoría, tipo, importe y descripción.");
@@ -48,11 +51,12 @@ public static class ImportRowValidator
         {
             var movement = Transaction.Create(
                 userId,
-                categoryId,
-                isIncome ? TransactionType.Income : TransactionType.Expense,
-                amount,
-                date,
-                fields[4],
+                new TransactionData(
+                    categoryId,
+                    isIncome ? TransactionType.Income : TransactionType.Expense,
+                    amount,
+                    date,
+                    fields[4]),
                 today);
 
             return new ImportPreviewRowDto(

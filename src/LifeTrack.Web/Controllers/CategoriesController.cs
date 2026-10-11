@@ -25,7 +25,6 @@ public sealed class CategoriesController(
     }
 
     [HttpPost("create")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
         [FromForm] CreateCategoryInputModel input,
         CancellationToken ct)
@@ -66,7 +65,6 @@ public sealed class CategoriesController(
     }
 
     [HttpPost("{id:guid}/edit")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
         Guid id,
         [FromForm] EditCategoryInputModel input,
@@ -94,7 +92,6 @@ public sealed class CategoriesController(
     }
 
     [HttpPost("{id:guid}/delete")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         try

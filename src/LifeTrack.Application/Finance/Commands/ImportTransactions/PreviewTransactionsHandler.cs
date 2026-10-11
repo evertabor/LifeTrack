@@ -45,7 +45,7 @@ public sealed class PreviewTransactionsHandler(
         foreach (var fields in rows)
         {
             lineNumber++;
-            var row = ImportRowValidator.Validate(lineNumber, fields, names, userId, today);
+            var row = ImportRowValidator.Validate(new ImportRow(lineNumber, fields), names, userId, today);
 
             if (row.IsValid)
             {
