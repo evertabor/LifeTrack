@@ -9,6 +9,8 @@ public static class ImportRowValidator
 {
     private static readonly CultureInfo Spanish = new("es-ES");
 
+    private const int ColumnCount = 5;
+
     public static ImportPreviewRowDto Validate(
         int lineNumber,
         string[] fields,
@@ -16,9 +18,9 @@ public static class ImportRowValidator
         Guid userId,
         DateOnly today)
     {
-        if (fields.Length != 5)
+        if (fields.Length != ColumnCount)
         {
-            return Invalid(lineNumber, "La fila debe tener 5 columnas: fecha, categoría, tipo, importe y descripción.");
+            return Invalid(lineNumber, $"La fila debe tener {ColumnCount} columnas: fecha, categoría, tipo, importe y descripción.");
         }
 
         if (!TryParseDate(fields[0], out var date))

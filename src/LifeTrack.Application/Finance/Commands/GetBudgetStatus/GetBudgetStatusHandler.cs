@@ -12,6 +12,7 @@ public sealed class GetBudgetStatusHandler(
     ICurrentUser currentUser) : IRequestHandler<GetBudgetStatusQuery, IReadOnlyList<BudgetStatusDto>>
 {
     public const decimal WarningPercent = 80m;
+    public const decimal FullPercent = 100m;
 
     public async Task<IReadOnlyList<BudgetStatusDto>> Handle(GetBudgetStatusQuery request, CancellationToken ct)
     {
@@ -20,7 +21,7 @@ public sealed class GetBudgetStatusHandler(
             throw new BusinessRuleException("No se puede consultar presupuestos sin usuario autenticado.");
         }
 
-        if (request.Year is < Budget.MinYear or > Budget.MaxYear || request.Month is < 1 or > 12)
+        if (request.Year is < Budget.MinYear or > Budget.MaxYear || request.Month is < Budget.MinMonth or > Budget.MaxMonth)
         {
             throw new BusinessRuleException("El periodo solicitado no es válido.");
         }
@@ -44,8 +45,8 @@ public sealed class GetBudgetStatusHandler(
                 var spent = movements
                     .Where(t => t.CategoryId == budget.CategoryId && t.Type == TransactionType.Expense)
                     .Sum(t => t.Amount);
-                var percent = spent / budget.Limit * 100m;
-                var state = percent >= 100m ? "exceeded" : percent >= WarningPercent ? "warning" : "ok";
+                var percent = spent / budget.Limit * FullPercent;
+                var state = percent >= FullPercent ? "exceeded" : percent >= WarningPercent ? "warning" : "ok";
                 return new BudgetStatusDto(
                     budget.CategoryId,
                     names.GetValueOrDefault(budget.CategoryId, "Sin categoría"),

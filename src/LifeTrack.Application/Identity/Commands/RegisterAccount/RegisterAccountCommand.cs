@@ -3,4 +3,4 @@ using MediatR;
 
 namespace LifeTrack.Application.Identity;
 
-public sealed record RegisterAccountCommand(string Email, string Password) : ICommand<RegisterAccountResult>;
+public sealed record RegisterAccountCommand(string Email, string Password, string? DisplayName, string? PhoneNumber) : ICommand<RegisterAccountResult>;

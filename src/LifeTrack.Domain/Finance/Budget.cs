@@ -7,6 +7,10 @@ public sealed class Budget : Entity
     public const decimal MaxLimit = 1_000_000_000m;
     public const int MinYear = 2000;
     public const int MaxYear = 2100;
+    public const int MinMonth = 1;
+    public const int MaxMonth = 12;
+
+    private const int DecimalPlaces = 2;
 
     private Budget(
         Guid id,
@@ -65,7 +69,7 @@ public sealed class Budget : Entity
 
     private static void ValidatePeriod(int year, int month)
     {
-        if (year < MinYear || year > MaxYear || month < 1 || month > 12)
+        if (year < MinYear || year > MaxYear || month < MinMonth || month > MaxMonth)
         {
             throw new DomainException("El periodo del presupuesto no es válido.");
         }
@@ -78,9 +82,9 @@ public sealed class Budget : Entity
             throw new DomainException("El límite debe ser mayor que 0 y no superar 1.000.000.000.");
         }
 
-        if (decimal.Round(limit, 2) != limit)
+        if (decimal.Round(limit, DecimalPlaces) != limit)
         {
-            throw new DomainException("El límite admite como máximo 2 decimales.");
+            throw new DomainException($"El límite admite como máximo {DecimalPlaces} decimales.");
         }
     }
 }

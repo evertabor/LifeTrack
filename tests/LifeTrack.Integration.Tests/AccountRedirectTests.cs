@@ -116,6 +116,7 @@ public class AccountRedirectTests : IClassFixture<RedirectWebApplicationFactory>
         {
             ["Email"] = $"register-{Guid.NewGuid():N}@example.com",
             ["Password"] = Password,
+            ["ConfirmPassword"] = Password,
             ["__RequestVerificationToken"] = token
         }));
 

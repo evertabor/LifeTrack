@@ -61,7 +61,7 @@
                 </div>
                 <div class="app-form-field">
                     <label asp-for="NewTransaction.Description" class="form-label">Descripción</label>
-                    <input asp-for="NewTransaction.Description" class="form-control" maxlength="200" autocomplete="off" aria-describedby="transaction-description-help" />
+                    <input asp-for="NewTransaction.Description" class="form-control" maxlength="@CreateTransactionInputModel.DescriptionMaxLength" autocomplete="off" aria-describedby="transaction-description-help" />
                     <div id="transaction-description-help" class="form-text">Opcional, máximo 200 caracteres.</div>
                     <span asp-validation-for="NewTransaction.Description" class="field-validation-error"></span>
                 </div>

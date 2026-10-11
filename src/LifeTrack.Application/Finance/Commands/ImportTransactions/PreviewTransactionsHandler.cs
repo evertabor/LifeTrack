@@ -30,7 +30,7 @@ public sealed class PreviewTransactionsHandler(
 
         if (rows.Count > TransactionCsvParser.MaxRows)
         {
-            throw new BusinessRuleException("El archivo supera el máximo de 500 filas.");
+            throw new BusinessRuleException($"El archivo supera el máximo de {TransactionCsvParser.MaxRows} filas.");
         }
 
         var userId = currentUser.UserId.Value;

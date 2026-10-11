@@ -12,12 +12,26 @@ public class RegisterAccountHandlerTests
             new AccountOperationResult(true, null),
             new LoginOperationResult(false, "Irrelevant"));
         var handler = new RegisterAccountHandler(fakeService);
-        var command = new RegisterAccountCommand("test@example.com", "VeryStrongPassword123!");
+        var command = new RegisterAccountCommand("test@example.com", "VeryStrongPassword123!", "Test User", null);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
         Assert.True(result.Succeeded);
         Assert.Null(result.Errors);
+    }
+
+    [Fact]
+    public async Task RegisterAccountHandler_ValidInput_ForwardsProfileFields()
+    {
+        var fakeService = new FakeAccountService(
+            new AccountOperationResult(true, null),
+            new LoginOperationResult(false, "Irrelevant"));
+        var handler = new RegisterAccountHandler(fakeService);
+        var command = new RegisterAccountCommand("test@example.com", "VeryStrongPassword123!", "Test User", "600123456");
+
+        await handler.Handle(command, CancellationToken.None);
+
+        Assert.Equal(("test@example.com", "VeryStrongPassword123!", "Test User", "600123456"), fakeService.LastRegister);
     }
 
     [Fact]
@@ -28,7 +42,7 @@ public class RegisterAccountHandlerTests
             new AccountOperationResult(false, duplicateErrors),
             new LoginOperationResult(false, "Irrelevant"));
         var handler = new RegisterAccountHandler(fakeService);
-        var command = new RegisterAccountCommand("test@example.com", "VeryStrongPassword123!");
+        var command = new RegisterAccountCommand("test@example.com", "VeryStrongPassword123!", null, null);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
@@ -45,7 +59,7 @@ public class RegisterAccountHandlerTests
             new AccountOperationResult(false, passwordErrors),
             new LoginOperationResult(false, "Irrelevant"));
         var handler = new RegisterAccountHandler(fakeService);
-        var command = new RegisterAccountCommand("test@example.com", "weak");
+        var command = new RegisterAccountCommand("test@example.com", "weak", null, null);
 
         var result = await handler.Handle(command, CancellationToken.None);
 

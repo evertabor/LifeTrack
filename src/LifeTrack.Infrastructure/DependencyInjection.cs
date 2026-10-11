@@ -12,6 +12,10 @@ namespace LifeTrack.Infrastructure;
 
 public static class DependencyInjection
 {
+    private const int MinPasswordLength = 12;
+    private const int MaxFailedAccessAttempts = 5;
+    private const int LockoutMinutes = 5;
+
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(options =>
@@ -19,12 +23,13 @@ public static class DependencyInjection
 
         services.AddIdentityCore<ApplicationUser>(options =>
         {
-            options.Password.RequiredLength = 12;
-            options.Lockout.MaxFailedAccessAttempts = 5;
-            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            options.Password.RequiredLength = MinPasswordLength;
+            options.Lockout.MaxFailedAccessAttempts = MaxFailedAccessAttempts;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(LockoutMinutes);
         })
         .AddUserManager<UserManager<ApplicationUser>>()
         .AddSignInManager<SignInManager<ApplicationUser>>()
+        .AddClaimsPrincipalFactory<ApplicationClaimsFactory>()
         .AddEntityFrameworkStores<AppDbContext>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();

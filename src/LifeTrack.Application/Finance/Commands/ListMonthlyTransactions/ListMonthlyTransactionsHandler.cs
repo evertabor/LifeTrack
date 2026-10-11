@@ -17,7 +17,7 @@ public sealed class ListMonthlyTransactionsHandler(
             throw new BusinessRuleException("No se puede listar movimientos sin usuario autenticado.");
         }
 
-        if (request.Year is < 2000 or > 2100 || request.Month is < 1 or > 12)
+        if (request.Year is < Budget.MinYear or > Budget.MaxYear || request.Month is < Budget.MinMonth or > Budget.MaxMonth)
         {
             throw new BusinessRuleException("El periodo solicitado no es válido.");
         }

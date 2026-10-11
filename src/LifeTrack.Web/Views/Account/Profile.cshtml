@@ -1,0 +1,43 @@
+    @model LifeTrack.Web.ViewModels.Account.ProfileViewModel
+
+@{
+    Layout = "_AuthenticatedLayout";
+    ViewData["Title"] = "Mi perfil";
+    ViewData["Breadcrumb"] = "Cuenta / Mi perfil";
+}
+
+<section class="app-auth" aria-labelledby="profile-title">
+    <div class="app-auth__shell">
+        <div class="app-auth__card">
+            <header class="app-auth__header">
+                <p class="app-auth__eyebrow">Cuenta</p>
+                <h1 id="profile-title">Mi perfil</h1>
+                <p class="app-auth__intro">Solo puedes editar tus datos personales.</p>
+            </header>
+            @if (Model.HasSuccessMessage)
+            {
+                <div class="app-alert app-alert--success" role="status">@Model.SuccessMessage</div>
+            }
+            <dl class="app-form-field">
+                <dt class="form-label">Correo electrónico</dt>
+                <dd>@Model.Email</dd>
+            </dl>
+        <form class="app-auth__form" method="post" asp-controller="Account" asp-action="Profile" data-app-validate novalidate aria-labelledby="profile-title">
+            <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+            <div class="app-form-field">
+                <label asp-for="Input.DisplayName" class="form-label">Nombre para mostrar</label>
+                <input asp-for="Input.DisplayName" class="form-control" type="text" autocomplete="nickname" aria-describedby="DisplayName-error" />
+                <span asp-validation-for="Input.DisplayName" id="DisplayName-error" class="field-validation-error"></span>
+            </div>
+            <div class="app-form-field">
+                <label asp-for="Input.PhoneNumber" class="form-label">Teléfono</label>
+                <input asp-for="Input.PhoneNumber" class="form-control" type="tel" autocomplete="tel" aria-describedby="PhoneNumber-help PhoneNumber-error" />
+                <div id="PhoneNumber-help" class="form-text">Opcional. No se verifica por SMS.</div>
+                <span asp-validation-for="Input.PhoneNumber" id="PhoneNumber-error" class="field-validation-error"></span>
+            </div>
+            <button class="btn btn-primary app-auth__submit" type="submit">Guardar cambios</button>
+            <p class="app-auth__switch"><a asp-controller="Transactions" asp-action="Index">Volver a movimientos</a></p>
+        </form>
+        </div>
+    </div>
+</section>

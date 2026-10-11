@@ -20,10 +20,27 @@
                 <span asp-validation-for="Email" id="Email-error" class="field-validation-error"></span>
             </div>
             <div class="app-form-field">
+                <label asp-for="DisplayName" class="form-label">Nombre para mostrar</label>
+                <input asp-for="DisplayName" class="form-control" type="text" autocomplete="nickname" aria-describedby="DisplayName-help DisplayName-error" />
+                <div id="DisplayName-help" class="form-text">Opcional. Así aparecerá tu nombre.</div>
+                <span asp-validation-for="DisplayName" id="DisplayName-error" class="field-validation-error"></span>
+            </div>
+            <div class="app-form-field">
+                <label asp-for="PhoneNumber" class="form-label">Teléfono</label>
+                <input asp-for="PhoneNumber" class="form-control" type="tel" autocomplete="tel" aria-describedby="PhoneNumber-help PhoneNumber-error" />
+                <div id="PhoneNumber-help" class="form-text">Opcional. No se verifica por SMS.</div>
+                <span asp-validation-for="PhoneNumber" id="PhoneNumber-error" class="field-validation-error"></span>
+            </div>
+            <div class="app-form-field">
                 <label asp-for="Password" class="form-label">Contraseña</label>
-                <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" aria-describedby="Password-help Password-error" minlength="12" required />
-                <div id="Password-help" class="form-text">Usa al menos 12 caracteres.</div>
+                <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" aria-describedby="Password-help Password-error" minlength="@RegisterViewModel.MinPasswordLength" required />
+                <div id="Password-help" class="form-text">@Model.PasswordHelpText</div>
                 <span asp-validation-for="Password" id="Password-error" class="field-validation-error"></span>
+            </div>
+            <div class="app-form-field">
+                <label asp-for="ConfirmPassword" class="form-label">Confirmar contraseña</label>
+                <input asp-for="ConfirmPassword" class="form-control" type="password" autocomplete="new-password" aria-describedby="ConfirmPassword-error" required />
+                <span asp-validation-for="ConfirmPassword" id="ConfirmPassword-error" class="field-validation-error"></span>
             </div>
             @if (!string.IsNullOrEmpty(Model.ErrorMessage))
             {

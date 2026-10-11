@@ -33,6 +33,23 @@ public sealed record TransactionCategoryExpense
         };
 }
 
+public sealed record TransactionMonthOption
+{
+    private static readonly CultureInfo Spanish = new("es-ES");
+
+    public int Month { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public bool IsSelected { get; init; }
+
+    public static TransactionMonthOption From(int month, int selectedMonth) =>
+        new()
+        {
+            Month = month,
+            Name = Spanish.TextInfo.ToTitleCase(Spanish.DateTimeFormat.MonthNames[month - 1]),
+            IsSelected = month == selectedMonth
+        };
+}
+
 public sealed record TransactionListViewModel
 {
     private static readonly CultureInfo Spanish = new("es-ES");
@@ -47,6 +64,7 @@ public sealed record TransactionListViewModel
     public IReadOnlyList<TransactionRowViewModel> Transactions { get; init; } = [];
     public IReadOnlyList<TransactionCategoryOption> CategoryOptions { get; init; } = [];
     public IReadOnlyList<TransactionCategoryOption> CreateCategoryOptions { get; init; } = [];
+    public IReadOnlyList<TransactionMonthOption> MonthOptions { get; init; } = [];
     public Guid? SelectedCategoryId { get; init; }
     public CreateTransactionInputModel NewTransaction { get; init; } = new();
     public SetBudgetInputModel NewBudget { get; init; } = new();
@@ -72,6 +90,11 @@ public sealed record TransactionListViewModel
         Guid? selectedCategoryId = null)
     {
         var current = newTransaction ?? new();
+        var monthOptions = new List<TransactionMonthOption>();
+        for (var month = SetBudgetInputModel.MinMonth; month <= SetBudgetInputModel.MaxMonth; month++)
+        {
+            monthOptions.Add(TransactionMonthOption.From(month, result.Month));
+        }
         return new()
         {
             Year = result.Year,
@@ -84,6 +107,7 @@ public sealed record TransactionListViewModel
             Transactions = result.Transactions.Select(TransactionRowViewModel.From).ToList(),
             CategoryOptions = categories.Select(c => TransactionCategoryOption.From(c, selectedCategoryId)).ToList(),
             CreateCategoryOptions = categories.Select(c => TransactionCategoryOption.From(c, current.CategoryId == Guid.Empty ? null : current.CategoryId)).ToList(),
+            MonthOptions = monthOptions,
             SelectedCategoryId = selectedCategoryId,
             NewTransaction = current,
             NewBudget = newBudget ?? new() { Year = result.Year, Month = result.Month },

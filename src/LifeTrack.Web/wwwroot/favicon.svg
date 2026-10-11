@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LifeTrack">
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#C2410C"/>
+  <path d="M11 39 H21 L26 27 L32 47 L38 33 H43 L53 23" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M53 23 L44 24 M53 23 L52 32" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+</svg>

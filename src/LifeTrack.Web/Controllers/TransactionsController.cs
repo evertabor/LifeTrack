@@ -199,8 +199,8 @@ public sealed class TransactionsController(
             }
         }
 
-        var safeYear = input.Year is >= 2000 and <= 2100 ? input.Year : timeProvider.Today().Year;
-        var safeMonth = input.Month is >= 1 and <= 12 ? input.Month : timeProvider.Today().Month;
+        var safeYear = input.Year is >= SetBudgetInputModel.MinYear and <= SetBudgetInputModel.MaxYear ? input.Year : timeProvider.Today().Year;
+        var safeMonth = input.Month is >= SetBudgetInputModel.MinMonth and <= SetBudgetInputModel.MaxMonth ? input.Month : timeProvider.Today().Month;
         return await RenderIndexAsync(new DateOnly(safeYear, safeMonth, 1), null, input, null, ct);
     }
 

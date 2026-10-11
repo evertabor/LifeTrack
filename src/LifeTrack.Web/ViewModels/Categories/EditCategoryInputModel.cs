@@ -4,7 +4,9 @@ namespace LifeTrack.Web.ViewModels.Categories;
 
 public sealed record EditCategoryInputModel
 {
+    public const int NameMaxLength = 50;
+
     [Required(ErrorMessage = "El nombre es obligatorio.")]
-    [StringLength(50, ErrorMessage = "El nombre no puede superar los 50 caracteres.")]
+    [StringLength(NameMaxLength, ErrorMessage = "El nombre no puede superar los 50 caracteres.")]
     public string NewName { get; init; } = string.Empty;
 }

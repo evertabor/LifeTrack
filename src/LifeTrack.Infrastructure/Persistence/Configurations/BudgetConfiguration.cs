@@ -7,12 +7,15 @@ namespace LifeTrack.Infrastructure.Persistence.Configurations;
 
 public sealed class BudgetConfiguration : IEntityTypeConfiguration<Budget>
 {
+    private const int Precision = 18;
+    private const int Scale = 2;
+
     public void Configure(EntityTypeBuilder<Budget> builder)
     {
         builder.ToTable("Budgets");
         builder.HasKey(b => b.Id);
         builder.Property(b => b.Id).ValueGeneratedNever();
-        builder.Property(b => b.Limit).HasPrecision(18, 2).IsRequired();
+        builder.Property(b => b.Limit).HasPrecision(Precision, Scale).IsRequired();
         builder.HasIndex(b => b.UserId);
         builder.HasIndex(b => new { b.UserId, b.CategoryId, b.Year, b.Month }).IsUnique();
         builder.HasOne<ApplicationUser>().WithMany().HasForeignKey(b => b.UserId).OnDelete(DeleteBehavior.Cascade);

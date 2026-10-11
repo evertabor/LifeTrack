@@ -31,11 +31,23 @@
         <form class="transactions-filter__form" method="get" asp-controller="Transactions" asp-action="Index">
             <div class="app-form-field transactions-filter__field">
                 <label class="form-label" for="transactions-filter-year">Año</label>
-                <input id="transactions-filter-year" name="year" class="form-control" type="number" value="@Model.Year" min="2000" max="2100" required />
+                <input id="transactions-filter-year" name="year" class="form-control" type="number" value="@Model.Year" min="@SetBudgetInputModel.MinYear" max="@SetBudgetInputModel.MaxYear" required />
             </div>
             <div class="app-form-field transactions-filter__field">
                 <label class="form-label" for="transactions-filter-month">Mes</label>
-                <input id="transactions-filter-month" name="month" class="form-control" type="number" value="@Model.Month" min="1" max="12" required />
+                <select id="transactions-filter-month" name="month" class="form-select">
+                    @foreach (var option in Model.MonthOptions)
+                    {
+                        @if (option.IsSelected)
+                        {
+                            <option value="@option.Month" selected>@option.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@option.Month">@option.Name</option>
+                        }
+                    }
+                </select>
             </div>
             <div class="app-form-field transactions-filter__field">
                 <label class="form-label" for="transactions-filter-category">Categoría</label>

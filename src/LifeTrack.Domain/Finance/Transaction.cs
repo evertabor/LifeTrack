@@ -7,6 +7,8 @@ public sealed class Transaction : Entity
     public const int DescriptionMaxLength = 200;
     public const decimal MaxAmount = 1_000_000_000m;
 
+    private const int DecimalPlaces = 2;
+
     private Transaction(
         Guid id,
         Guid userId,
@@ -100,9 +102,9 @@ public sealed class Transaction : Entity
             throw new DomainException("El monto debe ser mayor que 0 y no superar 1.000.000.000.");
         }
 
-        if (decimal.Round(amount, 2) != amount)
+        if (decimal.Round(amount, DecimalPlaces) != amount)
         {
-            throw new DomainException("El monto admite como máximo 2 decimales.");
+            throw new DomainException($"El monto admite como máximo {DecimalPlaces} decimales.");
         }
 
         if (date > today)
@@ -113,7 +115,7 @@ public sealed class Transaction : Entity
         var cleanDescription = description?.Trim() ?? string.Empty;
         if (cleanDescription.Length > DescriptionMaxLength)
         {
-            throw new DomainException("La descripción no puede superar 200 caracteres.");
+            throw new DomainException($"La descripción no puede superar {DescriptionMaxLength} caracteres.");
         }
 
         return cleanDescription;

@@ -12,7 +12,8 @@ public sealed class RegisterAccountHandler(
     {
         try
         {
-            var result = await accountService.RegisterAsync(request.Email, request.Password, cancellationToken);
+
+            var result = await accountService.RegisterAsync(request.Email, request.Password, request.DisplayName, request.PhoneNumber, cancellationToken);
             if (!result.Succeeded && result.Errors is not null)
             {
                 foreach (var error in result.Errors)

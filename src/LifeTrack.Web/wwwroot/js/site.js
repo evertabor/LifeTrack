@@ -7,7 +7,10 @@
         CLOSE_BUTTON: "[data-app-nav-close]",
         SIDEBAR: "[data-app-sidebar]",
         SIDEBAR_LINK: "[data-app-sidebar] a",
-        THEME_TOGGLE: "[data-app-theme-toggle]"
+        THEME_TOGGLE: "[data-app-theme-toggle]",
+        USER_MENU: "[data-app-user-menu]",
+        USER_MENU_BUTTON: "[data-app-user-menu-button]",
+        USER_MENU_LIST: "[data-app-user-menu-list]"
     };
 
     const CSS_CLASSES = {
@@ -100,7 +103,46 @@
         }
     }
 
+    function _setUserMenuExpanded(menu, button, isOpen) {
+        const list = menu.querySelector(SELECTORS.USER_MENU_LIST);
+
+        if (!list) {
+            return;
+        }
+
+        list.hidden = !isOpen;
+        button.setAttribute(CONSTANTS.ARIA_EXPANDED, isOpen ? CONSTANTS.TRUE : CONSTANTS.FALSE);
+    }
+
+    function _initializeUserMenu() {
+        const menu = document.querySelector(SELECTORS.USER_MENU);
+        const button = document.querySelector(SELECTORS.USER_MENU_BUTTON);
+
+        if (!menu || !button) {
+            return;
+        }
+
+        button.addEventListener(CONSTANTS.EVENT_CLICK, function () {
+            const list = menu.querySelector(SELECTORS.USER_MENU_LIST);
+            _setUserMenuExpanded(menu, button, list ? list.hidden : false);
+        });
+        document.addEventListener(CONSTANTS.EVENT_CLICK, function (event) {
+            if (!menu.contains(event.target)) {
+                _setUserMenuExpanded(menu, button, false);
+            }
+        });
+        document.addEventListener(CONSTANTS.EVENT_KEYDOWN, function (event) {
+            const list = menu.querySelector(SELECTORS.USER_MENU_LIST);
+
+            if (event.key === CONSTANTS.ESCAPE_KEY && list && !list.hidden) {
+                _setUserMenuExpanded(menu, button, false);
+                button.focus();
+            }
+        });
+    }
+
     function _initialize() {
+        _initializeUserMenu();
         _initializeTheme();
         const shell = document.querySelector(SELECTORS.SHELL);
         const openButton = document.querySelector(SELECTORS.OPEN_BUTTON);

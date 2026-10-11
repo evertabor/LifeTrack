@@ -1,3 +1,5 @@
+@inject UserBadgeService UserBadge
+
 <header class="app-topbar">
     <div class="app-topbar__start">
         <button class="app-topbar__menu" type="button" data-app-nav-open aria-controls="app-authenticated-sidebar" aria-expanded="false" aria-label="Abrir navegación"><span aria-hidden="true">☰</span></button>
@@ -8,7 +10,16 @@
     </div>
     <div class="app-topbar__tools">
         <button class="app-topbar__tool" type="button" data-app-theme-toggle aria-label="Activar tema oscuro" aria-pressed="false"><span aria-hidden="true">◐</span></button>
-        <button class="app-topbar__tool" type="button" aria-label="Notificaciones no disponibles todavía" disabled><span aria-hidden="true">♧</span></button>
-        <div class="app-topbar__user"><span class="app-topbar__avatar" aria-hidden="true">LT</span><span class="app-topbar__user-name">LifeTrack</span></div>
+        <div class="app-topbar__user-menu" data-app-user-menu>
+            <button class="app-topbar__user" type="button" data-app-user-menu-button aria-expanded="false" aria-haspopup="menu" aria-controls="app-user-menu-list">
+                <span class="app-topbar__avatar" aria-hidden="true">@UserBadge.Initials</span><span class="app-topbar__user-name">@UserBadge.DisplayName</span>
+            </button>
+            <div class="app-topbar__menu-list" id="app-user-menu-list" role="menu" data-app-user-menu-list hidden>
+                <a class="app-topbar__menu-item" role="menuitem" asp-controller="Account" asp-action="Profile">Mi perfil</a>
+                <form method="post" asp-controller="Account" asp-action="Logout" data-app-validate>
+                    <button class="app-topbar__menu-item" role="menuitem" type="submit">Cerrar sesión</button>
+                </form>
+            </div>
+        </div>
     </div>
 </header>

@@ -7,13 +7,16 @@ namespace LifeTrack.Infrastructure.Persistence.Configurations;
 
 public sealed class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
 {
+    private const int Precision = 18;
+    private const int Scale = 2;
+
     public void Configure(EntityTypeBuilder<Transaction> builder)
     {
         builder.ToTable("Transactions");
         builder.HasKey(t => t.Id);
         builder.Property(t => t.Id).ValueGeneratedNever();
         builder.Property(t => t.Type).HasConversion<string>().IsRequired();
-        builder.Property(t => t.Amount).HasPrecision(18, 2).IsRequired();
+        builder.Property(t => t.Amount).HasPrecision(Precision, Scale).IsRequired();
         builder.Property(t => t.Description).HasMaxLength(Transaction.DescriptionMaxLength).IsRequired();
         builder.HasIndex(t => t.UserId);
         builder.HasIndex(t => new { t.UserId, t.Date });

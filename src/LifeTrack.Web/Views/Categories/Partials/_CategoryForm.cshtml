@@ -14,7 +14,7 @@
             <div class="modal-body">
                 <div class="app-form-field">
                     <label asp-for="Name" class="form-label">Nombre</label>
-                    <input asp-for="Name" class="form-control" autocomplete="off" aria-describedby="category-name-help category-name-error" required maxlength="50" />
+                    <input asp-for="Name" class="form-control" autocomplete="off" aria-describedby="category-name-help category-name-error" required maxlength="@CreateCategoryInputModel.NameMaxLength" />
                     <div id="category-name-help" class="form-text">Máximo 50 caracteres.</div>
                     <span asp-validation-for="Name" class="field-validation-error" id="category-name-error"></span>
                 </div>

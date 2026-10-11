@@ -7,6 +7,9 @@ public sealed record BudgetStatusViewModel
 {
     private static readonly CultureInfo Spanish = new("es-ES");
 
+    private const int MinPercent = 0;
+    private const int MaxPercent = 100;
+
     public string CategoryName { get; init; } = string.Empty;
     public string UsageText { get; init; } = string.Empty;
     public string PercentText { get; init; } = string.Empty;
@@ -19,7 +22,7 @@ public sealed record BudgetStatusViewModel
 
     public static BudgetStatusViewModel From(BudgetStatusDto dto)
     {
-        var fill = dto.Percent < 0 ? 0 : dto.Percent > 100 ? 100 : (int)dto.Percent;
+        var fill = Math.Clamp((int)dto.Percent, MinPercent, MaxPercent);
         var stateText = dto.State switch
         {
             "warning" => "Cerca del límite",

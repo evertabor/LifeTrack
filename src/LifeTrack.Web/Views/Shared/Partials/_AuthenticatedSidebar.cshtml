@@ -1,7 +1,9 @@
+@inject UserBadgeService UserBadge
+
 <aside id="app-authenticated-sidebar" class="app-sidebar app-on-dark" data-app-sidebar aria-hidden="false" aria-label="Navegación de la aplicación">
     <div class="app-sidebar__header">
         <div>
-            <a class="app-sidebar__brand" asp-controller="Categories" asp-action="Index"><span class="app-sidebar__brand-mark" aria-hidden="true">L</span>LifeTrack</a>
+            <a class="app-sidebar__brand" asp-controller="Categories" asp-action="Index"><span class="app-sidebar__brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path d="M11 39 H21 L26 27 L32 47 L38 33 H43 L53 23" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M53 23 L44 24 M53 23 L52 32" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/></svg></span>LifeTrack</a>
             <p class="app-sidebar__tagline">Control financiero personal</p>
         </div>
         <button class="app-sidebar__close" type="button" data-app-nav-close aria-label="Cerrar navegación"><span aria-hidden="true">×</span></button>
@@ -28,7 +30,7 @@
         </ul>
     </nav>
     <div class="app-sidebar__account">
-        <div class="app-sidebar__avatar" aria-hidden="true">LT</div>
+        <div class="app-sidebar__avatar" aria-hidden="true">@UserBadge.Initials</div>
         <div class="app-sidebar__account-copy">
             <span class="app-sidebar__account-label">Sesión activa</span>
             <span class="app-sidebar__account-text">Tu espacio personal</span>

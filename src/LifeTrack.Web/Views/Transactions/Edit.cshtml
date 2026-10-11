@@ -65,7 +65,7 @@
             </div>
             <div class="app-form-field">
                 <label asp-for="Input.Description" class="form-label">Descripción</label>
-                <input asp-for="Input.Description" class="form-control" maxlength="200" autocomplete="off" />
+                <input asp-for="Input.Description" class="form-control" maxlength="@EditTransactionInputModel.DescriptionMaxLength" autocomplete="off" />
                 <span asp-validation-for="Input.Description" class="field-validation-error"></span>
             </div>
             <div class="transactions-edit__actions">
