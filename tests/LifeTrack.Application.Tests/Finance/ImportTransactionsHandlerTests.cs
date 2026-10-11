@@ -189,4 +189,23 @@ public class ConfirmTransactionImportHandlerTests
             () => handler.Handle(new ConfirmTransactionImportCommand(content), CancellationToken.None));
         Assert.Equal(0, unitOfWork.SaveCount);
     }
+
+    [Fact]
+    public async Task Handle_CategoryRemovedAfterPreview_SkipsRowAndImportsTheRest()
+    {
+        var userId = Guid.NewGuid();
+        var transactions = new FakeTransactionRepository();
+        var categories = new FakeCategoryRepository();
+        await categories.AddAsync(Category.Create("Comida", userId), CancellationToken.None);
+        var unitOfWork = new FakeUnitOfWork();
+        var handler = new ConfirmTransactionImportHandler(transactions, categories, unitOfWork, new FakeCurrentUser(userId), new FixedTimeProvider(Today));
+        categories.Reset();
+        await categories.AddAsync(Category.Create("Ocio", userId), CancellationToken.None);
+        var content = "06/10/2026;Comida;Gasto;10;Compra\n06/10/2026;Ocio;Gasto;5;Cine";
+
+        var imported = await handler.Handle(new ConfirmTransactionImportCommand(content), CancellationToken.None);
+
+        Assert.Equal(1, imported);
+        Assert.Equal(1, unitOfWork.SaveCount);
+    }
 }

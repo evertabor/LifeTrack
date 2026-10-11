@@ -40,7 +40,7 @@ public sealed class BudgetsController(
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    logger.LogWarning("Budget set requested with unknown category {CategoryId}: {Message}", input.CategoryId, ex.Message);
+                    logger.LogWarning(ex, "Budget set requested with unknown category {CategoryId}", input.CategoryId);
                     ModelState.AddModelError("NewBudget.CategoryId", "La categoría no es válida.");
                 }
             }

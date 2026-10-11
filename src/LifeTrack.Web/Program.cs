@@ -34,6 +34,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/account/login";
     options.AccessDeniedPath = "/Error";
     options.ExpireTimeSpan = TimeSpan.FromHours(CookieLifetimeHours);
+    options.SlidingExpiration = true;
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;

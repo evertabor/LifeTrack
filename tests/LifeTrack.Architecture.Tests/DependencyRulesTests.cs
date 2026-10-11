@@ -103,14 +103,16 @@ public class DependencyRulesTests
     [Fact]
     public void Controllers_DoNotInjectConcreteHandlers()
     {
-        var result = Types.InAssembly(WebAssembly)
-            .That()
-            .HaveNameEndingWith("Controller")
-            .ShouldNot()
-            .HaveDependencyOn("LifeTrack.Application.Habits.CreateHabitHandler")
-            .GetResult();
+        var offenders = WebAssembly.GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false } && t.Name.EndsWith("Controller", StringComparison.Ordinal))
+            .SelectMany(t => t.GetConstructors().SelectMany(c => c.GetParameters()))
+            .Where(p => p.ParameterType.Name.EndsWith("Handler", StringComparison.Ordinal)
+                || p.ParameterType.Name.EndsWith("Repository", StringComparison.Ordinal)
+                || p.ParameterType.Name.EndsWith("DbContext", StringComparison.Ordinal))
+            .Select(p => $"{p.Member.DeclaringType?.Name}({p.ParameterType.Name} {p.Name})")
+            .ToList();
 
-        AssertSuccessful(result);
+        Assert.Empty(offenders);
     }
 
     [Fact]

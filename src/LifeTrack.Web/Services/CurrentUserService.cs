@@ -13,12 +13,14 @@ public sealed class CurrentUserService(
         {
             var user = httpContextAccessor.HttpContext?.User;
             if (user?.Identity?.IsAuthenticated != true)
-                return null;
+                throw new InvalidOperationException("No hay un usuario autenticado.");
             var claim = user.FindFirst(ClaimTypes.NameIdentifier)
                 ?? user.FindFirst("sub");
             if (claim is null)
-                return null;
-            return Guid.TryParse(claim.Value, out var id) ? id : null;
+                throw new InvalidOperationException("No hay un usuario autenticado.");
+            return Guid.TryParse(claim.Value, out var id)
+                ? id
+                : throw new InvalidOperationException("No hay un usuario autenticado.");
         }
     }
 }

@@ -23,10 +23,9 @@ public sealed class FakeTransactionRepository : ITransactionRepository
         return Task.FromResult(_transactions.Any(t => t.CategoryId == categoryId && t.UserId == userId));
     }
 
-    public Task RemoveAsync(Transaction transaction, CancellationToken cancellationToken)
+    public void Remove(Transaction transaction)
     {
         _transactions.Remove(transaction);
-        return Task.CompletedTask;
     }
 
     public Task<IReadOnlyList<Transaction>> ListByPeriodAsync(

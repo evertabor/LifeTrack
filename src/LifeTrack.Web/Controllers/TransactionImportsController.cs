@@ -49,7 +49,7 @@ public sealed class TransactionImportsController(
         }
         catch (BusinessRuleException ex)
         {
-            logger.LogWarning("Transaction import preview rejected: {Message}", ex.Message);
+            logger.LogWarning(ex, "Transaction import preview rejected");
             TempData["Message"] = ex.Message;
             return RedirectToAction(nameof(TransactionsController.Index), "Transactions");
         }
@@ -72,7 +72,7 @@ public sealed class TransactionImportsController(
         }
         catch (BusinessRuleException ex)
         {
-            logger.LogWarning("Transaction import confirmation rejected: {Message}", ex.Message);
+            logger.LogWarning(ex, "Transaction import confirmation rejected");
             TempData["Message"] = ex.Message;
             return RedirectToAction(nameof(TransactionsController.Index), "Transactions");
         }

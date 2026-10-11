@@ -19,28 +19,28 @@ public sealed class AccountController(
 
     [HttpPost("Register")]
     [AllowAnonymous]
-    public async Task<IActionResult> Register(RegisterViewModel model, CancellationToken ct)
+    public async Task<IActionResult> Register(RegisterInputModel input, CancellationToken ct)
     {
         if (!ModelState.IsValid)
-            return View(model);
+            return View(RegisterViewModel.From(input));
 
         try
         {
-            var result = await sender.Send(new RegisterAccountCommand(model.Email, model.Password, model.DisplayName, model.PhoneNumber), ct);
+            var result = await sender.Send(new RegisterAccountCommand(input.Email, input.Password, input.DisplayName, input.PhoneNumber), ct);
             if (result.Succeeded)
                 return RedirectToAction("Index", "Transactions");
 
-            return View(new RegisterViewModel { Email = model.Email, DisplayName = model.DisplayName, PhoneNumber = model.PhoneNumber, ErrorMessage = string.Join(" ", result.Errors ?? Array.Empty<string>()) });
+            return View(RegisterViewModel.From(input, string.Join(" ", result.Errors ?? Array.Empty<string>())));
         }
         catch (BusinessRuleException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
-            return View(model);
+            return View(RegisterViewModel.From(input));
         }
         catch (ResourceNotFoundException ex)
         {
-            logger.LogWarning("Unexpected resource not found during registration: {Message}", ex.Message);
-            return View(model);
+            logger.LogWarning(ex, "Unexpected resource not found during registration");
+            return View(RegisterViewModel.From(input));
         }
     }
 
@@ -51,33 +51,32 @@ public sealed class AccountController(
 
     [HttpPost("Login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login(LoginViewModel model, CancellationToken ct)
+    public async Task<IActionResult> Login(LoginInputModel input, CancellationToken ct)
     {
         if (!ModelState.IsValid)
-            return View(model);
+            return View(LoginViewModel.From(input));
 
         try
         {
-            var result = await sender.Send(new LoginCommand(model.Email, model.Password), ct);
+            var result = await sender.Send(new LoginCommand(input.Email, input.Password), ct);
             if (result.Succeeded)
                 return RedirectToAction("Index", "Transactions");
 
-            return View(new LoginViewModel { Email = model.Email, ErrorMessage = result.ErrorMessage });
+            return View(LoginViewModel.From(input, result.ErrorMessage));
         }
         catch (BusinessRuleException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
-            return View(model);
+            return View(LoginViewModel.From(input));
         }
         catch (ResourceNotFoundException ex)
         {
-            logger.LogWarning("Resource not found during login: {Message}", ex.Message);
-            return View(model);
+            logger.LogWarning(ex, "Resource not found during login");
+            return View(LoginViewModel.From(input));
         }
     }
 
     [HttpPost("Logout")]
-    [AllowAnonymous]
     public async Task<IActionResult> Logout(CancellationToken ct)
     {
         await sender.Send(new LogoutCommand(), ct);
@@ -94,7 +93,7 @@ public sealed class AccountController(
         }
         catch (ResourceNotFoundException ex)
         {
-            logger.LogWarning("Profile requested with unknown account: {Message}", ex.Message);
+            logger.LogWarning(ex, "Profile requested with unknown account");
             return RedirectToAction("Index", "Transactions");
         }
     }
@@ -121,7 +120,7 @@ public sealed class AccountController(
             }
             catch (ResourceNotFoundException ex)
             {
-                logger.LogWarning("Profile update requested with unknown account: {Message}", ex.Message);
+                logger.LogWarning(ex, "Profile update requested with unknown account");
                 return RedirectToAction("Index", "Transactions");
             }
         }
@@ -133,7 +132,7 @@ public sealed class AccountController(
         }
         catch (ResourceNotFoundException ex)
         {
-            logger.LogWarning("Profile requested with unknown account: {Message}", ex.Message);
+            logger.LogWarning(ex, "Profile requested with unknown account");
             return RedirectToAction("Index", "Transactions");
         }
     }

@@ -27,10 +27,9 @@ public sealed class CategoryRepository(
             .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId, cancellationToken);
     }
 
-    public Task RemoveAsync(Category category, CancellationToken cancellationToken)
+    public void Remove(Category category)
     {
         context.Categories.Remove(category);
-        return Task.CompletedTask;
     }
 
     public async Task<IReadOnlyList<Category>> ListAsync(Guid userId, CancellationToken cancellationToken)

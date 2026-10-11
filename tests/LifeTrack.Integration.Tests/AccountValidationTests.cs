@@ -3,9 +3,9 @@ using LifeTrack.Web.ViewModels.Account;
 
 namespace LifeTrack.Integration.Tests;
 
-public class RegisterViewModelValidationTests
+public class RegisterInputModelValidationTests
 {
-    private static RegisterViewModel ValidInput() => new()
+    private static RegisterInputModel ValidInput() => new()
     {
         Email = "test@example.com",
         DisplayName = "Test User",
@@ -14,7 +14,7 @@ public class RegisterViewModelValidationTests
         ConfirmPassword = "VeryStrongPassword123!"
     };
 
-    private static IReadOnlyList<ValidationResult> Validate(RegisterViewModel input)
+    private static IReadOnlyList<ValidationResult> Validate(RegisterInputModel input)
     {
         var results = new List<ValidationResult>();
         Validator.TryValidateObject(input, new ValidationContext(input), results, true);
@@ -44,7 +44,7 @@ public class RegisterViewModelValidationTests
     [Fact]
     public void Validate_LongDisplayName_HasDisplayNameError()
     {
-        var errors = Validate(ValidInput() with { DisplayName = new string('a', RegisterViewModel.DisplayNameMaxLength + 1) });
+        var errors = Validate(ValidInput() with { DisplayName = new string('a', RegisterInputModel.DisplayNameMaxLength + 1) });
 
         Assert.Contains(errors, r => r.MemberNames.Contains("DisplayName"));
     }
@@ -52,9 +52,19 @@ public class RegisterViewModelValidationTests
     [Fact]
     public void Validate_LongPhoneNumber_HasPhoneNumberError()
     {
-        var errors = Validate(ValidInput() with { PhoneNumber = new string('1', RegisterViewModel.PhoneNumberMaxLength + 1) });
+        var errors = Validate(ValidInput() with { PhoneNumber = new string('1', RegisterInputModel.PhoneNumberMaxLength + 1) });
 
         Assert.Contains(errors, r => r.MemberNames.Contains("PhoneNumber"));
+    }
+
+    [Fact]
+    public void RegisterViewModel_From_CarriesInputAndError()
+    {
+        var viewModel = RegisterViewModel.From(ValidInput(), "Fallo el registro.");
+
+        Assert.Equal("test@example.com", viewModel.Email);
+        Assert.Equal("Fallo el registro.", viewModel.ErrorMessage);
+        Assert.Contains("12", viewModel.PasswordHelpText);
     }
 }
 

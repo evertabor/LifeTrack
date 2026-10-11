@@ -1,18 +1,21 @@
-using System.ComponentModel.DataAnnotations;
 using LifeTrack.Application.Identity;
 
 namespace LifeTrack.Web.ViewModels.Account;
 
 public sealed record LoginViewModel
 {
-    [Required]
-    [EmailAddress]
     public string Email { get; init; } = string.Empty;
 
-    [Required]
     public string Password { get; init; } = string.Empty;
 
     public string? ErrorMessage { get; init; }
+
+    public static LoginViewModel From(LoginInputModel input, string? errorMessage = null) => new()
+    {
+        Email = input.Email,
+        Password = input.Password,
+        ErrorMessage = errorMessage
+    };
 
     public sealed record DisplayModel(string Email, string? ReturnUrl, string? ErrorMessage)
     {

@@ -1,5 +1,6 @@
 using LifeTrack.Application.Abstractions;
 using LifeTrack.Application.Common;
+using LifeTrack.Domain.Common;
 using LifeTrack.Domain.Finance;
 using MediatR;
 
@@ -54,16 +55,28 @@ public sealed class ConfirmTransactionImportHandler(
                 continue;
             }
 
-            await transactions.AddAsync(Transaction.Create(
-                userId,
-                new TransactionData(
-                    names[row.CategoryName.Trim()],
-                    row.IsIncome ? TransactionType.Income : TransactionType.Expense,
-                    row.Amount,
-                    row.Date.Value,
-                    row.Description),
-                today), ct);
-            imported++;
+            if (!names.TryGetValue(row.CategoryName.Trim(), out var categoryId))
+            {
+                continue;
+            }
+
+            try
+            {
+                await transactions.AddAsync(Transaction.Create(
+                    userId,
+                    new TransactionData(
+                        categoryId,
+                        row.IsIncome ? TransactionType.Income : TransactionType.Expense,
+                        row.Amount,
+                        row.Date.Value,
+                        row.Description),
+                    today), ct);
+                imported++;
+            }
+            catch (DomainException)
+            {
+                continue;
+            }
         }
 
         if (imported == 0)

@@ -35,7 +35,7 @@ public sealed class TransactionsController(
         }
         catch (ResourceNotFoundException ex)
         {
-            logger.LogWarning("Transaction list requested with unknown category {CategoryId}: {Message}", categoryId, ex.Message);
+            logger.LogWarning(ex, "Transaction list requested with unknown category {CategoryId}", categoryId);
             return RedirectToAction(nameof(Index));
         }
     }
@@ -71,7 +71,7 @@ public sealed class TransactionsController(
             }
             catch (ResourceNotFoundException ex)
             {
-                logger.LogWarning("Transaction create requested with unknown category {CategoryId}: {Message}", input.CategoryId, ex.Message);
+                logger.LogWarning(ex, "Transaction create requested with unknown category {CategoryId}", input.CategoryId);
                 ModelState.AddModelError("NewTransaction.CategoryId", "La categoría no es válida.");
             }
         }
@@ -90,7 +90,7 @@ public sealed class TransactionsController(
         }
         catch (ResourceNotFoundException ex)
         {
-            logger.LogWarning("Transaction edit requested with unknown movement {TransactionId}: {Message}", id, ex.Message);
+            logger.LogWarning(ex, "Transaction edit requested with unknown movement {TransactionId}", id);
             return RedirectToAction(nameof(Index));
         }
     }
@@ -127,7 +127,7 @@ public sealed class TransactionsController(
                 }
                 catch (ResourceNotFoundException ex)
                 {
-                    logger.LogWarning("Transaction edit requested with unknown movement {TransactionId}: {Message}", id, ex.Message);
+                    logger.LogWarning(ex, "Transaction edit requested with unknown movement {TransactionId}", id);
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -147,7 +147,7 @@ public sealed class TransactionsController(
         }
         catch (ResourceNotFoundException ex)
         {
-            logger.LogWarning("Transaction delete requested with unknown movement {TransactionId}: {Message}", id, ex.Message);
+            logger.LogWarning(ex, "Transaction delete requested with unknown movement {TransactionId}", id);
         }
 
         return RedirectToAction(nameof(Index));

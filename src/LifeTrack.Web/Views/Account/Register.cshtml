@@ -33,7 +33,7 @@
             </div>
             <div class="app-form-field">
                 <label asp-for="Password" class="form-label">Contraseña</label>
-                <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" aria-describedby="Password-help Password-error" minlength="@RegisterViewModel.MinPasswordLength" required />
+                <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" aria-describedby="Password-help Password-error" minlength="@RegisterInputModel.MinPasswordLength" required />
                 <div id="Password-help" class="form-text">@Model.PasswordHelpText</div>
                 <span asp-validation-for="Password" id="Password-error" class="field-validation-error"></span>
             </div>

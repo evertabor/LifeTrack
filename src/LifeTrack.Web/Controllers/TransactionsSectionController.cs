@@ -38,7 +38,7 @@ public abstract class TransactionsSectionController(
         }
         catch (ResourceNotFoundException ex)
         {
-            logger.LogWarning("Transaction list requested with unknown category {CategoryId}: {Message}", options.CategoryId, ex.Message);
+            logger.LogWarning(ex, "Transaction list requested with unknown category {CategoryId}", options.CategoryId);
             return RedirectToAction(nameof(TransactionsController.Index), "Transactions", new { year = options.Selected.Year, month = options.Selected.Month });
         }
 

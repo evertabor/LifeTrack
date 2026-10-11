@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LifeTrack.Infrastructure.Persistence;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IUnitOfWork
+public sealed class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IUnitOfWork
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -16,7 +16,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
 
     public DbSet<Budget> Budgets => Set<Budget>();
 
-    public new async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
         await base.SaveChangesAsync(cancellationToken);
 
     protected override void OnModelCreating(ModelBuilder builder)

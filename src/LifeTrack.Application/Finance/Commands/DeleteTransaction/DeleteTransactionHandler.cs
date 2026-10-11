@@ -23,7 +23,7 @@ public sealed class DeleteTransactionHandler(
             throw new ResourceNotFoundException("El movimiento no existe.");
         }
 
-        await transactions.RemoveAsync(transaction, ct);
+        transactions.Remove(transaction);
         await unitOfWork.SaveChangesAsync(ct);
     }
 }

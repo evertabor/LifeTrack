@@ -75,12 +75,13 @@ public class AntiforgeryTests : IClassFixture<CustomWebApplicationFactory>
     }
 
     [Fact]
-    public async Task Logout_PostWithoutAntiforgeryToken_ReturnsBadRequest()
+    public async Task Logout_PostWithoutAuthentication_RedirectsToLogin()
     {
         using var client = _factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), AllowAutoRedirect = false });
 
         using var response = await client.PostAsync("/Account/Logout", new FormUrlEncodedContent(Array.Empty<KeyValuePair<string, string>>()));
 
-        Assert.Equal(400, (int)response.StatusCode);
+        Assert.Equal(302, (int)response.StatusCode);
+        Assert.Contains("account/login", response.Headers.Location?.ToString(), StringComparison.OrdinalIgnoreCase);
     }
 }

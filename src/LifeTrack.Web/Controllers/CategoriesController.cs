@@ -43,7 +43,7 @@ public sealed class CategoriesController(
             }
             catch (ResourceNotFoundException ex)
             {
-                logger.LogWarning("Unexpected resource not found during category creation: {Message}", ex.Message);
+                logger.LogWarning(ex, "Unexpected resource not found during category creation");
             }
         }
         return await RenderIndexAsync(input, ct);
@@ -59,7 +59,7 @@ public sealed class CategoriesController(
         }
         catch (ResourceNotFoundException ex)
         {
-            logger.LogWarning("Unexpected resource not found opening category edit: {Message}", ex.Message);
+            logger.LogWarning(ex, "Unexpected resource not found opening category edit");
             return RedirectToAction(nameof(Index));
         }
     }
@@ -84,7 +84,7 @@ public sealed class CategoriesController(
             }
             catch (ResourceNotFoundException ex)
             {
-                logger.LogWarning("Unexpected resource not found during category edit: {Message}", ex.Message);
+                logger.LogWarning(ex, "Unexpected resource not found during category edit");
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -105,7 +105,7 @@ public sealed class CategoriesController(
         }
         catch (ResourceNotFoundException ex)
         {
-            logger.LogWarning("Unexpected resource not found during category deletion: {Message}", ex.Message);
+            logger.LogWarning(ex, "Unexpected resource not found during category deletion");
         }
         return RedirectToAction(nameof(Index));
     }

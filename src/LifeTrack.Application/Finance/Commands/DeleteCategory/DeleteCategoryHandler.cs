@@ -31,7 +31,7 @@ public sealed class DeleteCategoryHandler(
             throw new BusinessRuleException("No se puede eliminar la categoría porque tiene movimientos o presupuestos asociados.");
         }
 
-        await repository.RemoveAsync(category, ct);
+        repository.Remove(category);
         await unitOfWork.SaveChangesAsync(ct);
     }
 }

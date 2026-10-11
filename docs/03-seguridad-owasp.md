@@ -1,7 +1,7 @@
 # Seguridad — OWASP Top 10:2025 aplicado a LifeTrack
 
 Este documento traduce cada categoría a **controles concretos**, **reglas para la IA** y **cómo se verifica**.
-Estado: ☐ pendiente · ☑ hecho. Se actualiza al cerrar cada fase del plan.
+Estado: ☐ pendiente · ☑ hecho. Se actualiza al cerrar cada fase del plan. Revisado en código el 2026-10-11: lo verificado ahí va ☑; lo que depende del despliegue o sigue pendiente queda ☐.
 
 > La IA genera código plausible, no necesariamente seguro. Toda salida de un agente se revisa con la checklist del final.
 
@@ -12,10 +12,10 @@ Estado: ☐ pendiente · ☑ hecho. Se actualiza al cerrar cada fase del plan.
 
 | Control | Dónde | Verificación |
 |---|---|---|
-| Política *fallback* = usuario autenticado (denegar por defecto) | `Program.cs` | Test de integración: páginas privadas redirigen sin sesión ☐ |
-| Toda consulta filtra por `UserId` | Repositorios | Test de IDOR por handler ☐ |
-| Recurso ajeno ⇒ `ResourceNotFoundException` (404 genérico, no 403) | Handlers | Tests de Application ☐ |
-| `ICurrentUser` falla cerrado sin identidad | `Web/Services/CurrentUserService` | Test unitario ☐ |
+| Política *fallback* = usuario autenticado (denegar por defecto) | `Program.cs` | Test de integración: páginas privadas redirigen sin sesión ☑ |
+| Toda consulta filtra por `UserId` | Repositorios | Test de IDOR por handler ☑ |
+| Recurso ajeno ⇒ `ResourceNotFoundException` (404 genérico, no 403) | Handlers | Tests de Application ☑ |
+| `ICurrentUser` falla cerrado sin identidad | `Web/Services/CurrentUserService` | Test unitario ☑ |
 | Ids no secuenciales (`Guid`) como defensa adicional, **no** como control principal | Domain | — |
 
 **Reglas para la IA:** no crees repositorios con `GetById(id)` sin `userId`. No uses `[AllowAnonymous]` salvo en error, login/registro y `/health`. Cada handler con un id necesita su test de IDOR.
@@ -25,12 +25,12 @@ Estado: ☐ pendiente · ☑ hecho. Se actualiza al cerrar cada fase del plan.
 |---|---|---|
 | Secretos fuera del repo (`user-secrets`, App Settings) | Config | Escaneo de secretos en CI ☐ |
 | Clave de licencia de MediatR solo en producción y solo por configuración; su ausencia no rompe la app | Config, Azure | Revisión de despliegue ☐ |
-| Cabeceras: CSP, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, COOP | `Security/` | Test de integración que comprueba las cabeceras ☐ |
-| HTTPS obligatorio: `UseHttpsRedirection`, `UseHsts`, "HTTPS Only" en App Service | `Program.cs`, Azure | Revisión de despliegue ☐ |
-| Página de error genérica; sin detalles en producción | `Program.cs` | Revisión manual ☐ |
+| Cabeceras: CSP, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, COOP | `Security/` | Test de integración que comprueba las cabeceras ☑ |
+| HTTPS obligatorio: `UseHttpsRedirection`, `UseHsts`, "HTTPS Only" en App Service | `Program.cs`, Azure | Revisión de despliegue ☑ en código, ☐ "HTTPS Only" en Azure |
+| Página de error genérica; sin detalles en producción | `Program.cs` | Revisión manual ☑ |
 | `AllowedHosts` restringido al dominio real | Config | Revisión de despliegue ☐ |
-| Migraciones automáticas solo en Development | `Program.cs` | Revisión de código ☐ |
-| Puertos de SQL local solo en `127.0.0.1` | `docker-compose.yml` | Revisión ☐ |
+| Migraciones automáticas solo en Development | `Program.cs` | Revisión de código ☑ (no hay migración automática) |
+| Puertos de SQL local solo en `127.0.0.1` | `docker-compose.yml` | Revisión ☑ |
 | Reglas de firewall de Azure SQL mínimas | Azure | Checklist de despliegue ☐ |
 
 **Reglas para la IA:** nunca pongas cadenas de conexión, contraseñas ni claves en código ni en `appsettings.json`. Esto incluye `MediatR:LicenseKey`. No habilites `DeveloperExceptionPage` fuera de Development. Si necesitas relajar la CSP, pide aprobación y documenta por qué.
@@ -38,11 +38,11 @@ Estado: ☐ pendiente · ☑ hecho. Se actualiza al cerrar cada fase del plan.
 ## A03 — Fallos en la cadena de suministro de software (*Software Supply Chain Failures*)
 | Control | Dónde | Verificación |
 |---|---|---|
-| Versiones solo en `Directory.Packages.props` (CPM) | Raíz | Revisión de PR ☐ |
-| `MediatR` **aprobado y pineado** (`13.*`), solo en `LifeTrack.Application` y `LifeTrack.Web` | `Directory.Packages.props` | Revisión de PR ☐ |
+| Versiones solo en `Directory.Packages.props` (CPM) | Raíz | Revisión de PR ☑ |
+| `MediatR` **aprobado y pineado** (`13.*`), solo en `LifeTrack.Application` y `LifeTrack.Web` | `Directory.Packages.props` | Revisión de PR ☑ |
 | Clave de licencia de MediatR (`MediatR:LicenseKey`) como **App Setting secreto**, nunca en el repositorio ni en `appsettings.json` | Azure, `dotnet user-secrets` en local | Escaneo de secretos en CI ☐ |
-| `NuGetAudit` activo; `dotnet list package --vulnerable --include-transitive` sin hallazgos | CI | Falla el pipeline ☐ |
-| `packages.lock.json` y `restore --locked-mode` tras el primer restore | CI | ☐ |
+| `NuGetAudit` activo; `dotnet list package --vulnerable --include-transitive` sin hallazgos | CI | Falla el pipeline ☑ |
+| `packages.lock.json` y `restore --locked-mode` tras el primer restore | CI | ☑ |
 | Dependabot para NuGet y GitHub Actions | `.github/dependabot.yml` | ☐ |
 | CodeQL para C# | CI | ☐ |
 | Acciones de GitHub fijadas por versión (idealmente por SHA) y permisos mínimos del workflow | CI | ☐ |
@@ -67,22 +67,22 @@ funcionalidad, ni degradación.
 ## A04 — Fallos criptográficos (*Cryptographic Failures*)
 | Control | Dónde |
 |---|---|
-| Contraseñas con el hasher de Identity (PBKDF2 con sal); nunca propio | Identity |
-| TLS en tránsito (HTTPS y `Encrypt=True` en la cadena de conexión) | Web, BD |
-| Cifrado en reposo de Azure SQL (TDE, activo por defecto) | Azure |
-| Cookies `Secure`, `HttpOnly`, `SameSite`; Data Protection de ASP.NET Core para tokens | Web |
-| Analizadores CA5350/5351/5358/5379/5394 como *warning* (error en CI) | `.editorconfig` |
+| Contraseñas con el hasher de Identity (PBKDF2 con sal); nunca propio | Identity | ☑ |
+| TLS en tránsito (HTTPS y `Encrypt=True` en la cadena de conexión) | Web, BD | ☑ HTTPS en código, ☐ `Encrypt=True` y TDE en Azure |
+| Cifrado en reposo de Azure SQL (TDE, activo por defecto) | Azure | ☐ revisión de despliegue |
+| Cookies `Secure`, `HttpOnly`, `SameSite`; Data Protection de ASP.NET Core para tokens | Web | ☑ |
+| Analizadores CA5350/5351/5358/5379/5394 como *warning* (error en CI) | `.editorconfig` | ☑ |
 
 **Reglas para la IA:** prohibido MD5/SHA1/DES/3DES, `Random` para tokens, claves hardcodeadas y cifrado casero. Para aleatoriedad de seguridad usa `RandomNumberGenerator`.
 
 ## A05 — Inyección (*Injection*)
 | Control | Dónde | Verificación |
 |---|---|---|
-| EF Core + LINQ (consultas parametrizadas) | Repositorios | Revisión + CA2100/CA3001 ☐ |
-| SQL crudo solo con `FromSql($"…")` interpolado; nunca concatenado | Infrastructure | Búsqueda de `FromSqlRaw` en revisión ☐ |
-| Codificación de salida de Razor; sin `Html.Raw` con datos de usuario | Vistas | Búsqueda en revisión/CI ☐ |
-| CSP sin scripts en línea | `Security/` | Test de cabeceras ☐ |
-| Validación de forma (DataAnnotations) + de negocio (invariantes del dominio) | Web, Domain | Tests ☐ |
+| EF Core + LINQ (consultas parametrizadas) | Repositorios | Revisión + CA2100/CA3001 ☑ |
+| SQL crudo solo con `FromSql($"…")` interpolado; nunca concatenado | Infrastructure | Búsqueda de `FromSqlRaw` en revisión ☑ (sin usos) |
+| Codificación de salida de Razor; sin `Html.Raw` con datos de usuario | Vistas | Búsqueda en revisión/CI ☑ (sin usos) |
+| CSP sin scripts en línea | `Security/` | Test de cabeceras ☑ |
+| Validación de forma (DataAnnotations) + de negocio (invariantes del dominio) | Web, Domain | Tests ☑ |
 | Importación CSV (RF-F07): validar tamaño, filas, tipos y **escapar fórmulas** (`=`, `+`, `-`, `@`) al exportar | Futuro | Tests ☐ |
 
 **Reglas para la IA:** no construyas SQL con `string.Format`/interpolación en `FromSqlRaw`/`ExecuteSqlRaw`. No uses `Html.Raw`. No confíes en validación solo del cliente.
@@ -105,7 +105,7 @@ funcionalidad, ni degradación.
 | Identity con contraseña ≥ 12 caracteres | `Program.cs` |
 | Bloqueo tras 5 intentos fallidos durante 15 min | `Program.cs` |
 | Mensajes de login genéricos (no revelan si el correo existe) | Identity UI |
-| Cookie de sesión con expiración (8 h, deslizante) | `Program.cs` |
+| Cookie de sesión con expiración (1 h, deslizante) | `Program.cs` |
 | Confirmación de correo y MFA | Pendiente (RF-A05) ☐ |
 | Registro abierto deshabilitable tras crear la cuenta personal | Pendiente (endurecimiento) ☐ |
 

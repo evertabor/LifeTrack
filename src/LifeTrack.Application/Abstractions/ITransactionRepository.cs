@@ -10,7 +10,7 @@ public interface ITransactionRepository
 
     Task<bool> ExistsForCategoryAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken);
 
-    Task RemoveAsync(Transaction transaction, CancellationToken cancellationToken);
+    void Remove(Transaction transaction);
 
     Task<IReadOnlyList<Transaction>> ListByPeriodAsync(
         Guid userId,

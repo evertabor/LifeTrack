@@ -25,10 +25,9 @@ public sealed class TransactionRepository(
             .AnyAsync(t => t.CategoryId == categoryId && t.UserId == userId, cancellationToken);
     }
 
-    public Task RemoveAsync(Transaction transaction, CancellationToken cancellationToken)
+    public void Remove(Transaction transaction)
     {
         context.Transactions.Remove(transaction);
-        return Task.CompletedTask;
     }
 
     public async Task<IReadOnlyList<Transaction>> ListByPeriodAsync(
