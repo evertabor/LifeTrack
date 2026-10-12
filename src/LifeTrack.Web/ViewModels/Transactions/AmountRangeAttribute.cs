@@ -15,7 +15,8 @@ public sealed class AmountRangeAttribute : ValidationAttribute
 
         if (amount < CreateTransactionInputModel.MinAmount || amount > CreateTransactionInputModel.MaxAmount)
         {
-            return new ValidationResult(ErrorMessage);
+            var memberName = validationContext.MemberName ?? string.Empty;
+            return new ValidationResult(ErrorMessage, [memberName]);
         }
 
         return ValidationResult.Success;

@@ -1,0 +1,38 @@
+name: Deploy
+on:
+  workflow_dispatch:
+  push: { branches: [main] }
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with: { global-json-file: global.json }
+      - run: dotnet restore --locked-mode
+      - run: dotnet build -c Release --no-restore
+      - name: Generar script de migraciones
+        env:
+          ConnectionStrings__DefaultConnection: Server=tcp:placeholder.database.windows.net,1433;Initial Catalog=LifeTrack;User ID=placeholder;Password=placeholder;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        run: |
+          dotnet tool restore
+          dotnet tool run dotnet-ef migrations script --idempotent --project src/LifeTrack.Infrastructure --startup-project src/LifeTrack.Web --output migrations.sql --no-build
+      - name: Aplicar migraciones
+        uses: Azure/sql-action@dae62750f3e645283b7755717b44a2029c0735fb # v2.3
+        with:
+          connection-string: ${{ secrets.AZURE_SQL_MIGRATION_CONNECTION_STRING }}
+          path: ./migrations.sql
+      - run: dotnet publish src/LifeTrack.Web -c Release --no-build -o publish
+      - uses: azure/login@8216e11d8cd9b42fe925c852af8e76311ff067ac # v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: azure/webapps-deploy@b686016b4de8820a23519503685d8d03fbfa03a6 # v3
+        with:
+          app-name: lifetrack
+          package: publish

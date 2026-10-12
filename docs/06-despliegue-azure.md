@@ -8,7 +8,7 @@
 |---|---|---|
 | Grupo de recursos | — | Agrupa todo para poder borrarlo de una vez |
 | App Service Plan | **F1** (gratuito) | Cuota diaria de CPU limitada, sin *always-on*, sin SLA |
-| Web App | .NET 10 (Linux) | Activar "solo HTTPS" |
+| Web App | .NET 10 (Linux preferido; Windows si F1 Linux no está disponible en la región) | Activar "solo HTTPS" |
 | Azure SQL Database | **Free offer** (serverless) | Límites mensuales de vCore-segundos y almacenamiento; se pausa por inactividad |
 
 Si tu suscripción es *Azure for Students Starter*, la oferta gratuita de Azure SQL puede no ser compatible: revisa el tipo de suscripción.
@@ -36,7 +36,7 @@ No se suben al repositorio. Todas se declaran como App Settings **secretos** en 
 
 | Clave | Valor |
 |---|---|
-| `ConnectionStrings__DefaultConnection` | Cadena de Azure SQL con `Encrypt=True` |
+| `ConnectionStrings__DefaultConnection` | Cadena de Azure SQL con `Encrypt=True` (en la pestaña **Cadenas de conexión** como `DefaultConnection` de tipo `SQLAzure`) |
 | `MediatR__LicenseKey` | Clave de licencia de MediatR, **solo en producción**. App Setting **secreto** |
 | `App__TimeZoneId` | Zona IANA del usuario (p. ej. `America/Bogota`) — **obligatoria** para que "hoy" sea correcto |
 | `AllowedHosts` | `<app-unica>.azurewebsites.net` |
@@ -99,20 +99,36 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with: { global-json-file: global.json }
-      - run: dotnet publish src/LifeTrack.Web -c Release -o publish
-      - uses: azure/login@v2
+      - run: dotnet restore --locked-mode
+      - run: dotnet build -c Release --no-restore
+      - name: Generar script de migraciones
+        env:
+          ConnectionStrings__DefaultConnection: Server=tcp:placeholder.database.windows.net,1433;Initial Catalog=LifeTrack;User ID=placeholder;Password=placeholder;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        run: |
+          dotnet tool restore
+          dotnet tool run dotnet-ef migrations script --idempotent --project src/LifeTrack.Infrastructure --startup-project src/LifeTrack.Web --output migrations.sql --no-build
+      - name: Aplicar migraciones
+        uses: Azure/sql-action@dae62750f3e645283b7755717b44a2029c0735fb # v2.3
+        with:
+          connection-string: ${{ secrets.AZURE_SQL_MIGRATION_CONNECTION_STRING }}
+          path: ./migrations.sql
+      - run: dotnet publish src/LifeTrack.Web -c Release --no-build -o publish
+      - uses: azure/login@8216e11d8cd9b42fe925c852af8e76311ff067ac # v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - uses: azure/webapps-deploy@v3
+      - uses: azure/webapps-deploy@b686016b4de8820a23519503685d8d03fbfa03a6 # v3
         with:
-          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          app-name: lifetrack
           package: publish
 ```
+El paso de migraciones usa una cadena de marcador solo para generar el script (nunca conecta); la
+aplicación real usa el secreto `AZURE_SQL_MIGRATION_CONNECTION_STRING`, con un usuario de migración
+separado de `lifetrack_app`. La herramienta `dotnet-ef` se fija en `dotnet-tools.json` (EF 10).
 Pasos únicos para OIDC: crear una aplicación en Microsoft Entra, añadir una **credencial federada** para tu repositorio (rama `main` o el entorno `production`), darle rol *Contributor* solo sobre el grupo de recursos y guardar `client-id`, `tenant-id` y `subscription-id` como secretos del repositorio. Consulta la guía oficial de "Deploy to App Service using GitHub Actions" para los comandos vigentes.
 
 También: **CodeQL** (plantilla de GitHub para C#) y **`dependabot.yml`** para `nuget` y `github-actions`.
