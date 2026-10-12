@@ -24,7 +24,7 @@ public sealed class BudgetsController(
 
             if (categoryId is null || limit is null)
             {
-                ModelState.AddModelError(string.Empty, "Revisa los datos del formulario.");
+                ModelState.AddModelError("NewBudget", "Revisa los datos del formulario.");
             }
             else
             {
@@ -36,7 +36,7 @@ public sealed class BudgetsController(
                 }
                 catch (BusinessRuleException ex)
                 {
-                    ModelState.AddModelError(string.Empty, ex.Message);
+                    ModelState.AddModelError("NewBudget", ex.Message);
                 }
                 catch (ResourceNotFoundException ex)
                 {

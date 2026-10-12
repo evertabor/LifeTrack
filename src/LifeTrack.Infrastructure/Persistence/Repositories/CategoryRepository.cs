@@ -16,9 +16,9 @@ public sealed class CategoryRepository(
 
     public async Task<bool> ExistsAsync(string normalizedName, Guid userId, CancellationToken cancellationToken)
     {
-        var upperName = normalizedName.ToUpperInvariant();
+        var upperName = normalizedName.ToUpper();
         return await context.Categories
-            .AnyAsync(c => c.UserId == userId && c.Name.ToUpperInvariant() == upperName, cancellationToken);
+            .AnyAsync(c => c.UserId == userId && c.Name.ToUpper() == upperName, cancellationToken);
     }
 
     public async Task<Category?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken)

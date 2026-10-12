@@ -15,7 +15,7 @@ public sealed record EditTransactionInputModel
     public bool? Type { get; init; }
 
     [Required(ErrorMessage = "El importe es obligatorio.")]
-    [AmountRange(ErrorMessage = "El importe debe ser mayor que 0.")]
+    [AmountRange(ErrorMessage = "El importe debe ser mayor que 0 y no superar 1.000.000.000.")]
     public decimal? Amount { get; init; }
 
     [Required(ErrorMessage = "La fecha es obligatoria.")]

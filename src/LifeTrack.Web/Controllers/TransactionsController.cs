@@ -54,7 +54,7 @@ public sealed class TransactionsController(
 
             if (categoryId is null || type is null || amount is null || date is null)
             {
-                ModelState.AddModelError(string.Empty, "Revisa los datos del formulario.");
+                ModelState.AddModelError("NewTransaction", "Revisa los datos del formulario.");
                 return await RenderTransactionsIndexAsync(new IndexRenderOptions(date ?? timeProvider.Today(), input, null, null), ct);
             }
 
@@ -67,7 +67,7 @@ public sealed class TransactionsController(
             }
             catch (BusinessRuleException ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                ModelState.AddModelError("NewTransaction", ex.Message);
             }
             catch (ResourceNotFoundException ex)
             {

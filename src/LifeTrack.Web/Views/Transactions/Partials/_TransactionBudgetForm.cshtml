@@ -13,6 +13,7 @@
             </div>
             <div class="modal-body">
                 <div asp-validation-summary="ModelOnly" class="field-validation-error" role="alert"></div>
+                <span asp-validation-for="NewBudget" class="field-validation-error" role="alert"></span>
                 <input type="hidden" asp-for="NewBudget.Year" />
                 <input type="hidden" asp-for="NewBudget.Month" />
                 <div class="app-form-field">

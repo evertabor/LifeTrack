@@ -13,6 +13,7 @@
             </div>
             <div class="modal-body">
                 <div asp-validation-summary="ModelOnly" class="field-validation-error" role="alert"></div>
+                <span asp-validation-for="NewTransaction" class="field-validation-error" role="alert"></span>
                 <div class="app-form-field">
                     <label asp-for="NewTransaction.Type" class="form-label">Tipo</label>
                     <select asp-for="NewTransaction.Type" class="form-select">
