@@ -20,7 +20,7 @@ jobs:
           ConnectionStrings__DefaultConnection: Server=tcp:placeholder.database.windows.net,1433;Initial Catalog=LifeTrack;User ID=placeholder;Password=placeholder;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         run: |
           dotnet tool restore
-          dotnet tool run dotnet-ef migrations script --idempotent --project src/LifeTrack.Infrastructure --startup-project src/LifeTrack.Web --output migrations.sql --no-build
+          dotnet tool run dotnet-ef migrations script --idempotent --configuration Release --project src/LifeTrack.Infrastructure --startup-project src/LifeTrack.Web --output migrations.sql --no-build
       - name: Aplicar migraciones
         uses: Azure/sql-action@dae62750f3e645283b7755717b44a2029c0735fb # v2.3
         with:
