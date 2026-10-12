@@ -64,6 +64,8 @@ public class RegisterInputModelValidationTests
 
         Assert.Equal("test@example.com", viewModel.Email);
         Assert.Equal("Fallo el registro.", viewModel.ErrorMessage);
+        Assert.True(viewModel.HasError);
+        Assert.False(new RegisterViewModel().HasError);
         Assert.Contains("12", viewModel.PasswordHelpText);
     }
 }

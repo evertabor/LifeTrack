@@ -36,8 +36,8 @@ public sealed class AccountService(
     {
         var result = await signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: true);
         if (result.IsLockedOut)
-            return new LoginOperationResult(false, "Invalid email or password.");
-        return new LoginOperationResult(result.Succeeded, result.Succeeded ? null : "Invalid email or password.");
+            return new LoginOperationResult(false, "Correo o contraseña no válidos.");
+        return new LoginOperationResult(result.Succeeded, result.Succeeded ? null : "Correo o contraseña no válidos.");
     }
 
     public async Task LogoutAsync(CancellationToken cancellationToken)

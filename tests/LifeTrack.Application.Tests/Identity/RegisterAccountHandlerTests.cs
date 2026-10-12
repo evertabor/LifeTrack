@@ -48,7 +48,7 @@ public class RegisterAccountHandlerTests
 
         Assert.False(result.Succeeded);
         Assert.NotNull(result.Errors);
-        Assert.Contains(result.Errors!, e => e.Contains("already", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(result.Errors!, e => e.Contains("Ya existe", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]

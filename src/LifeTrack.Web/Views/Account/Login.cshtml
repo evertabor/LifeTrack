@@ -24,7 +24,7 @@
                 <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" aria-describedby="Password-error" required />
                 <span asp-validation-for="Password" id="Password-error" class="field-validation-error"></span>
             </div>
-            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            @if (Model.HasError)
             {
                 <div id="login-error" class="app-alert app-alert--error" role="alert" aria-live="assertive">
                     <span>@Model.ErrorMessage</span>

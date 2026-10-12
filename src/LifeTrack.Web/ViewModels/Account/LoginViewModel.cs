@@ -10,6 +10,8 @@ public sealed record LoginViewModel
 
     public string? ErrorMessage { get; init; }
 
+    public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+
     public static LoginViewModel From(LoginInputModel input, string? errorMessage = null) => new()
     {
         Email = input.Email,

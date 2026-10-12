@@ -143,9 +143,10 @@ public class ConfirmTransactionImportHandlerTests
         var arranged = await ArrangeAsync();
         var content = "06/10/2026;Comida;Gasto;25,50;Compra\n06/10/2026;Comida;Gasto;0;Sin importe";
 
-        var imported = await arranged.Handler.Handle(new ConfirmTransactionImportCommand(content), CancellationToken.None);
+        var confirmation = await arranged.Handler.Handle(new ConfirmTransactionImportCommand(content), CancellationToken.None);
 
-        Assert.Equal(1, imported);
+        Assert.Equal(1, confirmation.Imported);
+        Assert.Equal(1, confirmation.Skipped);
         Assert.Equal(1, arranged.UnitOfWork.SaveCount);
         var stored = await arranged.Transactions.ListByPeriodAsync(arranged.UserId, new DateOnly(2026, 10, 1), new DateOnly(2026, 11, 1), CancellationToken.None);
         Assert.Single(stored);
@@ -203,9 +204,10 @@ public class ConfirmTransactionImportHandlerTests
         await categories.AddAsync(Category.Create("Ocio", userId), CancellationToken.None);
         var content = "06/10/2026;Comida;Gasto;10;Compra\n06/10/2026;Ocio;Gasto;5;Cine";
 
-        var imported = await handler.Handle(new ConfirmTransactionImportCommand(content), CancellationToken.None);
+        var confirmation = await handler.Handle(new ConfirmTransactionImportCommand(content), CancellationToken.None);
 
-        Assert.Equal(1, imported);
+        Assert.Equal(1, confirmation.Imported);
+        Assert.Equal(1, confirmation.Skipped);
         Assert.Equal(1, unitOfWork.SaveCount);
     }
 }

@@ -7,7 +7,7 @@ namespace LifeTrack.Web.Controllers;
 [AllowAnonymous]
 [IgnoreAntiforgeryToken]
 [Route("Error")]
-public class ErrorController : Controller
+public sealed class ErrorController : Controller
 {
     [HttpGet]
     [HttpPost]

@@ -18,7 +18,7 @@ public sealed class CategoryRepository(
     {
         var upperName = normalizedName.ToUpperInvariant();
         return await context.Categories
-            .AnyAsync(c => c.UserId == userId && c.Name.ToUpper() == upperName, cancellationToken);
+            .AnyAsync(c => c.UserId == userId && c.Name.ToUpperInvariant() == upperName, cancellationToken);
     }
 
     public async Task<Category?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken)

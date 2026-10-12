@@ -276,7 +276,7 @@ dominio, y el mensaje llega al navegador desde el handler a través de su excepc
 - `"use strict"` al inicio de la IIFE.
 - `function` declaradas, no flechas, para que `this` no dependa del contexto.
 - **Prohibido** `var`. Usa `const`; `let` solo si la reasignación es real.
-- **Prohibido** `document.getElementById` para leer `data-*`: usa `dataset` con la clave de `SELECTORS`.
+- **Prohibido** `document.getElementById` para leer atributos `data-*`: usa `dataset` con la clave de `SELECTORS`. Resolver un elemento por su `id` (como hace el modal para abrirlo) sí está permitido.
 - **Prohibido** el selector por índice (`querySelectorAll(...)[0]`) para alcanzar un elemento con
   estado: usa un atributo que lo identifique.
 - Al construir un selector concatenando un valor dinámico, **escapa** el valor:
@@ -306,7 +306,7 @@ dominio, y el mensaje llega al navegador desde el handler a través de su excepc
 - Variables globales fuera de una IIFE.
 - Punto de entrada distinto de `_initialize()`, o más de uno por fichero.
 - `var`.
-- `document.getElementById` para leer atributos `data-*`.
+- `document.getElementById` para leer atributos `data-*` (resolver por `id` sí está permitido).
 - Cargar JavaScript desde un CDN.
 - `<script>` en línea (la CSP lo bloquea).
 - Un mismo fichero que mezcle varias features.

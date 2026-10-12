@@ -91,8 +91,8 @@ mismo nombre de área, y por eso se localizan juntas.
 
 - **Uno por área**, no uno por acción. Check-in, deshacer y archivar viven en `HabitsController`.
 - Los nombres van en inglés y en plural: `CategoriesController`, no `CategoryController`.
-- Inyectan **solo** handlers de Application, `TimeProvider` e `ILogger`. Nunca `DbContext`, nunca
-  repositorios, nunca `UserManager` para datos de negocio.
+- Inyectan **`ISender`** (MediatR) y **`ILogger<TController>`** (más `TimeProvider` si lo necesitan).
+  **Nunca** un handler concreto, ni `DbContext`, ni repositorios, ni `UserManager` para datos de negocio.
 - **Delgados.** Su trabajo es: recibir, invocar un handler, mapear a `ViewModel`, devolver la vista.
 - Enlazan formularios a un `InputModel` dedicado con DataAnnotations, **nunca a una entidad**.
 - Cada método que recibe un id filtra por `ICurrentUser` a través del handler y necesita su test de IDOR.
@@ -176,20 +176,17 @@ junto al modelo, sin ficheros de mapeo adicionales, y se puede probar sin depend
 
 ### `InputModel`
 
-Los formularios se enlazan a un `InputModel` anidado en el controller, con DataAnnotations. Es la
+Los formularios se enlazan a un `InputModel` con DataAnnotations que vive en su propio archivo bajo
+`ViewModels/<Area>/`, nunca como clase anidada dentro de un controller. Es la
 excepción a "solo para pintar": los `InputModel` reciben datos y los validan en el borde.
 
 ```csharp
-public sealed class HabitsController : Controller
-{
-    public sealed class CheckInInputModel
-    {
-        [Required]
-        public Guid HabitId { get; set; }
+namespace LifeTrack.Web.ViewModels.Transactions;
 
-        [Required]
-        public DateOnly Date { get; set; }
-    }
+public sealed record CreateTransactionInputModel
+{
+    [Required(ErrorMessage = "La categoría es obligatoria.")]
+    public Guid? CategoryId { get; init; }
 }
 ```
 

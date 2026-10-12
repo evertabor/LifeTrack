@@ -4,8 +4,8 @@ namespace LifeTrack.Web.ViewModels.Transactions;
 
 public sealed record EditTransactionInputModel
 {
-    public const double MinAmount = 0.01;
-    public const double MaxAmount = 1000000000;
+    public const decimal MinAmount = 0.01m;
+    public const decimal MaxAmount = 1000000000m;
     public const int DescriptionMaxLength = 200;
 
     [Required(ErrorMessage = "La categoría es obligatoria.")]
@@ -15,7 +15,7 @@ public sealed record EditTransactionInputModel
     public bool? Type { get; init; }
 
     [Required(ErrorMessage = "El importe es obligatorio.")]
-    [Range(MinAmount, MaxAmount, ErrorMessage = "El importe debe ser mayor que 0.")]
+    [AmountRange(ErrorMessage = "El importe debe ser mayor que 0.")]
     public decimal? Amount { get; init; }
 
     [Required(ErrorMessage = "La fecha es obligatoria.")]

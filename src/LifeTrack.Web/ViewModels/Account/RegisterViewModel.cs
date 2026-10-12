@@ -18,6 +18,8 @@ public sealed record RegisterViewModel
 
     public string? ErrorMessage { get; init; }
 
+    public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+
     public static RegisterViewModel From(RegisterInputModel input, string? errorMessage = null) => new()
     {
         Email = input.Email,

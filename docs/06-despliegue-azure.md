@@ -71,8 +71,8 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with: { global-json-file: global.json }
       - run: dotnet restore            # usa --locked-mode cuando exista packages.lock.json
       - run: dotnet format --verify-no-changes --no-restore
@@ -125,7 +125,7 @@ También: **CodeQL** (plantilla de GitHub para C#) y **`dependabot.yml`** para `
 - **Control de costos:** crea una alerta de presupuesto en Azure Cost Management y comprueba periódicamente que no haya recursos de pago.
 
 ## 7. Checklist posterior al despliegue
-- [ ] HTTPS obligatorio activo y `AllowedHosts` configurado.
+- [ ] HTTPS obligatorio activo y `AllowedHosts` configurado con el dominio real (sin esto, el valor local `localhost` devuelve 400 en el dominio real).
 - [ ] `App__TimeZoneId` definida.
 - [ ] `MediatR__LicenseKey` declarada como secreto **solo en producción** (opcional: sin ella la app funciona y solo queda un *warning* en el log).
 - [ ] Cabeceras de seguridad presentes (revísalas con las herramientas del navegador).

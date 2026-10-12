@@ -33,6 +33,8 @@ Estado: ☐ pendiente · ☑ hecho. Se actualiza al cerrar cada fase del plan. R
 | Puertos de SQL local solo en `127.0.0.1` | `docker-compose.yml` | Revisión ☑ |
 | Reglas de firewall de Azure SQL mínimas | Azure | Checklist de despliegue ☐ |
 
+`style-src 'unsafe-inline'` se acepta como concesión documentada (estilos de Bootstrap); `script-src 'self'` sin scripts en línea se mantiene.
+
 **Reglas para la IA:** nunca pongas cadenas de conexión, contraseñas ni claves en código ni en `appsettings.json`. Esto incluye `MediatR:LicenseKey`. No habilites `DeveloperExceptionPage` fuera de Development. Si necesitas relajar la CSP, pide aprobación y documenta por qué.
 
 ## A03 — Fallos en la cadena de suministro de software (*Software Supply Chain Failures*)
@@ -43,9 +45,9 @@ Estado: ☐ pendiente · ☑ hecho. Se actualiza al cerrar cada fase del plan. R
 | Clave de licencia de MediatR (`MediatR:LicenseKey`) como **App Setting secreto**, nunca en el repositorio ni en `appsettings.json` | Azure, `dotnet user-secrets` en local | Escaneo de secretos en CI ☐ |
 | `NuGetAudit` activo; `dotnet list package --vulnerable --include-transitive` sin hallazgos | CI | Falla el pipeline ☑ |
 | `packages.lock.json` y `restore --locked-mode` tras el primer restore | CI | ☑ |
-| Dependabot para NuGet y GitHub Actions | `.github/dependabot.yml` | ☐ |
-| CodeQL para C# | CI | ☐ |
-| Acciones de GitHub fijadas por versión (idealmente por SHA) y permisos mínimos del workflow | CI | ☐ |
+| Dependabot para NuGet y GitHub Actions | `.github/dependabot.yml` | ☑ |
+| CodeQL para C# | CI | ☑ |
+| Acciones de GitHub fijadas por SHA en `ci.yml` (CodeQL usa tags `v3` con Dependabot) y permisos mínimos del workflow | CI | ☑ |
 | Despliegue por OIDC (sin credenciales de larga duración) | CI/CD | ☐ |
 
 **Coste en licencia de MediatR.** La versión **13.0.0 (julio de 2025)** dejó de distribuirse bajo

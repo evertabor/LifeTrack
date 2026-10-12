@@ -21,14 +21,14 @@ const Modal = (function () {
         ESCAPE_KEY: "Escape",
         TRUE: "true",
         FALSE: "false",
-        DIALOG_ROLE: "dialog",
-        NULL: null,
-        FOCUS_TRIGGERS: new Map()
+        DIALOG_ROLE: "dialog"
     };
+
+    const focusByModal = new Map();
 
     function _getModal(modalId) {
         const modal = document.getElementById(modalId);
-        return modal && modal.matches(SELECTORS.MODAL) ? modal : CONSTANTS.NULL;
+        return modal && modal.matches(SELECTORS.MODAL) ? modal : null;
     }
 
     function _setOpenState(modal) {
@@ -43,8 +43,8 @@ const Modal = (function () {
     }
 
     function _restoreFocus(modal) {
-        const trigger = CONSTANTS.FOCUS_TRIGGERS.get(modal.id);
-        CONSTANTS.FOCUS_TRIGGERS.delete(modal.id);
+        const trigger = focusByModal.get(modal.id);
+        focusByModal.delete(modal.id);
 
         if (trigger && document.contains(trigger)) {
             trigger.focus();
@@ -72,7 +72,7 @@ const Modal = (function () {
         const activeElement = document.activeElement;
 
         if (activeElement instanceof HTMLElement) {
-            CONSTANTS.FOCUS_TRIGGERS.set(modalId, activeElement);
+            focusByModal.set(modalId, activeElement);
         }
 
         _setOpenState(modal);

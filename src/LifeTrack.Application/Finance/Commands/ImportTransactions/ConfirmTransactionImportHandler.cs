@@ -11,9 +11,9 @@ public sealed class ConfirmTransactionImportHandler(
     ICategoryRepository categories,
     IUnitOfWork unitOfWork,
     ICurrentUser currentUser,
-    TimeProvider timeProvider) : IRequestHandler<ConfirmTransactionImportCommand, int>
+    TimeProvider timeProvider) : IRequestHandler<ConfirmTransactionImportCommand, ImportConfirmationResult>
 {
-    public async Task<int> Handle(ConfirmTransactionImportCommand request, CancellationToken ct)
+    public async Task<ImportConfirmationResult> Handle(ConfirmTransactionImportCommand request, CancellationToken ct)
     {
         if (currentUser.UserId is null)
         {
@@ -43,6 +43,7 @@ public sealed class ConfirmTransactionImportHandler(
         var today = timeProvider.Today();
 
         var imported = 0;
+        var skipped = 0;
         var lineNumber = 0;
 
         foreach (var fields in rows)
@@ -52,11 +53,13 @@ public sealed class ConfirmTransactionImportHandler(
 
             if (!row.IsValid || row.Date is null)
             {
+                skipped++;
                 continue;
             }
 
             if (!names.TryGetValue(row.CategoryName.Trim(), out var categoryId))
             {
+                skipped++;
                 continue;
             }
 
@@ -75,6 +78,7 @@ public sealed class ConfirmTransactionImportHandler(
             }
             catch (DomainException)
             {
+                skipped++;
                 continue;
             }
         }
@@ -85,6 +89,6 @@ public sealed class ConfirmTransactionImportHandler(
         }
 
         await unitOfWork.SaveChangesAsync(ct);
-        return imported;
+        return new ImportConfirmationResult(imported, skipped);
     }
 }

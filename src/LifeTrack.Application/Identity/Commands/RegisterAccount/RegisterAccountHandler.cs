@@ -21,7 +21,7 @@ public sealed class RegisterAccountHandler(
                     if (error.Contains("email", StringComparison.OrdinalIgnoreCase) &&
                         error.Contains("already", StringComparison.OrdinalIgnoreCase))
                     {
-                        return new RegisterAccountResult(false, new[] { "An account with this email already exists." });
+                        return new RegisterAccountResult(false, new[] { "Ya existe una cuenta con ese correo." });
                     }
                 }
             }

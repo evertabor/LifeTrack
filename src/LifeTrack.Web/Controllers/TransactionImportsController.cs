@@ -66,8 +66,10 @@ public sealed class TransactionImportsController(
 
         try
         {
-            var imported = await sender.Send(new ConfirmTransactionImportCommand(csvContent), ct);
-            TempData["Message"] = $"Se importaron {imported} movimientos.";
+            var confirmation = await sender.Send(new ConfirmTransactionImportCommand(csvContent), ct);
+            TempData["Message"] = confirmation.Skipped == 0
+                ? $"Se importaron {confirmation.Imported} movimientos."
+                : $"Se importaron {confirmation.Imported} movimientos. {confirmation.Skipped} filas omitidas.";
             return RedirectToAction(nameof(TransactionsController.Index), "Transactions");
         }
         catch (BusinessRuleException ex)

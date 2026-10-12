@@ -30,7 +30,7 @@ public sealed class AccountController(
             if (result.Succeeded)
                 return RedirectToAction("Index", "Transactions");
 
-            return View(RegisterViewModel.From(input, string.Join(" ", result.Errors ?? Array.Empty<string>())));
+            return View(RegisterViewModel.From(input, "No se pudo crear la cuenta. Revisa el correo y la contraseña."));
         }
         catch (BusinessRuleException ex)
         {
@@ -62,7 +62,7 @@ public sealed class AccountController(
             if (result.Succeeded)
                 return RedirectToAction("Index", "Transactions");
 
-            return View(LoginViewModel.From(input, result.ErrorMessage));
+            return View(LoginViewModel.From(input, "Correo o contraseña no válidos."));
         }
         catch (BusinessRuleException ex)
         {
@@ -112,7 +112,7 @@ public sealed class AccountController(
                     return RedirectToAction(nameof(Profile));
                 }
 
-                ModelState.AddModelError(string.Empty, string.Join(" ", result.Errors ?? Array.Empty<string>()));
+                ModelState.AddModelError(string.Empty, "No se pudo actualizar el perfil. Revisa los datos.");
             }
             catch (BusinessRuleException ex)
             {

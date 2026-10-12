@@ -106,6 +106,26 @@ public class AccountRedirectTests : IClassFixture<RedirectWebApplicationFactory>
     }
 
     [Fact]
+    public async Task Login_WrongCredentials_ShowsSpanishMessage()
+    {
+        var email = $"login-wrong-{Guid.NewGuid():N}@example.com";
+        await SeedUserAsync(email);
+        using var client = CreateClient();
+
+        var token = await ExtractAntiforgeryTokenAsync(client, "/Account/Login");
+        using var response = await client.PostAsync("/Account/Login", new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["Email"] = email,
+            ["Password"] = "WrongPassword123!",
+            ["__RequestVerificationToken"] = token
+        }));
+
+        Assert.Equal(200, (int)response.StatusCode);
+        var body = System.Net.WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+        Assert.Contains("Correo o contraseña no válidos.", body, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task Register_ValidInput_RedirectsToTransactions()
     {
         using var client = CreateClient();
