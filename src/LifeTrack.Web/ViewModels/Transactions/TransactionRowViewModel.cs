@@ -1,4 +1,5 @@
 using System.Globalization;
+using LifeTrack.Application.Finance.Commands.ListCategories;
 using LifeTrack.Application.Finance.Commands.ListMonthlyTransactions;
 
 namespace LifeTrack.Web.ViewModels.Transactions;
@@ -15,13 +16,20 @@ public sealed record TransactionRowViewModel
     public string DateText { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
     public bool IsIncome { get; init; }
+    public EditTransactionInputModel Input { get; init; } = new();
+    public IReadOnlyList<TransactionCategoryOption> CategoryOptions { get; init; } = [];
     public string EditLabel { get; init; } = string.Empty;
+    public string EditModalId { get; init; } = string.Empty;
+    public string EditModalTitleId { get; init; } = string.Empty;
+    public string EditAmountHelpId { get; init; } = string.Empty;
     public string DeleteLabel { get; init; } = string.Empty;
     public string DeleteModalId { get; init; } = string.Empty;
     public string DeleteModalTitleId { get; init; } = string.Empty;
     public string DeleteConfirmMessage { get; init; } = string.Empty;
 
-    public static TransactionRowViewModel From(TransactionSummary summary) =>
+    public static TransactionRowViewModel From(
+        TransactionSummary summary,
+        IReadOnlyList<CategorySummary> categories) =>
         new()
         {
             Id = summary.Id,
@@ -34,7 +42,21 @@ public sealed record TransactionRowViewModel
             DateText = summary.Date.ToString("dd/MM/yyyy"),
             Description = summary.Description,
             IsIncome = summary.IsIncome,
+            Input = new EditTransactionInputModel
+            {
+                CategoryId = summary.CategoryId,
+                Type = summary.IsIncome,
+                Amount = summary.Amount,
+                Date = summary.Date,
+                Description = summary.Description
+            },
+            CategoryOptions = categories
+                .Select(c => TransactionCategoryOption.From(c, summary.CategoryId))
+                .ToList(),
             EditLabel = "Editar movimiento",
+            EditModalId = $"transaction-edit-modal-{summary.Id:D}",
+            EditModalTitleId = $"transaction-edit-modal-title-{summary.Id:D}",
+            EditAmountHelpId = $"transaction-edit-amount-help-{summary.Id:D}",
             DeleteLabel = "Eliminar movimiento",
             DeleteModalId = $"transaction-delete-modal-{summary.Id:D}",
             DeleteModalTitleId = $"transaction-delete-modal-title-{summary.Id:D}",

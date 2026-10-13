@@ -74,6 +74,16 @@ body {
   min-height: 100vh;
 }
 
+.app-public-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-public-main {
+  flex: 1 0 auto;
+}
+
 .app-sidebar {
   background: var(--app-color-primary-800);
   bottom: 0;

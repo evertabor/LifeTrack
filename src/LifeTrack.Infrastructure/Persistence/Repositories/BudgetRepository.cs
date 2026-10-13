@@ -25,6 +25,11 @@ public sealed class BudgetRepository(
             .AnyAsync(b => b.CategoryId == categoryId && b.UserId == userId, cancellationToken);
     }
 
+    public void Remove(Budget budget)
+    {
+        context.Budgets.Remove(budget);
+    }
+
     public async Task<IReadOnlyList<Budget>> ListByPeriodAsync(Guid userId, int year, int month, CancellationToken cancellationToken)
     {
         return await context.Budgets

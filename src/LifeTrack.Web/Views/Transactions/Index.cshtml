@@ -99,10 +99,11 @@
                 @foreach (var budget in Model.Budgets)
                 {
                     <div class="@budget.ProgressCssClass">
-                        <div class="app-progress__header">
-                            <span class="app-progress__label">@budget.CategoryName</span>
-                            <span class="app-progress__value app-amount">@budget.UsageText</span>
-                        </div>
+                    <div class="app-progress__header">
+                        <span class="app-progress__label">@budget.CategoryName</span>
+                        <button class="app-progress__delete" type="button" data-modal-open="@budget.DeleteModalId" aria-controls="@budget.DeleteModalId" aria-label="@budget.DeleteLabel"><span aria-hidden="true">🗑</span></button>
+                        <span class="app-progress__value app-amount">@budget.UsageText</span>
+                    </div>
                         <div class="app-progress__track" role="progressbar" aria-label="@budget.AriaLabel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@budget.ProgressBarValue" aria-valuetext="@budget.PercentText">
                             <div class="app-progress__fill" data-transactions-percent="@budget.FillPercent"></div>
                         </div>
@@ -110,6 +111,10 @@
                     </div>
                 }
             </div>
+            @foreach (var budget in Model.Budgets)
+            {
+                <partial name="Partials/_BudgetDeleteForm" model="budget" />
+            }
         }
         else
         {
@@ -162,7 +167,7 @@
                                 <td data-transactions-label="Importe" class="text-end @transaction.AmountCssClass">@transaction.AmountText</td>
                                 <td>
                                     <span class="transactions-table__actions">
-                                        <a class="btn btn-sm btn-secondary" asp-controller="Transactions" asp-action="Edit" asp-route-id="@transaction.Id" aria-label="@transaction.EditLabel"><span aria-hidden="true">✎</span></a>
+                                        <button class="btn btn-sm btn-secondary" type="button" data-modal-open="@transaction.EditModalId" aria-controls="@transaction.EditModalId" aria-label="@transaction.EditLabel"><span aria-hidden="true">✎</span></button>
                                         <button class="btn btn-sm btn-danger" type="button" data-modal-open="@transaction.DeleteModalId" aria-controls="@transaction.DeleteModalId" aria-label="@transaction.DeleteLabel"><span aria-hidden="true">🗑</span></button>
                                     </span>
                                 </td>
@@ -173,6 +178,7 @@
             </div>
             @foreach (var transaction in Model.Transactions)
             {
+                <partial name="Partials/_TransactionEditForm" model="transaction" />
                 <partial name="Partials/_TransactionDeleteForm" model="transaction" />
             }
         }

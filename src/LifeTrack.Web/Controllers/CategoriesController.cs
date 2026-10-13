@@ -113,6 +113,6 @@ public sealed class CategoriesController(
     private async Task<IActionResult> RenderIndexAsync(CreateCategoryInputModel input, CancellationToken ct)
     {
         var categories = await sender.Send(new ListCategoriesQuery(), ct);
-        return View(CategoryListViewModel.From(categories, TempData["Message"] as string, input));
+        return View(nameof(Index), CategoryListViewModel.From(categories, TempData["Message"] as string, input));
     }
 }

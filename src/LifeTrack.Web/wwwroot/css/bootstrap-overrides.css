@@ -31,3 +31,7 @@
 .btn {
   min-height: var(--app-control-min-size);
 }
+
+.form-text {
+  color: var(--app-color-text-secondary);
+}

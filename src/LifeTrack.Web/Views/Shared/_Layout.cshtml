@@ -14,7 +14,10 @@
 </head>
 <body class="app-public-shell">
     <a class="app-skip-link" href="#main-content">Saltar al contenido</a>
-    <partial name="Partials/_PublicHeader" />
+    @if (ViewData["HidePublicHeader"] is not true)
+    {
+        <partial name="Partials/_PublicHeader" />
+    }
     <main id="main-content" role="main" class="app-main app-public-main">
         <div class="app-container">
             @RenderBody()

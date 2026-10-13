@@ -1,4 +1,5 @@
 using LifeTrack.Application.Common;
+using LifeTrack.Application.Finance.Commands.DeleteBudget;
 using LifeTrack.Application.Finance.Commands.SetBudget;
 using LifeTrack.Web.ViewModels.Transactions;
 using MediatR;
@@ -49,5 +50,21 @@ public sealed class BudgetsController(
         var safeYear = input.Year is >= SetBudgetInputModel.MinYear and <= SetBudgetInputModel.MaxYear ? input.Year : timeProvider.Today().Year;
         var safeMonth = input.Month is >= SetBudgetInputModel.MinMonth and <= SetBudgetInputModel.MaxMonth ? input.Month : timeProvider.Today().Month;
         return await RenderTransactionsIndexAsync(new IndexRenderOptions(new DateOnly(safeYear, safeMonth, 1), null, input, null), ct);
+    }
+
+    [HttpPost("{categoryId:guid}/delete")]
+    public async Task<IActionResult> Delete(Guid categoryId, int year, int month, CancellationToken ct)
+    {
+        try
+        {
+            await Sender.Send(new DeleteBudgetCommand(categoryId, year, month), ct);
+            TempData["Message"] = "Presupuesto eliminado.";
+        }
+        catch (ResourceNotFoundException ex)
+        {
+            logger.LogWarning(ex, "Budget delete requested with unknown budget {CategoryId} {Year} {Month}", categoryId, year, month);
+        }
+
+        return RedirectToAction(nameof(TransactionsController.Index), "Transactions", new { year, month });
     }
 }

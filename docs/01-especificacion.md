@@ -76,7 +76,7 @@ Prioridad con MoSCoW: **M** (imprescindible), **S** (debería), **C** (podría).
 | RF-F03 | Listar los movimientos de un mes, con filtro por categoría | M |
 | RF-F04 | Editar y eliminar un movimiento | S |
 | RF-F05 | Resumen mensual: ingresos, gastos, balance y gasto por categoría | M |
-| RF-F06 | Definir presupuesto mensual por categoría y mostrar su consumo (aviso al 80 % y al 100 %) | S |
+| RF-F06 | Definir y eliminar presupuesto mensual por categoría y mostrar su consumo (aviso al 80 % y al 100 %) | S |
 | RF-F07 | Importar movimientos desde un CSV (con vista previa y validación) | C |
 
 ### 3.3 Hábitos
@@ -154,6 +154,7 @@ Prioridad con MoSCoW: **M** (imprescindible), **S** (debería), **C** (podría).
 **HU-07 — Controlar presupuesto** (RF-F06)
 - *Dado* presupuesto 100 para "Comida" y gasto acumulado 80, *entonces* se muestra un aviso de consumo al 80 %.
 - *Dado* gasto acumulado ≥ 100, *entonces* se muestra el aviso de presupuesto superado.
+- *Dado* un presupuesto del mes, *cuando* lo elimino, *entonces* desaparece de la lista y los movimientos no cambian.
 
 **HU-08 — Crear y marcar hábitos** (RF-H01..H03)
 - *Dado* un nombre válido, *entonces* el hábito aparece con racha 0.

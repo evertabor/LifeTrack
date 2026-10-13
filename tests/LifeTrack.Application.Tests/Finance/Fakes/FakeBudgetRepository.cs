@@ -29,4 +29,9 @@ public sealed class FakeBudgetRepository : IBudgetRepository
         return Task.FromResult<IReadOnlyList<Budget>>(
             _budgets.Where(b => b.UserId == userId && b.Year == year && b.Month == month).ToList());
     }
+
+    public void Remove(Budget budget)
+    {
+        _budgets.Remove(budget);
+    }
 }

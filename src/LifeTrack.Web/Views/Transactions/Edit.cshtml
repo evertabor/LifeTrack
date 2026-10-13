@@ -54,7 +54,7 @@
             </div>
             <div class="app-form-field">
                 <label asp-for="Input.Amount" class="form-label">Importe</label>
-                <input asp-for="Input.Amount" class="form-control" type="number" step="0.01" min="0.01" max="@EditTransactionInputModel.MaxAmount" inputmode="decimal" autocomplete="off" aria-describedby="transaction-amount-help" required />
+                <input asp-for="Input.Amount" class="form-control" type="text" inputmode="decimal" autocomplete="off" data-app-money aria-describedby="transaction-amount-help" required />
                 <div id="transaction-amount-help" class="form-text">Introduce el importe sin símbolo de moneda.</div>
                 <span asp-validation-for="Input.Amount" class="field-validation-error"></span>
             </div>

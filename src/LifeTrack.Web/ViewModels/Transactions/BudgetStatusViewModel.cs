@@ -11,6 +11,14 @@ public sealed record BudgetStatusViewModel
     private const int MaxPercent = 100;
 
     public string CategoryName { get; init; } = string.Empty;
+    public Guid CategoryId { get; init; }
+    public int Year { get; init; }
+    public int Month { get; init; }
+    public string DeleteModalId { get; init; } = string.Empty;
+    public string DeleteModalTitleId { get; init; } = string.Empty;
+    public string DeleteLabel { get; init; } = string.Empty;
+    public string DeleteConfirmMessage { get; init; } = string.Empty;
+    public string DeleteDescription { get; init; } = string.Empty;
     public string UsageText { get; init; } = string.Empty;
     public string PercentText { get; init; } = string.Empty;
     public string StateText { get; init; } = string.Empty;
@@ -20,7 +28,7 @@ public sealed record BudgetStatusViewModel
     public int ProgressBarValue { get; init; }
     public string AriaLabel { get; init; } = string.Empty;
 
-    public static BudgetStatusViewModel From(BudgetStatusDto dto)
+    public static BudgetStatusViewModel From(BudgetStatusDto dto, int year, int month)
     {
         var fill = Math.Clamp((int)dto.Percent, MinPercent, MaxPercent);
         var stateText = dto.State switch
@@ -42,10 +50,19 @@ public sealed record BudgetStatusViewModel
             _ => "app-progress app-progress--ok"
         };
         var usageText = $"{dto.Spent.ToString("N2", Spanish)} de {dto.Limit.ToString("N2", Spanish)}";
+        var deleteConfirmMessage = "¿Eliminar este presupuesto? Esta acción no se puede deshacer.";
 
         return new()
         {
+            CategoryId = dto.CategoryId,
             CategoryName = dto.CategoryName,
+            Year = year,
+            Month = month,
+            DeleteModalId = $"budget-delete-modal-{dto.CategoryId:D}",
+            DeleteModalTitleId = $"budget-delete-modal-title-{dto.CategoryId:D}",
+            DeleteLabel = "Eliminar presupuesto",
+            DeleteConfirmMessage = deleteConfirmMessage,
+            DeleteDescription = $"{dto.CategoryName}: {usageText}. {deleteConfirmMessage}",
             UsageText = usageText,
             PercentText = $"{dto.Percent.ToString("N0", Spanish)} % usado",
             StateText = stateText,
