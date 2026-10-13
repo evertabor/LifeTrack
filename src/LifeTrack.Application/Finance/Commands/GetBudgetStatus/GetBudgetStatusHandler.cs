@@ -27,7 +27,22 @@ public sealed class GetBudgetStatusHandler(
         }
 
         var userId = currentUser.UserId.Value;
+
+        if (request.CategoryId.HasValue)
+        {
+            var filter = await categories.GetByIdAsync(request.CategoryId.Value, userId, ct);
+            if (filter is null)
+            {
+                throw new ResourceNotFoundException("La categoría no existe.");
+            }
+        }
+
         var items = await budgets.ListByPeriodAsync(userId, request.Year, request.Month, ct);
+
+        if (request.CategoryId.HasValue)
+        {
+            items = items.Where(b => b.CategoryId == request.CategoryId.Value).ToList();
+        }
 
         if (items.Count == 0)
         {

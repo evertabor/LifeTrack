@@ -25,7 +25,7 @@ public sealed class TransactionsController(
         {
             var result = await Sender.Send(new ListMonthlyTransactionsQuery(year, month, categoryId), ct);
             var categories = await Sender.Send(new ListCategoriesQuery(), ct);
-            var budgets = await Sender.Send(new GetBudgetStatusQuery(result.Year, result.Month), ct);
+            var budgets = await Sender.Send(new GetBudgetStatusQuery(result.Year, result.Month, categoryId), ct);
             return View(TransactionListViewModel.From(result, categories, budgets, new TransactionListOptions(TempData["Message"] as string, null, null, categoryId)));
         }
         catch (BusinessRuleException ex)

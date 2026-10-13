@@ -163,4 +163,35 @@ public class GetBudgetStatusHandlerTests
             () => handler.Handle(new GetBudgetStatusQuery(2026, 10), CancellationToken.None));
         Assert.Contains("usuario autenticado", ex.Message);
     }
+
+    [Fact]
+    public async Task Handle_CategoryFilter_ReturnsOnlyMatchingBudget()
+    {
+        var userId = Guid.NewGuid();
+        var budgets = new FakeBudgetRepository();
+        var transactions = new FakeTransactionRepository();
+        var categories = new FakeCategoryRepository();
+        var food = Category.Create("Comida", userId);
+        var transport = Category.Create("Transporte", userId);
+        await categories.AddAsync(food, CancellationToken.None);
+        await categories.AddAsync(transport, CancellationToken.None);
+        await budgets.AddAsync(Budget.Create(userId, food.Id, new BudgetPeriod(2026, 10), 100m), CancellationToken.None);
+        await budgets.AddAsync(Budget.Create(userId, transport.Id, new BudgetPeriod(2026, 10), 200m), CancellationToken.None);
+        var handler = new GetBudgetStatusHandler(budgets, transactions, categories, new FakeCurrentUser(userId));
+
+        var result = await handler.Handle(new GetBudgetStatusQuery(2026, 10, food.Id), CancellationToken.None);
+
+        var status = Assert.Single(result);
+        Assert.Equal(food.Id, status.CategoryId);
+    }
+
+    [Fact]
+    public async Task Handle_CategoryOfAnotherUser_ThrowsResourceNotFound()
+    {
+        var arranged = await ArrangeAsync(10m);
+        var foreign = Category.Create("Restaurantes", Guid.NewGuid());
+
+        await Assert.ThrowsAsync<ResourceNotFoundException>(
+            () => arranged.Handler.Handle(new GetBudgetStatusQuery(2026, 10, foreign.Id), CancellationToken.None));
+    }
 }
