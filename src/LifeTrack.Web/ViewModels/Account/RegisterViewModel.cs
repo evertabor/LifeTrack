@@ -14,7 +14,7 @@ public sealed record RegisterViewModel
 
     public string ConfirmPassword { get; init; } = string.Empty;
 
-    public string PasswordHelpText => $"Usa al menos {RegisterInputModel.MinPasswordLength} caracteres.";
+    public string PasswordHelpText => "Mínimo 12 caracteres, con mayúscula, minúscula, número y símbolo.";
 
     public string? ErrorMessage { get; init; }
 

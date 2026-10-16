@@ -10,13 +10,17 @@ public sealed record TransactionCategoryOption
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
     public bool IsSelected { get; init; }
+    public bool IsIncome { get; init; }
+    public string KindText { get; init; } = string.Empty;
 
     public static TransactionCategoryOption From(CategorySummary summary, Guid? selectedId) =>
         new()
         {
             Id = summary.Id,
             Name = summary.Name,
-            IsSelected = selectedId.HasValue && selectedId.Value == summary.Id
+            IsSelected = selectedId.HasValue && selectedId.Value == summary.Id,
+            IsIncome = summary.IsIncome,
+            KindText = summary.IsIncome ? "income" : "expense"
         };
 }
 
@@ -56,7 +60,8 @@ public sealed record TransactionListOptions(
     string? Message,
     CreateTransactionInputModel? NewTransaction = null,
     SetBudgetInputModel? NewBudget = null,
-    Guid? SelectedCategoryId = null);
+    Guid? SelectedCategoryId = null,
+    DateOnly? Today = null);
 
 public sealed record TransactionListViewModel
 {
@@ -72,6 +77,7 @@ public sealed record TransactionListViewModel
     public IReadOnlyList<TransactionRowViewModel> Transactions { get; init; } = [];
     public IReadOnlyList<TransactionCategoryOption> CategoryOptions { get; init; } = [];
     public IReadOnlyList<TransactionCategoryOption> CreateCategoryOptions { get; init; } = [];
+    public IReadOnlyList<TransactionCategoryOption> BudgetCategoryOptions { get; init; } = [];
     public IReadOnlyList<TransactionMonthOption> MonthOptions { get; init; } = [];
     public Guid? SelectedCategoryId { get; init; }
     public CreateTransactionInputModel NewTransaction { get; init; } = new();
@@ -80,6 +86,10 @@ public sealed record TransactionListViewModel
     public string? SuccessMessage { get; init; }
     public bool IsIncomeSelected { get; init; }
     public bool IsExpenseSelected { get; init; } = true;
+    public string MinTransactionDateText { get; init; } = string.Empty;
+    public string MaxTransactionDateText { get; init; } = string.Empty;
+    public string TransactionDateHelpText { get; init; } = string.Empty;
+    public int MaxFilterYear { get; init; }
 
     public bool HasSuccessMessage => !string.IsNullOrEmpty(SuccessMessage);
     public bool HasTransactions => Transactions.Count > 0;
@@ -100,6 +110,11 @@ public sealed record TransactionListViewModel
         {
             monthOptions.Add(TransactionMonthOption.From(month, result.Month));
         }
+        var firstDay = new DateOnly(result.Year, result.Month, 1);
+        var lastDay = firstDay.AddMonths(1).AddDays(-1);
+        var today = options.Today ?? lastDay;
+        var minDay = firstDay;
+        var maxDay = lastDay <= today ? lastDay : today;
         return new()
         {
             Year = result.Year,
@@ -109,9 +124,10 @@ public sealed record TransactionListViewModel
             TotalExpenseText = result.TotalExpense.ToString("N2", Spanish),
             BalanceText = result.Balance.ToString("N2", Spanish),
             ExpenseByCategory = result.ExpenseByCategory.Select(TransactionCategoryExpense.From).ToList(),
-            Transactions = result.Transactions.Select(t => TransactionRowViewModel.From(t, categories)).ToList(),
+            Transactions = result.Transactions.Select(t => TransactionRowViewModel.From(t, categories, options.Today)).ToList(),
             CategoryOptions = categories.Select(c => TransactionCategoryOption.From(c, options.SelectedCategoryId)).ToList(),
             CreateCategoryOptions = categories.Select(c => TransactionCategoryOption.From(c, current.CategoryId == Guid.Empty ? null : current.CategoryId)).ToList(),
+            BudgetCategoryOptions = categories.Where(c => !c.IsIncome).Select(c => TransactionCategoryOption.From(c, null)).ToList(),
             MonthOptions = monthOptions,
             SelectedCategoryId = options.SelectedCategoryId,
             NewTransaction = current,
@@ -119,7 +135,11 @@ public sealed record TransactionListViewModel
             Budgets = budgets.Select(b => BudgetStatusViewModel.From(b, result.Year, result.Month)).ToList(),
             SuccessMessage = options.Message,
             IsIncomeSelected = current.Type is true,
-            IsExpenseSelected = current.Type is not true
+            IsExpenseSelected = current.Type is not true,
+            MinTransactionDateText = minDay.ToString("yyyy-MM-dd"),
+            MaxTransactionDateText = maxDay.ToString("yyyy-MM-dd"),
+            TransactionDateHelpText = $"Solo fechas de {new DateTime(result.Year, result.Month, 1).ToString("MMMM yyyy", Spanish)} hasta hoy.",
+            MaxFilterYear = today.Year
         };
     }
 }

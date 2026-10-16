@@ -29,7 +29,8 @@ public sealed class AccountService(
         }
         return new AccountOperationResult(
             result.Succeeded,
-            result.Errors.Select(e => e.Description).ToArray());
+            result.Errors.Select(e => e.Description).ToArray(),
+            result.Succeeded ? user.Id : null);
     }
 
     public async Task<LoginOperationResult> LoginAsync(string email, string password, CancellationToken cancellationToken)

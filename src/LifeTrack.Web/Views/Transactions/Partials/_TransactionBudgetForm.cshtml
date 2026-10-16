@@ -18,9 +18,9 @@
                 <input type="hidden" asp-for="NewBudget.Month" />
                 <div class="app-form-field">
                     <label asp-for="NewBudget.CategoryId" class="form-label">Categoría</label>
-                    <select asp-for="NewBudget.CategoryId" class="form-select" required>
+                    <select asp-for="NewBudget.CategoryId" class="form-select" aria-describedby="transactions-budget-category-help" required>
                         <option value="">Selecciona una categoría</option>
-                        @foreach (var option in Model.CreateCategoryOptions)
+                        @foreach (var option in Model.BudgetCategoryOptions)
                         {
                             @if (option.IsSelected)
                             {
@@ -32,11 +32,12 @@
                             }
                         }
                     </select>
+                    <div id="transactions-budget-category-help" class="form-text">Solo las categorías de gasto admiten presupuesto.</div>
                     <span asp-validation-for="NewBudget.CategoryId" class="field-validation-error"></span>
                 </div>
                 <div class="app-form-field">
                     <label asp-for="NewBudget.Limit" class="form-label">Límite</label>
-                    <input asp-for="NewBudget.Limit" class="form-control" type="text" inputmode="decimal" autocomplete="off" data-app-money aria-describedby="transactions-budget-limit-help" required />
+                    <input asp-for="NewBudget.Limit" class="form-control" type="text" inputmode="decimal" autocomplete="off" data-app-money aria-describedby="transactions-budget-limit-help" required maxlength="16" />
                     <div id="transactions-budget-limit-help" class="form-text">Importe sin símbolo de moneda.</div>
                     <span asp-validation-for="NewBudget.Limit" class="field-validation-error"></span>
                 </div>

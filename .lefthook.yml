@@ -1,0 +1,36 @@
+# .lefthook.yml — LifeTrack pre-commit / pre-push hooks
+# Ejecuta: lefthook install   (una sola vez)
+# Salta hooks: git commit --no-verify / git push --no-verify
+
+pre-commit:
+  parallel: true
+  commands:
+    # 1. Formato (EditorConfig + dotnet format) — AGENTS.md §6, §11
+    dotnet-format:
+      glob: "*.cs"
+      run: dotnet format --verify-no-changes --verbosity quiet
+      stage_fixed: true
+
+    # 2. Build Release (warnings as errors en CI) — AGENTS.md §5
+    dotnet-build:
+      run: dotnet build -c Release --no-restore --verbosity quiet
+
+    # 3. Tests unitarios rápidos (excluye Integration) — AGENTS.md §10
+    dotnet-test-unit:
+      run: dotnet test --filter "FullyQualifiedName!~Integration" --no-build -c Release --verbosity quiet
+
+    # 4. Architecture tests (regla de dependencias) — AGENTS.md §4, §11
+    arch-tests:
+      run: dotnet test tests/LifeTrack.Architecture.Tests --no-build -c Release --verbosity quiet
+
+    # 5. Vulnerabilidades NuGet (OWASP A03) — AGENTS.md §7, docs/03-seguridad-owasp.md
+    nuget-audit:
+      run: dotnet list package --vulnerable --include-transitive --verbosity quiet
+
+pre-push:
+  commands:
+    # Suite completa antes de push (tests completos + auditoría)
+    full-check:
+      run: |
+        dotnet test -c Release --verbosity normal
+        dotnet list package --vulnerable --include-transitive

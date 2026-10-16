@@ -14,7 +14,7 @@ public class EditCategoryHandlerTests
         var repository = new Fakes.FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
-        var category = Category.Create("Comida", userId);
+        var category = Category.Create("Comida", userId, TransactionType.Expense);
         await repository.AddAsync(category, CancellationToken.None);
         var handler = new EditCategoryHandler(repository, unitOfWork, currentUser);
         var command = new EditCategoryCommand(category.Id, "Transporte");
@@ -33,7 +33,7 @@ public class EditCategoryHandlerTests
         var repository = new Fakes.FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
-        var category = Category.Create("Comida", userId);
+        var category = Category.Create("Comida", userId, TransactionType.Expense);
         await repository.AddAsync(category, CancellationToken.None);
         var handler = new EditCategoryHandler(repository, unitOfWork, currentUser);
         var command = new EditCategoryCommand(category.Id, "Comida");
@@ -51,8 +51,8 @@ public class EditCategoryHandlerTests
         var repository = new Fakes.FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
-        await repository.AddAsync(Category.Create("Comida", userId), CancellationToken.None);
-        var category = Category.Create("Transporte", userId);
+        await repository.AddAsync(Category.Create("Comida", userId, TransactionType.Expense), CancellationToken.None);
+        var category = Category.Create("Transporte", userId, TransactionType.Expense);
         await repository.AddAsync(category, CancellationToken.None);
         var handler = new EditCategoryHandler(repository, unitOfWork, currentUser);
         var command = new EditCategoryCommand(category.Id, "Comida");
@@ -70,7 +70,7 @@ public class EditCategoryHandlerTests
         var repository = new Fakes.FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
-        var category = Category.Create("Comida", userId);
+        var category = Category.Create("Comida", userId, TransactionType.Expense);
         await repository.AddAsync(category, CancellationToken.None);
         var handler = new EditCategoryHandler(repository, unitOfWork, currentUser);
         var command = new EditCategoryCommand(category.Id, "");
@@ -88,7 +88,7 @@ public class EditCategoryHandlerTests
         var repository = new Fakes.FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
-        var category = Category.Create("Comida", userId);
+        var category = Category.Create("Comida", userId, TransactionType.Expense);
         await repository.AddAsync(category, CancellationToken.None);
         var handler = new EditCategoryHandler(repository, unitOfWork, currentUser);
         var command = new EditCategoryCommand(category.Id, new string('a', 51));
@@ -107,7 +107,7 @@ public class EditCategoryHandlerTests
         var repository = new Fakes.FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userB);
-        var category = Category.Create("Comida", userA);
+        var category = Category.Create("Comida", userA, TransactionType.Expense);
         await repository.AddAsync(category, CancellationToken.None);
         var handler = new EditCategoryHandler(repository, unitOfWork, currentUser);
         var command = new EditCategoryCommand(category.Id, "Transporte");

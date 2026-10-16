@@ -49,7 +49,8 @@ public sealed class Budget : Entity
         Guid userId,
         Guid categoryId,
         BudgetPeriod period,
-        decimal limit)
+        decimal limit,
+        Category category)
     {
         if (userId == Guid.Empty)
         {
@@ -59,6 +60,16 @@ public sealed class Budget : Entity
         if (categoryId == Guid.Empty)
         {
             throw new DomainException("La categoría es obligatoria.");
+        }
+
+        if (categoryId != category.Id)
+        {
+            throw new DomainException("La categoría no es válida.");
+        }
+
+        if (category.Type != TransactionType.Expense)
+        {
+            throw new DomainException("Solo las categorías de gasto admiten presupuesto.");
         }
 
         ValidatePeriod(period.Year, period.Month);

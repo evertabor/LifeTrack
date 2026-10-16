@@ -15,7 +15,7 @@ public class SetBudgetHandlerTests
         var budgets = new FakeBudgetRepository();
         var categories = new FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var category = Category.Create("Comida", owner);
+        var category = Category.Create("Comida", owner, TransactionType.Expense);
         categories.AddAsync(category, CancellationToken.None).GetAwaiter().GetResult();
         var handler = new SetBudgetHandler(budgets, categories, unitOfWork, new FakeCurrentUser(owner));
         return (handler, budgets, unitOfWork, owner, category.Id);
@@ -55,10 +55,25 @@ public class SetBudgetHandlerTests
     }
 
     [Fact]
+    public async Task Handle_IncomeCategory_ThrowsBusinessRuleAndDoesNotSave()
+    {
+        var arranged = Arrange();
+        var income = Category.Create("Sueldo", arranged.UserId, TransactionType.Income);
+        var categories = new FakeCategoryRepository();
+        await categories.AddAsync(income, CancellationToken.None);
+        var handler = new SetBudgetHandler(arranged.Budgets, categories, arranged.UnitOfWork, new FakeCurrentUser(arranged.UserId));
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(
+            () => handler.Handle(new SetBudgetCommand(income.Id, 2026, 10, 100m), CancellationToken.None));
+        Assert.Contains("gasto", ex.Message);
+        Assert.Equal(0, arranged.UnitOfWork.SaveCount);
+    }
+
+    [Fact]
     public async Task Handle_CategoryOfAnotherUser_ThrowsResourceNotFoundAndDoesNotSave()
     {
         var arranged = Arrange();
-        var foreign = Category.Create("Restaurantes", Guid.NewGuid());
+        var foreign = Category.Create("Restaurantes", Guid.NewGuid(), TransactionType.Expense);
 
         await Assert.ThrowsAsync<ResourceNotFoundException>(
             () => arranged.Handler.Handle(new SetBudgetCommand(foreign.Id, 2026, 10, 100m), CancellationToken.None));
@@ -85,13 +100,13 @@ public class GetBudgetStatusHandlerTests
         var budgets = new FakeBudgetRepository();
         var transactions = new FakeTransactionRepository();
         var categories = new FakeCategoryRepository();
-        var food = Category.Create("Comida", userId);
+        var food = Category.Create("Comida", userId, TransactionType.Expense);
         await categories.AddAsync(food, CancellationToken.None);
-        budgets.AddAsync(Budget.Create(userId, food.Id, new BudgetPeriod(2026, 10), 100m), CancellationToken.None).GetAwaiter().GetResult();
+        budgets.AddAsync(Budget.Create(userId, food.Id, new BudgetPeriod(2026, 10), 100m, food), CancellationToken.None).GetAwaiter().GetResult();
         var today = new DateOnly(2026, 10, 31);
         if (foodSpent > 0)
         {
-            transactions.AddAsync(Transaction.Create(userId, new TransactionData(food.Id, TransactionType.Expense, foodSpent, new DateOnly(2026, 10, 6), null), today), CancellationToken.None).GetAwaiter().GetResult();
+            transactions.AddAsync(Transaction.Create(userId, new TransactionData(food.Id, TransactionType.Expense, foodSpent, new DateOnly(2026, 10, 6), null), today, food), CancellationToken.None).GetAwaiter().GetResult();
         }
 
         var handler = new GetBudgetStatusHandler(budgets, transactions, categories, new FakeCurrentUser(userId));
@@ -171,12 +186,12 @@ public class GetBudgetStatusHandlerTests
         var budgets = new FakeBudgetRepository();
         var transactions = new FakeTransactionRepository();
         var categories = new FakeCategoryRepository();
-        var food = Category.Create("Comida", userId);
-        var transport = Category.Create("Transporte", userId);
+        var food = Category.Create("Comida", userId, TransactionType.Expense);
+        var transport = Category.Create("Transporte", userId, TransactionType.Expense);
         await categories.AddAsync(food, CancellationToken.None);
         await categories.AddAsync(transport, CancellationToken.None);
-        await budgets.AddAsync(Budget.Create(userId, food.Id, new BudgetPeriod(2026, 10), 100m), CancellationToken.None);
-        await budgets.AddAsync(Budget.Create(userId, transport.Id, new BudgetPeriod(2026, 10), 200m), CancellationToken.None);
+        await budgets.AddAsync(Budget.Create(userId, food.Id, new BudgetPeriod(2026, 10), 100m, food), CancellationToken.None);
+        await budgets.AddAsync(Budget.Create(userId, transport.Id, new BudgetPeriod(2026, 10), 200m, transport), CancellationToken.None);
         var handler = new GetBudgetStatusHandler(budgets, transactions, categories, new FakeCurrentUser(userId));
 
         var result = await handler.Handle(new GetBudgetStatusQuery(2026, 10, food.Id), CancellationToken.None);
@@ -189,7 +204,7 @@ public class GetBudgetStatusHandlerTests
     public async Task Handle_CategoryOfAnotherUser_ThrowsResourceNotFound()
     {
         var arranged = await ArrangeAsync(10m);
-        var foreign = Category.Create("Restaurantes", Guid.NewGuid());
+        var foreign = Category.Create("Restaurantes", Guid.NewGuid(), TransactionType.Expense);
 
         await Assert.ThrowsAsync<ResourceNotFoundException>(
             () => arranged.Handler.Handle(new GetBudgetStatusQuery(2026, 10, foreign.Id), CancellationToken.None));

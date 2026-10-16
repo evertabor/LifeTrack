@@ -11,25 +11,27 @@ public class UpdateTransactionHandlerTests
 {
     private static readonly DateOnly Today = new(2026, 10, 10);
 
-    private static (UpdateTransactionHandler Handler, FakeTransactionRepository Transactions, FakeUnitOfWork UnitOfWork, Guid UserId, Guid CategoryId, Transaction Movement) Arrange()
+    private static (UpdateTransactionHandler Handler, FakeTransactionRepository Transactions, FakeUnitOfWork UnitOfWork, Guid UserId, Guid CategoryId, Guid IncomeCategoryId, Transaction Movement) Arrange()
     {
         var owner = Guid.NewGuid();
         var transactions = new FakeTransactionRepository();
         var categories = new FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var category = Category.Create("Comida", owner);
+        var category = Category.Create("Comida", owner, TransactionType.Expense);
+        var incomeCategory = Category.Create("Sueldo", owner, TransactionType.Income);
         categories.AddAsync(category, CancellationToken.None).GetAwaiter().GetResult();
-        var movement = Transaction.Create(owner, new TransactionData(category.Id, TransactionType.Expense, 25.50m, Today, "Compra"), Today);
+        categories.AddAsync(incomeCategory, CancellationToken.None).GetAwaiter().GetResult();
+        var movement = Transaction.Create(owner, new TransactionData(category.Id, TransactionType.Expense, 25.50m, Today, "Compra"), Today, category);
         transactions.AddAsync(movement, CancellationToken.None).GetAwaiter().GetResult();
         var handler = new UpdateTransactionHandler(transactions, categories, unitOfWork, new FakeCurrentUser(owner), new FixedTimeProvider(Today));
-        return (handler, transactions, unitOfWork, owner, category.Id, movement);
+        return (handler, transactions, unitOfWork, owner, category.Id, incomeCategory.Id, movement);
     }
 
     [Fact]
     public async Task Handle_ValidEdit_UpdatesAndSaves()
     {
         var arranged = Arrange();
-        var command = new UpdateTransactionCommand(arranged.Movement.Id, arranged.CategoryId, true, 100m, Today, "Sueldo");
+        var command = new UpdateTransactionCommand(arranged.Movement.Id, arranged.IncomeCategoryId, true, 100m, Today, "Sueldo");
 
         await arranged.Handler.Handle(command, CancellationToken.None);
 
@@ -64,6 +66,19 @@ public class UpdateTransactionHandlerTests
     }
 
     [Fact]
+    public async Task Handle_MismatchedCategoryType_ThrowsBusinessRuleAndDoesNotSave()
+    {
+        var arranged = Arrange();
+        var command = new UpdateTransactionCommand(arranged.Movement.Id, arranged.CategoryId, true, 100m, Today, "Sueldo");
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(
+            () => arranged.Handler.Handle(command, CancellationToken.None));
+        Assert.Contains("Comida", ex.Message);
+        Assert.Equal(25.50m, arranged.Movement.Amount);
+        Assert.Equal(0, arranged.UnitOfWork.SaveCount);
+    }
+
+    [Fact]
     public async Task Handle_MovementOfAnotherUser_ThrowsResourceNotFoundAndDoesNotSave()
     {
         var arranged = Arrange();
@@ -84,9 +99,9 @@ public class UpdateTransactionHandlerTests
     public async Task Handle_CategoryOfAnotherUser_ThrowsResourceNotFoundAndDoesNotSave()
     {
         var arranged = Arrange();
-        var foreign = Category.Create("Restaurantes", Guid.NewGuid());
+        var foreign = Category.Create("Restaurantes", Guid.NewGuid(), TransactionType.Expense);
         var categories = new FakeCategoryRepository();
-        var other = Category.Create("Comida", arranged.UserId);
+        var other = Category.Create("Comida", arranged.UserId, TransactionType.Expense);
         await categories.AddAsync(other, CancellationToken.None);
         var handler = new UpdateTransactionHandler(
             arranged.Transactions, categories, arranged.UnitOfWork, new FakeCurrentUser(arranged.UserId), new FixedTimeProvider(Today));
@@ -121,7 +136,8 @@ public class DeleteTransactionHandlerTests
         var userId = Guid.NewGuid();
         var transactions = new FakeTransactionRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var movement = Transaction.Create(userId, new TransactionData(Guid.NewGuid(), TransactionType.Expense, 10m, Today, null), Today);
+        var category = Category.Create("Comida", userId, TransactionType.Expense);
+        var movement = Transaction.Create(userId, new TransactionData(category.Id, TransactionType.Expense, 10m, Today, null), Today, category);
         await transactions.AddAsync(movement, CancellationToken.None);
         var handler = new DeleteTransactionHandler(transactions, unitOfWork, new FakeCurrentUser(userId));
 
@@ -137,7 +153,8 @@ public class DeleteTransactionHandlerTests
         var owner = Guid.NewGuid();
         var transactions = new FakeTransactionRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var movement = Transaction.Create(owner, new TransactionData(Guid.NewGuid(), TransactionType.Expense, 10m, Today, null), Today);
+        var category = Category.Create("Comida", owner, TransactionType.Expense);
+        var movement = Transaction.Create(owner, new TransactionData(category.Id, TransactionType.Expense, 10m, Today, null), Today, category);
         await transactions.AddAsync(movement, CancellationToken.None);
         var handler = new DeleteTransactionHandler(transactions, unitOfWork, new FakeCurrentUser(Guid.NewGuid()));
 

@@ -20,7 +20,8 @@ public abstract class TransactionsSectionController(
         DateOnly Selected,
         CreateTransactionInputModel? TransactionInput,
         SetBudgetInputModel? BudgetInput,
-        Guid? CategoryId);
+        Guid? CategoryId,
+        DateOnly? Today = null);
 
     protected async Task<IActionResult> RenderTransactionsIndexAsync(
         IndexRenderOptions options,
@@ -44,6 +45,6 @@ public abstract class TransactionsSectionController(
 
         var categories = await sender.Send(new ListCategoriesQuery(), ct);
         var budgets = await sender.Send(new GetBudgetStatusQuery(options.Selected.Year, options.Selected.Month, options.CategoryId), ct);
-        return View("~/Views/Transactions/Index.cshtml", TransactionListViewModel.From(result, categories, budgets, new TransactionListOptions(null, options.TransactionInput, options.BudgetInput, options.CategoryId)));
+        return View("~/Views/Transactions/Index.cshtml", TransactionListViewModel.From(result, categories, budgets, new TransactionListOptions(null, options.TransactionInput, options.BudgetInput, options.CategoryId, options.Today)));
     }
 }

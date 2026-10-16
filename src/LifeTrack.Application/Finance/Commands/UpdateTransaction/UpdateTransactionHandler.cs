@@ -42,7 +42,8 @@ public sealed class UpdateTransactionHandler(
                     request.Amount,
                     request.Date,
                     request.Description),
-                timeProvider.Today());
+                timeProvider.Today(),
+                category);
 
             await unitOfWork.SaveChangesAsync(ct);
         }

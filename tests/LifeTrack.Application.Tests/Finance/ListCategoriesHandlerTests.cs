@@ -26,9 +26,9 @@ public class ListCategoriesHandlerTests
         var userA = Guid.NewGuid();
         var userB = Guid.NewGuid();
         var repository = new Fakes.FakeCategoryRepository();
-        await repository.AddAsync(Category.Create("Comida", userA), CancellationToken.None);
-        await repository.AddAsync(Category.Create("Transporte", userA), CancellationToken.None);
-        await repository.AddAsync(Category.Create("Gastos", userB), CancellationToken.None);
+        await repository.AddAsync(Category.Create("Comida", userA, TransactionType.Expense), CancellationToken.None);
+        await repository.AddAsync(Category.Create("Transporte", userA, TransactionType.Expense), CancellationToken.None);
+        await repository.AddAsync(Category.Create("Gastos", userB, TransactionType.Expense), CancellationToken.None);
         var currentUser = new FakeCurrentUser(userA);
         var handler = new ListCategoriesHandler(repository, currentUser);
 
@@ -44,8 +44,8 @@ public class ListCategoriesHandlerTests
         var userA = Guid.NewGuid();
         var userB = Guid.NewGuid();
         var repository = new Fakes.FakeCategoryRepository();
-        await repository.AddAsync(Category.Create("Comida", userA), CancellationToken.None);
-        await repository.AddAsync(Category.Create("Comida", userB), CancellationToken.None);
+        await repository.AddAsync(Category.Create("Comida", userA, TransactionType.Expense), CancellationToken.None);
+        await repository.AddAsync(Category.Create("Comida", userB, TransactionType.Expense), CancellationToken.None);
         var currentUser = new FakeCurrentUser(userA);
         var handler = new ListCategoriesHandler(repository, currentUser);
 
@@ -53,6 +53,21 @@ public class ListCategoriesHandlerTests
 
         Assert.Single(result);
         Assert.Equal("Comida", result[0].Name);
+    }
+
+    [Fact]
+    public async Task Handle_ReturnsTypeFlags()
+    {
+        var userId = Guid.NewGuid();
+        var repository = new Fakes.FakeCategoryRepository();
+        await repository.AddAsync(Category.Create("Sueldo", userId, TransactionType.Income), CancellationToken.None);
+        await repository.AddAsync(Category.Create("Comida", userId, TransactionType.Expense), CancellationToken.None);
+        var handler = new ListCategoriesHandler(repository, new FakeCurrentUser(userId));
+
+        var result = await handler.Handle(new ListCategoriesQuery(), CancellationToken.None);
+
+        Assert.Contains(result, r => r.Name == "Sueldo" && r.IsIncome && r.TypeLabel == "Ingreso");
+        Assert.Contains(result, r => r.Name == "Comida" && !r.IsIncome && r.TypeLabel == "Gasto");
     }
 
     [Fact]

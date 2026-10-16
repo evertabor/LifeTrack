@@ -14,10 +14,10 @@ public class DeleteBudgetHandlerTests
         var budgets = new Fakes.FakeBudgetRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
-        var categoryId = Guid.NewGuid();
-        await budgets.AddAsync(Budget.Create(userId, categoryId, new BudgetPeriod(2026, 10), 100m), CancellationToken.None);
+        var category = Category.Create("Comida", userId, TransactionType.Expense);
+        await budgets.AddAsync(Budget.Create(userId, category.Id, new BudgetPeriod(2026, 10), 100m, category), CancellationToken.None);
         var handler = new DeleteBudgetHandler(budgets, unitOfWork, currentUser);
-        var command = new DeleteBudgetCommand(categoryId, 2026, 10);
+        var command = new DeleteBudgetCommand(category.Id, 2026, 10);
 
         await handler.Handle(command, CancellationToken.None);
 
@@ -49,10 +49,10 @@ public class DeleteBudgetHandlerTests
         var budgets = new Fakes.FakeBudgetRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userB);
-        var categoryId = Guid.NewGuid();
-        await budgets.AddAsync(Budget.Create(userA, categoryId, new BudgetPeriod(2026, 10), 100m), CancellationToken.None);
+        var category = Category.Create("Comida", userA, TransactionType.Expense);
+        await budgets.AddAsync(Budget.Create(userA, category.Id, new BudgetPeriod(2026, 10), 100m, category), CancellationToken.None);
         var handler = new DeleteBudgetHandler(budgets, unitOfWork, currentUser);
-        var command = new DeleteBudgetCommand(categoryId, 2026, 10);
+        var command = new DeleteBudgetCommand(category.Id, 2026, 10);
 
         await Assert.ThrowsAsync<ResourceNotFoundException>(
             () => handler.Handle(command, CancellationToken.None));

@@ -16,15 +16,17 @@ public class ListMonthlyTransactionsHandlerTests
         var transactions = new FakeTransactionRepository();
         var categories = new FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var food = Category.Create("Comida", userId);
-        var transport = Category.Create("Transporte", userId);
+        var food = Category.Create("Comida", userId, TransactionType.Expense);
+        var transport = Category.Create("Transporte", userId, TransactionType.Expense);
+        var salary = Category.Create("Sueldo", userId, TransactionType.Income);
         await categories.AddAsync(food, CancellationToken.None);
         await categories.AddAsync(transport, CancellationToken.None);
+        await categories.AddAsync(salary, CancellationToken.None);
         var today = new DateOnly(2026, 10, 31);
-        transactions.AddAsync(Transaction.Create(userId, new TransactionData(food.Id, TransactionType.Income, 1000m, new DateOnly(2026, 10, 5), null), today), CancellationToken.None).GetAwaiter().GetResult();
-        transactions.AddAsync(Transaction.Create(userId, new TransactionData(food.Id, TransactionType.Expense, 250m, new DateOnly(2026, 10, 6), null), today), CancellationToken.None).GetAwaiter().GetResult();
-        transactions.AddAsync(Transaction.Create(userId, new TransactionData(transport.Id, TransactionType.Expense, 150m, October15, null), today), CancellationToken.None).GetAwaiter().GetResult();
-        transactions.AddAsync(Transaction.Create(userId, new TransactionData(food.Id, TransactionType.Expense, 500m, new DateOnly(2026, 9, 20), null), today), CancellationToken.None).GetAwaiter().GetResult();
+        transactions.AddAsync(Transaction.Create(userId, new TransactionData(salary.Id, TransactionType.Income, 1000m, new DateOnly(2026, 10, 5), null), today, salary), CancellationToken.None).GetAwaiter().GetResult();
+        transactions.AddAsync(Transaction.Create(userId, new TransactionData(food.Id, TransactionType.Expense, 250m, new DateOnly(2026, 10, 6), null), today, food), CancellationToken.None).GetAwaiter().GetResult();
+        transactions.AddAsync(Transaction.Create(userId, new TransactionData(transport.Id, TransactionType.Expense, 150m, October15, null), today, transport), CancellationToken.None).GetAwaiter().GetResult();
+        transactions.AddAsync(Transaction.Create(userId, new TransactionData(food.Id, TransactionType.Expense, 500m, new DateOnly(2026, 9, 20), null), today, food), CancellationToken.None).GetAwaiter().GetResult();
         var handler = new ListMonthlyTransactionsHandler(transactions, categories, new FakeCurrentUser(userId), new FixedTimeProvider(today));
         return (handler, userId, food.Id, transport.Id);
     }
@@ -89,7 +91,7 @@ public class ListMonthlyTransactionsHandlerTests
         var attacker = Guid.NewGuid();
         var transactions = new FakeTransactionRepository();
         var categories = new FakeCategoryRepository();
-        var foreign = Category.Create("Comida", arranged.UserId);
+        var foreign = Category.Create("Comida", arranged.UserId, TransactionType.Expense);
         await categories.AddAsync(foreign, CancellationToken.None);
         var handler = new ListMonthlyTransactionsHandler(transactions, categories, new FakeCurrentUser(attacker), new FixedTimeProvider(new DateOnly(2026, 10, 31)));
 
@@ -113,8 +115,9 @@ public class ListMonthlyTransactionsHandlerTests
         var transactions = new FakeTransactionRepository();
         var categories = new FakeCategoryRepository();
         var today = new DateOnly(2026, 10, 31);
+        var category = Category.Create("Comida", userId, TransactionType.Expense);
         await transactions.AddAsync(
-            Transaction.Create(userId, new TransactionData(Guid.NewGuid(), TransactionType.Expense, 25m, new DateOnly(2026, 10, 6), null), today),
+            Transaction.Create(userId, new TransactionData(category.Id, TransactionType.Expense, 25m, new DateOnly(2026, 10, 6), null), today, category),
             CancellationToken.None);
         var handler = new ListMonthlyTransactionsHandler(transactions, categories, new FakeCurrentUser(userId), new FixedTimeProvider(today));
 

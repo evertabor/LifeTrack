@@ -7,7 +7,8 @@ public class TransactionTests
 {
     private static readonly DateOnly Today = new(2026, 10, 10);
     private static readonly Guid UserId = Guid.NewGuid();
-    private static readonly Guid CategoryId = Guid.NewGuid();
+    private static readonly Category ExpenseCategory = Category.Create("Comida", UserId, TransactionType.Expense);
+    private static readonly Category IncomeCategory = Category.Create("Sueldo", UserId, TransactionType.Income);
 
     private static Transaction CreateValid(
         decimal amount = 25.50m,
@@ -15,7 +16,8 @@ public class TransactionTests
         string? description = null,
         TransactionType type = TransactionType.Expense)
     {
-        return Transaction.Create(UserId, new TransactionData(CategoryId, type, amount, date ?? Today, description), Today);
+        var category = type == TransactionType.Income ? IncomeCategory : ExpenseCategory;
+        return Transaction.Create(UserId, new TransactionData(category.Id, type, amount, date ?? Today, description), Today, category);
     }
 
     [Fact]
@@ -24,7 +26,7 @@ public class TransactionTests
         var result = CreateValid();
 
         Assert.Equal(UserId, result.UserId);
-        Assert.Equal(CategoryId, result.CategoryId);
+        Assert.Equal(ExpenseCategory.Id, result.CategoryId);
         Assert.Equal(TransactionType.Expense, result.Type);
         Assert.Equal(25.50m, result.Amount);
         Assert.Equal(Today, result.Date);
@@ -92,30 +94,44 @@ public class TransactionTests
     }
 
     [Fact]
+    public void Create_WithMismatchedCategoryType_ThrowsDomainException()
+    {
+        var ex = Assert.Throws<DomainException>(() =>
+            Transaction.Create(UserId, new TransactionData(ExpenseCategory.Id, TransactionType.Income, 10m, Today, null), Today, ExpenseCategory));
+        Assert.Contains("Comida", ex.Message);
+    }
+
+    [Fact]
+    public void Create_WithDifferentCategoryEntity_ThrowsDomainException()
+    {
+        Assert.Throws<DomainException>(() =>
+            Transaction.Create(UserId, new TransactionData(ExpenseCategory.Id, TransactionType.Expense, 10m, Today, null), Today, IncomeCategory));
+    }
+
+    [Fact]
     public void Create_WithEmptyUserId_ThrowsDomainException()
     {
         Assert.Throws<DomainException>(() =>
-            Transaction.Create(Guid.Empty, new TransactionData(CategoryId, TransactionType.Expense, 10m, Today, null), Today));
+            Transaction.Create(Guid.Empty, new TransactionData(ExpenseCategory.Id, TransactionType.Expense, 10m, Today, null), Today, ExpenseCategory));
     }
 
     [Fact]
     public void Create_WithEmptyCategoryId_ThrowsDomainException()
     {
         Assert.Throws<DomainException>(() =>
-            Transaction.Create(UserId, new TransactionData(Guid.Empty, TransactionType.Expense, 10m, Today, null), Today));
+            Transaction.Create(UserId, new TransactionData(Guid.Empty, TransactionType.Expense, 10m, Today, null), Today, ExpenseCategory));
     }
 
     [Fact]
     public void Update_WithValidData_UpdatesFieldsAndKeepsId()
     {
         var transaction = CreateValid();
-        var otherCategory = Guid.NewGuid();
         var id = transaction.Id;
 
-        transaction.Update(new TransactionData(otherCategory, TransactionType.Income, 100m, Today, "Sueldo"), Today);
+        transaction.Update(new TransactionData(IncomeCategory.Id, TransactionType.Income, 100m, Today, "Sueldo"), Today, IncomeCategory);
 
         Assert.Equal(id, transaction.Id);
-        Assert.Equal(otherCategory, transaction.CategoryId);
+        Assert.Equal(IncomeCategory.Id, transaction.CategoryId);
         Assert.Equal(TransactionType.Income, transaction.Type);
         Assert.Equal(100m, transaction.Amount);
         Assert.Equal("Sueldo", transaction.Description);
@@ -127,7 +143,7 @@ public class TransactionTests
         var transaction = CreateValid();
 
         Assert.Throws<DomainException>(() =>
-            transaction.Update(new TransactionData(CategoryId, TransactionType.Expense, 0m, Today, null), Today));
+            transaction.Update(new TransactionData(ExpenseCategory.Id, TransactionType.Expense, 0m, Today, null), Today, ExpenseCategory));
     }
 
     [Fact]
@@ -136,7 +152,17 @@ public class TransactionTests
         var transaction = CreateValid();
 
         Assert.Throws<DomainException>(() =>
-            transaction.Update(new TransactionData(CategoryId, TransactionType.Expense, 10m, Today.AddDays(1), null), Today));
+            transaction.Update(new TransactionData(ExpenseCategory.Id, TransactionType.Expense, 10m, Today.AddDays(1), null), Today, ExpenseCategory));
+    }
+
+    [Fact]
+    public void Update_WithMismatchedCategoryType_ThrowsDomainException()
+    {
+        var transaction = CreateValid();
+
+        var ex = Assert.Throws<DomainException>(() =>
+            transaction.Update(new TransactionData(ExpenseCategory.Id, TransactionType.Income, 10m, Today, null), Today, ExpenseCategory));
+        Assert.Contains("Comida", ex.Message);
     }
 
     [Fact]
@@ -145,7 +171,7 @@ public class TransactionTests
         var transaction = CreateValid();
 
         Assert.Throws<DomainException>(() =>
-            transaction.Update(new TransactionData(CategoryId, TransactionType.Expense, 10m, Today, new string('a', 201)), Today));
+            transaction.Update(new TransactionData(ExpenseCategory.Id, TransactionType.Expense, 10m, Today, new string('a', 201)), Today, ExpenseCategory));
     }
 
     [Fact]
@@ -154,6 +180,6 @@ public class TransactionTests
         var transaction = CreateValid();
 
         Assert.Throws<DomainException>(() =>
-            transaction.Update(new TransactionData(Guid.Empty, TransactionType.Expense, 10m, Today, null), Today));
+            transaction.Update(new TransactionData(Guid.Empty, TransactionType.Expense, 10m, Today, null), Today, ExpenseCategory));
     }
 }

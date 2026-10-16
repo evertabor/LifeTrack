@@ -110,9 +110,9 @@ Prioridad con MoSCoW: **M** (imprescindible), **S** (debería), **C** (podría).
 | RN-F01 | El monto de un movimiento es mayor que 0, no supera 1.000.000.000 y tiene como máximo 2 decimales |
 | RN-F02 | La fecha de un movimiento no puede ser futura (respecto a "hoy") |
 | RN-F03 | La descripción tiene como máximo 200 caracteres; se recorta con `Trim` |
-| RN-F04 | El nombre de categoría es obligatorio, de hasta 50 caracteres, y único por usuario |
-| RN-F05 | Un movimiento solo puede usar categorías del mismo usuario |
-| RN-F06 | Un presupuesto es único por usuario + categoría + año + mes, con límite > 0 y 2 decimales |
+| RN-F04 | El nombre de categoría es obligatorio, de hasta 50 caracteres, y único por usuario. Toda categoría tiene un tipo fijo (Ingreso o Gasto) elegido al crearla |
+| RN-F05 | Un movimiento solo puede usar categorías del mismo usuario y del mismo tipo |
+| RN-F06 | Un presupuesto es único por usuario + categoría + año + mes, con límite > 0 y 2 decimales. Solo las categorías de gasto admiten presupuesto |
 | RN-H01 | El nombre de un hábito es obligatorio y de hasta 80 caracteres |
 | RN-H02 | Solo un check-in por hábito y día |
 | RN-H03 | No se admiten check-ins en fechas futuras ni en hábitos archivados |
@@ -120,6 +120,7 @@ Prioridad con MoSCoW: **M** (imprescindible), **S** (debería), **C** (podría).
 | RN-H05 | Un hábito archivado no aparece en las listas, pero conserva su historial |
 | RN-G01 | "Hoy" se calcula con la zona horaria `App:TimeZoneId` |
 | RN-G02 | Eliminar un usuario elimina en cascada todos sus datos |
+| RN-G03 | Al registrarse, cada usuario recibe 8 categorías iniciales (Sueldo, Otros ingresos, Comida, Transporte, Vivienda, Salud, Ocio, Gastos personales), que puede renombrar o eliminar |
 
 ---
 
@@ -128,6 +129,7 @@ Prioridad con MoSCoW: **M** (imprescindible), **S** (debería), **C** (podría).
 **HU-01 — Registrarme** (RF-A01)
 - *Dado* un visitante, *cuando* envía un correo válido y una contraseña de 12+ caracteres, *entonces* se crea la cuenta y queda con sesión iniciada.
 - *Dado* una contraseña de menos de 12 caracteres, *entonces* se muestra un error y no se crea la cuenta.
+- *Dado* un registro correcto, *entonces* la cuenta nace con las 8 categorías iniciales de RN-G03.
 
 **HU-02 — Proteger mi cuenta** (RF-A02)
 - *Dado* 5 intentos fallidos seguidos, *entonces* la cuenta se bloquea 15 minutos.
@@ -140,12 +142,14 @@ Prioridad con MoSCoW: **M** (imprescindible), **S** (debería), **C** (podría).
 **HU-04 — Gestionar categorías** (RF-F01)
 - *Dado* un nombre nuevo, *cuando* lo guardo, *entonces* aparece en mi lista.
 - *Dado* un nombre ya existente (ignorando espacios al borde), *entonces* veo "Ya existe una categoría con ese nombre".
+- *Dado* una categoría de tipo Ingreso, *cuando* intento registrar un gasto con ella, *entonces* se rechaza y el formulario solo me ofrece categorías de gasto.
 
 **HU-05 — Registrar un gasto** (RF-F02, RN-F01..F05)
 - *Dado* categoría propia, monto 25,50 y fecha de hoy, *entonces* el movimiento se guarda y aparece en el mes.
 - *Dado* monto 0, negativo o con 3 decimales, *entonces* se rechaza con mensaje claro.
 - *Dado* una fecha de mañana, *entonces* se rechaza.
 - *Dado* una categoría de otro usuario, *entonces* se rechaza como "no válida".
+- *Dado* una categoría de gasto, *cuando* intento registrar un ingreso con ella, *entonces* se rechaza.
 
 **HU-06 — Ver el resumen del mes** (RF-F05, RF-D01)
 - *Dado* ingresos 1000 y gastos 400 en el mes, *entonces* el balance mostrado es 600 y el desglose por categoría suma 400.
@@ -209,7 +213,7 @@ erDiagram
 
 | Entidad | Atributos | Invariantes / índices |
 |---|---|---|
-| **Category** | `Id`, `UserId`, `Name(≤50)` | Nombre obligatorio; único por (`UserId`,`Name`) |
+| **Category** | `Id`, `UserId`, `Name(≤50)`, `Type(Income/Expense)` | Nombre obligatorio; único por (`UserId`,`Name`); tipo fijo desde su creación |
 | **Transaction** | `Id`, `UserId`, `CategoryId`, `Type(Income/Expense)`, `Amount(18,2)`, `Date`, `Description(≤200)` | RN-F01..F03; índice (`UserId`,`Date`); FK a Category con `Restrict` |
 | **Budget** | `Id`, `UserId`, `CategoryId`, `Year`, `Month`, `Limit(18,2)` | RN-F06; único por (`UserId`,`CategoryId`,`Year`,`Month`) |
 | **Habit** *(raíz de agregado)* | `Id`, `UserId`, `Name(≤80)`, `IsArchived`, `CheckIns` | RN-H01..H05 |

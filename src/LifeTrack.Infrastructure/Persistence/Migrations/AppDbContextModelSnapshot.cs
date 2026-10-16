@@ -65,6 +65,13 @@ namespace LifeTrack.Infrastructure.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)")
+                        .HasDefaultValue("Expense");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 

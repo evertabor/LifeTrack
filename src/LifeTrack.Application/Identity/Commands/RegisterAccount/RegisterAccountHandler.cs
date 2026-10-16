@@ -1,11 +1,16 @@
+using LifeTrack.Application.Abstractions;
 using LifeTrack.Application.Common;
+using LifeTrack.Application.Finance;
 using LifeTrack.Domain.Common;
+using LifeTrack.Domain.Finance;
 using MediatR;
 
 namespace LifeTrack.Application.Identity;
 
 public sealed class RegisterAccountHandler(
-    IAccountService accountService) : IRequestHandler<RegisterAccountCommand, RegisterAccountResult>
+    IAccountService accountService,
+    ICategoryRepository categories,
+    IUnitOfWork unitOfWork) : IRequestHandler<RegisterAccountCommand, RegisterAccountResult>
 {
 
     public async Task<RegisterAccountResult> Handle(RegisterAccountCommand request, CancellationToken cancellationToken)
@@ -25,6 +30,10 @@ public sealed class RegisterAccountHandler(
                     }
                 }
             }
+            if (result.Succeeded && result.UserId.HasValue)
+            {
+                await SeedDefaultCategories(result.UserId.Value, cancellationToken);
+            }
             return new RegisterAccountResult(result.Succeeded, result.Errors);
         }
         catch (DomainException ex)
@@ -35,5 +44,18 @@ public sealed class RegisterAccountHandler(
         {
             throw new ResourceNotFoundException(ex.Message);
         }
+    }
+
+    private async Task SeedDefaultCategories(Guid userId, CancellationToken cancellationToken)
+    {
+        foreach (var defaults in DefaultCategories.All)
+        {
+            if (await categories.ExistsAsync(defaults.Name, userId, cancellationToken))
+            {
+                continue;
+            }
+            await categories.AddAsync(Category.Create(defaults.Name, userId, defaults.Type), cancellationToken);
+        }
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

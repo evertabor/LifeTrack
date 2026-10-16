@@ -26,9 +26,9 @@
         <section class="app-card categories-panel" aria-labelledby="categories-list-title">
             <h2 id="categories-list-title" class="visually-hidden">Tus categorías</h2>
             <div class="categories-panel__toolbar">
-                <form class="categories-panel__search" method="get" asp-controller="Categories" asp-action="Index" role="search">
+                <form class="categories-panel__search" method="get" asp-controller="Categories" asp-action="Index" role="search" data-categories-search>
                     <label class="visually-hidden" for="categories-search-input">Buscar en categorías</label>
-                    <input id="categories-search-input" name="q" type="search" value="@Model.SearchTerm" placeholder="Buscar" autocomplete="off" />
+                    <input id="categories-search-input" name="q" type="search" value="@Model.SearchTerm" placeholder="Buscar" autocomplete="off" maxlength="@CreateCategoryInputModel.NameMaxLength" data-categories-search-input />
                     <button type="submit" aria-label="Buscar"><span aria-hidden="true">⌕</span></button>
                 </form>
                 <span class="categories-panel__hint">Vista actual</span>
@@ -36,17 +36,18 @@
 
             @if (Model.HasCategories)
             {
-                <div class="categories-table-wrapper">
+                <div class="categories-table-wrapper" data-categories-list>
                     <table class="categories-table">
                         <caption class="visually-hidden">Lista de categorías</caption>
                         <thead>
-                            <tr><th scope="col">Nombre de la categoría</th><th scope="col">Acciones</th></tr>
+                            <tr><th scope="col">Nombre de la categoría</th><th scope="col">Tipo</th><th scope="col">Acciones</th></tr>
                         </thead>
                         <tbody>
                     @foreach (var category in Model.Categories)
                     {
-                            <tr tabindex="0">
-                                <td><span class="categories-table__name"><span class="categories-list__marker" aria-hidden="true"></span>@category.Name</span></td>
+                            <tr tabindex="0" data-categories-row>
+                                <td><span class="categories-table__name" data-categories-name><span class="categories-list__marker" aria-hidden="true"></span>@category.Name</span></td>
+                                <td>@category.TypeLabel</td>
                                 <td>
                                     <span class="categories-table__actions">
                                         <button class="btn btn-sm btn-secondary" type="button" data-modal-open="@category.EditModalId" aria-controls="@category.EditModalId" aria-label="@category.EditLabel"><span aria-hidden="true">✎</span></button>
@@ -58,6 +59,7 @@
                         </tbody>
                     </table>
                 </div>
+                <p class="categories-empty__text" data-categories-no-results hidden>Sin resultados para esa búsqueda.</p>
                 @foreach (var category in Model.Categories)
                 {
                     <partial name="Partials/_CategoryEditForm" model="category" />

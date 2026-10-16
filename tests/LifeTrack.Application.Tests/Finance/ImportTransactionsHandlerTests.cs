@@ -58,7 +58,7 @@ public class PreviewTransactionsHandlerTests
     {
         var userId = Guid.NewGuid();
         var categories = new FakeCategoryRepository();
-        var food = Category.Create("Comida", userId);
+        var food = Category.Create("Comida", userId, TransactionType.Expense);
         await categories.AddAsync(food, CancellationToken.None);
         var handler = new PreviewTransactionsHandler(categories, new FakeCurrentUser(userId), new FixedTimeProvider(Today));
         return (handler, food.Id);
@@ -89,6 +89,19 @@ public class PreviewTransactionsHandlerTests
 
         Assert.Empty(result.ValidRows);
         Assert.Single(result.InvalidRows);
+    }
+
+    [Fact]
+    public async Task Handle_MismatchedType_MarksRowInvalid()
+    {
+        var arranged = await ArrangeAsync();
+        var content = "06/10/2026;Comida;Ingreso;1000;Sueldo";
+
+        var result = await arranged.Handler.Handle(new PreviewTransactionsQuery(content), CancellationToken.None);
+
+        Assert.Empty(result.ValidRows);
+        var invalid = Assert.Single(result.InvalidRows);
+        Assert.Contains("Comida", invalid.Error);
     }
 
     [Fact]
@@ -131,7 +144,7 @@ public class ConfirmTransactionImportHandlerTests
         var userId = Guid.NewGuid();
         var transactions = new FakeTransactionRepository();
         var categories = new FakeCategoryRepository();
-        await categories.AddAsync(Category.Create("Comida", userId), CancellationToken.None);
+        await categories.AddAsync(Category.Create("Comida", userId, TransactionType.Expense), CancellationToken.None);
         var unitOfWork = new FakeUnitOfWork();
         var handler = new ConfirmTransactionImportHandler(transactions, categories, unitOfWork, new FakeCurrentUser(userId), new FixedTimeProvider(Today));
         return (handler, transactions, unitOfWork, userId);
@@ -181,7 +194,7 @@ public class ConfirmTransactionImportHandlerTests
         var owner = Guid.NewGuid();
         var transactions = new FakeTransactionRepository();
         var categories = new FakeCategoryRepository();
-        await categories.AddAsync(Category.Create("Comida", Guid.NewGuid()), CancellationToken.None);
+        await categories.AddAsync(Category.Create("Comida", Guid.NewGuid(), TransactionType.Expense), CancellationToken.None);
         var unitOfWork = new FakeUnitOfWork();
         var handler = new ConfirmTransactionImportHandler(transactions, categories, unitOfWork, new FakeCurrentUser(owner), new FixedTimeProvider(Today));
         var content = "06/10/2026;Comida;Gasto;10;Compra";
@@ -197,11 +210,11 @@ public class ConfirmTransactionImportHandlerTests
         var userId = Guid.NewGuid();
         var transactions = new FakeTransactionRepository();
         var categories = new FakeCategoryRepository();
-        await categories.AddAsync(Category.Create("Comida", userId), CancellationToken.None);
+        await categories.AddAsync(Category.Create("Comida", userId, TransactionType.Expense), CancellationToken.None);
         var unitOfWork = new FakeUnitOfWork();
         var handler = new ConfirmTransactionImportHandler(transactions, categories, unitOfWork, new FakeCurrentUser(userId), new FixedTimeProvider(Today));
         categories.Reset();
-        await categories.AddAsync(Category.Create("Ocio", userId), CancellationToken.None);
+        await categories.AddAsync(Category.Create("Ocio", userId, TransactionType.Expense), CancellationToken.None);
         var content = "06/10/2026;Comida;Gasto;10;Compra\n06/10/2026;Ocio;Gasto;5;Cine";
 
         var confirmation = await handler.Handle(new ConfirmTransactionImportCommand(content), CancellationToken.None);

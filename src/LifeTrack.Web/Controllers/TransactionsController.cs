@@ -26,7 +26,7 @@ public sealed class TransactionsController(
             var result = await Sender.Send(new ListMonthlyTransactionsQuery(year, month, categoryId), ct);
             var categories = await Sender.Send(new ListCategoriesQuery(), ct);
             var budgets = await Sender.Send(new GetBudgetStatusQuery(result.Year, result.Month, categoryId), ct);
-            return View(TransactionListViewModel.From(result, categories, budgets, new TransactionListOptions(TempData["Message"] as string, null, null, categoryId)));
+            return View(TransactionListViewModel.From(result, categories, budgets, new TransactionListOptions(TempData["Message"] as string, null, null, categoryId, timeProvider.Today())));
         }
         catch (BusinessRuleException ex)
         {
@@ -55,7 +55,7 @@ public sealed class TransactionsController(
             if (categoryId is null || type is null || amount is null || date is null)
             {
                 ModelState.AddModelError("NewTransaction", "Revisa los datos del formulario.");
-                return await RenderTransactionsIndexAsync(new IndexRenderOptions(date ?? timeProvider.Today(), input, null, null), ct);
+                return await RenderTransactionsIndexAsync(new IndexRenderOptions(date ?? timeProvider.Today(), input, null, null, timeProvider.Today()), ct);
             }
 
             try
@@ -76,7 +76,7 @@ public sealed class TransactionsController(
             }
         }
 
-        return await RenderTransactionsIndexAsync(new IndexRenderOptions(input.Date ?? timeProvider.Today(), input, null, null), ct);
+        return await RenderTransactionsIndexAsync(new IndexRenderOptions(input.Date ?? timeProvider.Today(), input, null, null, timeProvider.Today()), ct);
     }
 
     [HttpGet("{id:guid}/edit")]
@@ -86,7 +86,7 @@ public sealed class TransactionsController(
         {
             var transaction = await Sender.Send(new GetTransactionQuery(id), ct);
             var categories = await Sender.Send(new ListCategoriesQuery(), ct);
-            return View(TransactionEditViewModel.From(transaction, categories));
+            return View(TransactionEditViewModel.From(transaction, categories, timeProvider.Today()));
         }
         catch (ResourceNotFoundException ex)
         {
@@ -134,7 +134,7 @@ public sealed class TransactionsController(
         }
 
         var categories = await Sender.Send(new ListCategoriesQuery(), ct);
-        return View(nameof(Edit), TransactionEditViewModel.From(id, input, categories));
+        return View(nameof(Edit), TransactionEditViewModel.From(id, input, categories, timeProvider.Today()));
     }
 
     [HttpPost("{id:guid}/delete")]

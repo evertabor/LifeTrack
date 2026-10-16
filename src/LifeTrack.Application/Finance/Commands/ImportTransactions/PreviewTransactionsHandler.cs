@@ -40,7 +40,7 @@ public sealed class PreviewTransactionsHandler(
 
         var userId = currentUser.UserId.Value;
         var names = (await categories.ListAsync(userId, ct))
-            .ToDictionary(c => c.Name.Trim(), c => c.Id, StringComparer.OrdinalIgnoreCase);
+            .ToDictionary(c => c.Name.Trim(), c => c, StringComparer.OrdinalIgnoreCase);
         var today = timeProvider.Today();
 
         var valid = new List<ImportPreviewRowDto>();
