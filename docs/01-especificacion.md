@@ -2,21 +2,21 @@
 
 | | |
 |---|---|
-| **Proyecto** | LifeTrack: finanzas personales + hábitos, con dashboard cruzado |
+| **Proyecto** | LifeTrack: finanzas personales con dashboard inteligente |
 | **Tipo** | Proyecto final (TFM) del máster de desarrollo con IA |
 | **Versión** | 0.1 (borrador inicial) |
 | **Estado** | Listo para empezar el flujo Spec-Driven Development |
 | **Stack** | .NET 10, ASP.NET Core MVC (vistas Razor), EF Core, MediatR, Azure SQL (free offer), Identity, GitHub Actions |
 | **Despliegue** | Azure, solo recursos de capa gratuita (App Service F1 + Azure SQL free offer) |
 
-> Este documento es la **fuente de verdad funcional**. Un agente de IA (o una persona) no debe implementar nada que no figure aquí; si falta algo, se añade primero a este documento.
+> Este documento es la **fuente de verdad** funcional. Un agente de IA (o una persona) no debe implementar nada que no figure aquí; si falta algo, se añade primero a este documento.
 
 ---
 
 ## 1. Introducción
 
 ### 1.1 Propósito
-Construir una aplicación web **para uso personal** que permita (a) registrar ingresos y gastos con presupuesto mensual por categoría, (b) seguir hábitos diarios con rachas, y (c) ver ambos en un dashboard que **cruza hábitos con gasto** (p. ej. "los días que cocino en casa gasto menos en comida").
+Construir una aplicación web **para uso personal** que permita (a) registrar ingresos y gastos con presupuesto mensual por categoría, (b) ver ambos en un dashboard con insights automáticos (tendencias, alertas, proyecciones) y (c) gestionar presupuestos con avisos de consumo.
 
 ### 1.2 Objetivos del TFM
 1. Demostrar un flujo de desarrollo asistido por IA basado en **especificaciones** (SDD), reglas para agentes (`AGENTS.md`) y puertas de calidad automáticas.
@@ -25,15 +25,12 @@ Construir una aplicación web **para uso personal** que permita (a) registrar in
 4. Desplegar con **CI/CD** en Azure a **coste cero**.
 
 ### 1.3 Alcance
-**Dentro:** autenticación, finanzas (categorías, movimientos, presupuestos, resumen), hábitos (rachas, calendario), dashboard cruzado, despliegue, pruebas, documentación.
+**Dentro:** autenticación, finanzas (categorías, movimientos, presupuestos, resumen, alertas), dashboard con insights, despliegue, pruebas, documentación.
 **Fuera (no se hará en el TFM):** conexión bancaria automática, multimoneda, aplicación móvil nativa, uso compartido entre usuarios, notificaciones push, cálculo de impuestos.
 
 ### 1.4 Glosario
 | Término | Significado |
 |---|---|
-| **Check-in** | Registro de que un hábito se cumplió en una fecha |
-| **Racha actual** | Días consecutivos con check-in que terminan hoy (o ayer, si hoy aún no se registró) |
-| **Mejor racha** | La racha consecutiva más larga de la historia del hábito |
 | **Movimiento** | Ingreso o gasto con monto, fecha y categoría |
 | **Presupuesto** | Límite mensual de gasto para una categoría |
 | **Hoy** | Fecha actual en la zona horaria configurada (`App:TimeZoneId`), no la del servidor |
@@ -79,24 +76,14 @@ Prioridad con MoSCoW: **M** (imprescindible), **S** (debería), **C** (podría).
 | RF-F06 | Definir y eliminar presupuesto mensual por categoría y mostrar su consumo (aviso al 80 % y al 100 %) | S |
 | RF-F07 | Importar movimientos desde un CSV (con vista previa y validación) | C |
 
-### 3.3 Hábitos
-| ID | Requisito | Prio. |
-|---|---|---|
-| RF-H01 | Crear un hábito diario | M |
-| RF-H02 | Listar hábitos con racha actual, mejor racha y estado de hoy | M |
-| RF-H03 | Registrar check-in de hoy (y de fechas pasadas) | M |
-| RF-H04 | Deshacer un check-in | S |
-| RF-H05 | Archivar un hábito (conserva el historial, no admite nuevos check-ins) | S |
-| RF-H06 | Calendario de calor de los últimos 90 días por hábito | S |
-
-### 3.4 Dashboard
+### 3.3 Dashboard
 | ID | Requisito | Prio. |
 |---|---|---|
 | RF-D01 | Resumen del mes: ingresos, gastos, balance | M |
-| RF-D02 | Hábitos con racha activa y pendientes de hoy | M |
-| RF-D03 | **Correlación hábito–gasto:** para un hábito y una categoría, gasto medio diario los días con check-in frente a los días sin check-in | S |
+| RF-D02 | Proyección de saldo a fin de mes basada en gasto medio diario | S |
+| RF-D03 | Alerta de gasto inusual: movimiento que supera 2.5x la media de su categoría | S |
 
-### 3.5 Extras opcionales
+### 3.4 Extras opcionales
 | ID | Requisito | Prio. |
 |---|---|---|
 | RF-X01 | Recordatorio diario por Telegram/correo mediante Azure Function con temporizador | C |
@@ -110,14 +97,9 @@ Prioridad con MoSCoW: **M** (imprescindible), **S** (debería), **C** (podría).
 | RN-F01 | El monto de un movimiento es mayor que 0, no supera 1.000.000.000 y tiene como máximo 2 decimales |
 | RN-F02 | La fecha de un movimiento no puede ser futura (respecto a "hoy") |
 | RN-F03 | La descripción tiene como máximo 200 caracteres; se recorta con `Trim` |
-| RN-F04 | El nombre de categoría es obligatorio, de hasta 50 caracteres, y único por usuario. Toda categoría tiene un tipo (Ingreso o Gasto) elegido al crearla, que solo se puede cambiar si la categoría no tiene movimientos ni presupuestos asociados |
+| RN-F04 | El nombre de categoría es obligatorio, de hasta 50 caracteres, y único por usuario. Toda categoría tiene un tipo fijo (Ingreso o Gasto) elegido al crearla |
 | RN-F05 | Un movimiento solo puede usar categorías del mismo usuario y del mismo tipo |
 | RN-F06 | Un presupuesto es único por usuario + categoría + año + mes, con límite > 0 y 2 decimales. Solo las categorías de gasto admiten presupuesto |
-| RN-H01 | El nombre de un hábito es obligatorio y de hasta 80 caracteres |
-| RN-H02 | Solo un check-in por hábito y día |
-| RN-H03 | No se admiten check-ins en fechas futuras ni en hábitos archivados |
-| RN-H04 | La racha actual cuenta días consecutivos hasta hoy; si hoy no está marcado pero ayer sí, la racha sigue viva |
-| RN-H05 | Un hábito archivado no aparece en las listas, pero conserva su historial |
 | RN-G01 | "Hoy" se calcula con la zona horaria `App:TimeZoneId` |
 | RN-G02 | Eliminar un usuario elimina en cascada todos sus datos |
 | RN-G03 | Al registrarse, cada usuario recibe 8 categorías iniciales (Sueldo, Otros ingresos, Comida, Transporte, Vivienda, Salud, Ocio, Gastos personales), que puede renombrar o eliminar |
@@ -157,25 +139,19 @@ Prioridad con MoSCoW: **M** (imprescindible), **S** (debería), **C** (podría).
 
 **HU-07 — Controlar presupuesto** (RF-F06)
 - *Dado* presupuesto 100 para "Comida" y gasto acumulado 80, *entonces* se muestra un aviso de consumo al 80 %.
-- *Dado* gasto acumulado ≥ 100, *entonces* se muestra el aviso de presupuesto superado.
+- *Dado* gasto acumulado >= 100, *entonces* se muestra el aviso de presupuesto superado.
 - *Dado* un presupuesto del mes, *cuando* lo elimino, *entonces* desaparece de la lista y los movimientos no cambian.
 
-**HU-08 — Crear y marcar hábitos** (RF-H01..H03)
-- *Dado* un nombre válido, *entonces* el hábito aparece con racha 0.
-- *Dado* un hábito sin marcar hoy, *cuando* pulso "Marcar hoy", *entonces* la racha aumenta y el botón queda como "Hecho hoy".
-- *Dado* un hábito ya marcado hoy, *entonces* un segundo intento muestra "ya está registrado" y no duplica.
+**HU-08 — Proyección de saldo** (RF-D02)
+- *Dado* un gasto medio diario de 50 en gastos y un ingreso de 1500 el día 1, *entonces* el dashboard muestra "proyección a fin de mes: 0".
+- *Dado* un gasto medio diario de 100 y un ingreso de 1500 el día 1, *entonces* el dashboard muestra una proyección negativa.
 
-**HU-09 — Rachas correctas** (RN-H04)
-- *Dado* check-ins en hoy-1 y hoy, *entonces* racha actual = 2.
-- *Dado* check-ins solo en hoy-2 y hoy-1, *entonces* racha actual = 2 (sigue viva).
-- *Dado* check-ins en hoy-4 y hoy-3, *entonces* racha actual = 0 y mejor racha = 2.
+**HU-09 — Alerta de gasto inusual** (RF-D03)
+- *Dado* un gasto de 500 en "Comida" cuando la media de esa categoría es 80, *entonces* el dashboard muestra una alerta de gasto inusual.
+- *Dado* menos de 5 movimientos en la categoría, *entonces* no se muestra alerta (datos insuficientes).
 
-**HU-10 — Cruzar hábitos y gasto** (RF-D03)
-- *Dado* un hábito "Cocinar en casa" y la categoría "Restaurantes", *entonces* el dashboard muestra el gasto medio diario con y sin check-in, y el número de días de cada grupo.
-- *Dado* menos de 7 días en alguno de los grupos, *entonces* se muestra "datos insuficientes" en lugar de un porcentaje engañoso.
-
-**HU-11 — Borrar mis datos** (RF-A04, RN-G02)
-- *Dado* un usuario autenticado, *cuando* confirma la eliminación de su cuenta, *entonces* desaparecen su cuenta, categorías, movimientos, presupuestos y hábitos.
+**HU-10 — Borrar mis datos** (RF-A04, RN-G02)
+- *Dado* un usuario autenticado, *cuando* confirma la eliminación de su cuenta, *entonces* desaparecen su cuenta, categorías, movimientos y presupuestos.
 
 ---
 
@@ -205,19 +181,15 @@ erDiagram
     ApplicationUser ||--o{ Category : posee
     ApplicationUser ||--o{ Transaction : posee
     ApplicationUser ||--o{ Budget : posee
-    ApplicationUser ||--o{ Habit : posee
     Category ||--o{ Transaction : clasifica
     Category ||--o{ Budget : limita
-    Habit ||--o{ HabitCheckIn : registra
 ```
 
 | Entidad | Atributos | Invariantes / índices |
 |---|---|---|
-| **Category** | `Id`, `UserId`, `Name(≤50)`, `Type(Income/Expense)` | Nombre obligatorio; único por (`UserId`,`Name`); el tipo solo cambia si no hay movimientos ni presupuestos |
-| **Transaction** | `Id`, `UserId`, `CategoryId`, `Type(Income/Expense)`, `Amount(18,2)`, `Date`, `Description(≤200)` | RN-F01..F03; índice (`UserId`,`Date`); FK a Category con `Restrict` |
+| **Category** | `Id`, `UserId`, `Name(<=50)`, `Type(Income/Expense)` | Nombre obligatorio; único por (`UserId`,`Name`); tipo fijo desde su creación |
+| **Transaction** | `Id`, `UserId`, `CategoryId`, `Type(Income/Expense)`, `Amount(18,2)`, `Date`, `Description(<=200)` | RN-F01..F03; índice (`UserId`,`Date`); FK a Category con `Restrict` |
 | **Budget** | `Id`, `UserId`, `CategoryId`, `Year`, `Month`, `Limit(18,2)` | RN-F06; único por (`UserId`,`CategoryId`,`Year`,`Month`) |
-| **Habit** *(raíz de agregado)* | `Id`, `UserId`, `Name(≤80)`, `IsArchived`, `CheckIns` | RN-H01..H05 |
-| **HabitCheckIn** | `Id`, `HabitId`, `Date` | Único por (`HabitId`,`Date`) |
 
 Todas las entidades de usuario tienen FK a `AspNetUsers` con borrado en cascada (RN-G02). Los ids se generan en el dominio (`Guid`).
 
@@ -235,14 +207,11 @@ que implementa `ICommand<T>`, `IQuery<T>` o `IRequest`, y el handler es `sealed`
 | Listar categorías | `ListCategoriesHandler` | RF-F01 | Fase 2 |
 | Registrar movimiento | `CreateTransactionHandler` | RF-F02, RN-F01..F05 | Fase 2 |
 | Resumen/listado mensual | `ListMonthlyTransactionsHandler` | RF-F03, RF-F05, RF-D01 | Fase 2 |
-| Editar/eliminar movimiento | `UpdateTransactionHandler`, `DeleteTransactionHandler` | RF-F04 | Fase 5 |
-| Definir/consultar presupuesto | `SetBudgetHandler`, `GetBudgetStatusHandler` | RF-F06 | Fase 5 |
-| Crear hábito | `CreateHabitHandler` | RF-H01 | Fase 3 |
-| Marcar hábito | `CheckInHabitHandler` | RF-H03, RN-H02/H03 | Fase 3 |
-| Listar hábitos con rachas | `ListHabitsHandler` | RF-H02, RF-D02 | Fase 3 |
-| Deshacer check-in / archivar | `UndoCheckInHandler`, `ArchiveHabitHandler` | RF-H04, RF-H05 | Fase 5 |
-| Correlación hábito–gasto | `GetHabitSpendingCorrelationHandler` | RF-D03 | Fase 5 |
-| Eliminar mi cuenta | `DeleteAccountHandler` | RF-A04 | Fase 5 |
+| Editar/eliminar movimiento | `UpdateTransactionHandler`, `DeleteTransactionHandler` | RF-F04 | Fase 4 |
+| Definir/consultar presupuesto | `SetBudgetHandler`, `GetBudgetStatusHandler` | RF-F06 | Fase 4 |
+| Proyección de saldo | `GetBalanceProjectionHandler` | RF-D02 | Fase 4 |
+| Alerta de gasto inusual | `GetUnusualSpendingAlertsHandler` | RF-D03 | Fase 4 |
+| Eliminar mi cuenta | `DeleteAccountHandler` | RF-A04 | Fase 4 |
 
 ---
 
@@ -270,7 +239,7 @@ Detalle en `docs/06-despliegue-azure.md`.
 ## 10. Modelo de amenazas (resumen STRIDE)
 | Amenaza | Ejemplo | Mitigación |
 |---|---|---|
-| **S**poofing | Robo de sesión o fuerza bruta de contraseñas | Cookies `HttpOnly/Secure/SameSite`, bloqueo por intentos, contraseña ≥ 12, HTTPS |
+| **S**poofing | Robo de sesión o fuerza bruta de contraseñas | Cookies `HttpOnly/Secure/SameSite`, bloqueo por intentos, contraseña >= 12, HTTPS |
 | **T**ampering | Modificar el id de un recurso; *over-posting* | Filtro por usuario en cada consulta, `InputModel` dedicados, anti-forgery |
 | **R**epudiation | No poder reconstruir un acceso indebido | Logs estructurados de eventos de seguridad con identificador de solicitud |
 | **I**nformation disclosure | Ver datos de otro usuario; trazas de error visibles | Autorización por propiedad, página de error genérica, sin PII en logs |
@@ -287,7 +256,7 @@ Detalle en `docs/06-despliegue-azure.md`.
 | La IA inventa paquetes o APIs | Fallos de build o riesgo de cadena de suministro | Política de paquetes; revisión humana; verificar en documentación oficial |
 | La IA rompe la arquitectura | Deriva de diseño | Tests de arquitectura + `AGENTS.md` por capa |
 | Fuga de secretos | Compromiso de la base de datos | `.gitignore`, user-secrets, escaneo de secretos del repositorio |
-| Zona horaria mal configurada | Rachas y fechas desfasadas | `App:TimeZoneId` obligatoria en despliegue; tests con reloj fijo |
+| Zona horaria mal configurada | Fechas desfasadas | `App:TimeZoneId` obligatoria en despliegue; tests con reloj fijo |
 
 ---
 
@@ -298,10 +267,9 @@ Detalle en `docs/06-despliegue-azure.md`.
 | **0. Preparación** | Solución creada (ver `README.md`), `Directory.*`, `.editorconfig`, CI mínimo, tests de arquitectura en verde (vacíos) | `build + test + format` pasan en CI |
 | **1. Cuenta** | Identity, política *fallback*, cabeceras de seguridad, página de error, `/health` | HU-01..HU-03 |
 | **2. Finanzas núcleo** | Categorías, movimientos, resumen mensual | HU-04..HU-06 |
-| **3. Hábitos núcleo** | Hábitos, check-in, rachas | HU-08, HU-09 |
-| **4. Despliegue** | Recursos Azure gratuitos, CI/CD con OIDC, migraciones en pipeline | App accesible por HTTPS |
-| **5. Valor añadido** | Presupuestos, correlación hábito–gasto, borrado de cuenta, deshacer/archivar | HU-07, HU-10, HU-11 |
-| **6. Endurecimiento y memoria** | Checklist OWASP completa, CodeQL, cobertura, ADRs, memoria del TFM | Definition of Done global |
+| **3. Despliegue** | Recursos Azure gratuitos, CI/CD con OIDC, migraciones en pipeline | App accesible por HTTPS |
+| **4. Valor añadido** | Presupuestos, proyección de saldo, alertas de gasto inusual, borrado de cuenta | HU-07, HU-08, HU-09, HU-10 |
+| **5. Endurecimiento y memoria** | Checklist OWASP completa, CodeQL, cobertura, ADRs, memoria del TFM | Definition of Done global |
 
 ### Definition of Done global
 Todos los requisitos **M** implementados con sus criterios de aceptación, CI en verde, checklist de `docs/03-seguridad-owasp.md` completada, despliegue funcionando a coste cero, documentación y ADRs al día.
@@ -311,7 +279,7 @@ Todos los requisitos **M** implementados con sus criterios de aceptación, CI en
 ## 13. Trazabilidad (resumen)
 | Requisito | Dominio | Aplicación | Pruebas mínimas |
 |---|---|---|---|
-| RF-F02 | `Transaction.Create` | `CreateTransactionHandler` | Dominio: RN-F01..F03; Aplicación: categoría ajena ⇒ `ResourceNotFoundException` |
-| RF-H03 | `Habit.CheckIn` | `CheckInHabitHandler` | Dominio: futuro, duplicado, archivado; Aplicación: IDOR |
-| RF-H02 | `Habit.CurrentStreak/BestStreak` | `ListHabitsHandler` | Dominio: HU-09; Aplicación: solo hábitos propios |
+| RF-F02 | `Transaction.Create` | `CreateTransactionHandler` | Dominio: RN-F01..F03; Aplicación: categoría ajena => `ResourceNotFoundException` |
+| RF-F05 | `Transaction`, `Category` | `ListMonthlyTransactionsHandler` | Dominio: sumas y agrupaciones; Aplicación: solo movimientos propios |
 | RF-A03 | — | todos los handlers | IDOR por handler + test de acceso anónimo |
+| RF-F06 | `Budget.Create` | `SetBudgetHandler` | Dominio: RN-F06; Aplicación: IDOR |

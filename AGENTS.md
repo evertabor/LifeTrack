@@ -5,7 +5,7 @@ Si una instrucción del usuario contradice este archivo, **avisa del conflicto a
 
 ## 1. Qué es este proyecto
 
-Aplicación web personal para **finanzas personales y hábitos** con un dashboard que cruza ambos mundos.
+Aplicación web personal para **finanzas personales** con dashboard inteligente (proyecciones, alertas, insights).
 Es el proyecto final (TFM) de un máster de desarrollo con IA, pensado para desplegarse **gratis en Azure**.
 
 - **Stack:** .NET 10 (LTS), ASP.NET Core MVC (vistas Razor), EF Core, SQL Server (Azure SQL free offer), ASP.NET Core Identity.
@@ -94,7 +94,7 @@ Antes de dar una tarea por terminada, ejecuta **build + test + format**. No diga
 ## 6. Clean code — reglas obligatorias
 
 **Nombres y estructura**
-- Nombres que revelan intención (`CheckInHabitHandler`, no `HabitService2`). Sin abreviaturas crípticas.
+- Nombres que revelan intención (`CreateTransactionHandler`, no `TransactionService2`). Sin abreviaturas crípticas.
 - `PascalCase` para tipos y miembros públicos, `camelCase` para parámetros y locales, `_camelCase` para campos privados, prefijo `I` en interfaces.
 - Namespaces *file-scoped* (`namespace X;`) y `using` fuera del namespace.
 - Un tipo público por archivo. Los casos de uso se organizan por feature o agregado, y cada comando o caso de uso tiene su propia carpeta.
@@ -180,7 +180,7 @@ Detalle y verificación en `docs/03-seguridad-owasp.md`. Resumen para escribir c
 6. **A06 Diseño inseguro:** modela invariantes en el dominio; limita tasa de peticiones; enlaza formularios a modelos de entrada dedicados (`InputModel`), **nunca** a entidades (evita *over-posting*).
 7. **A07 Autenticación:** contraseña ≥ 12 caracteres, bloqueo por intentos fallidos, mensajes de login genéricos. No implementes autenticación a mano.
 8. **A08 Integridad:** anti-forgery en **todos** los POST. En MVC **no** es automático: `Program.cs` registra `AutoValidateAntiforgeryToken` como filtro global y `LifeTrack.Architecture.Tests` verifica que sigue registrado. Los formularios usan tag Helpers (`asp-for`, `asp-action`) para emitir el token. **Prohibido `[IgnoreAntiforgeryToken]`** salvo en la página de error, y prohibido desactivarlo "para que algo funcione". Sin deserialización insegura (`BinaryFormatter` prohibido). Workflows de CI con permisos mínimos.
-9. **A09 Registro y alertas:** `ILogger` con plantillas estructuradas (`"Habit {HabitId} not found"`), nunca interpolación de cadenas. Registra eventos de seguridad (acceso denegado, ids manipulados). **Nunca** registres contraseñas, tokens, cadenas de conexión ni datos personales innecesarios.
+9. **A09 Registro y alertas:** `ILogger` con plantillas estructuradas (`"Transaction {TransactionId} not found"`), nunca interpolación de cadenas. Registra eventos de seguridad (acceso denegado, ids manipulados). **Nunca** registres contraseñas, tokens, cadenas de conexión ni datos personales innecesarios.
 10. **A10 Condiciones excepcionales:** falla cerrado (sin identidad → sin datos), sin `catch` vacíos, `CancellationToken` en todo I/O, reintentos solo ante errores transitorios de BD.
 
 **Si añades funciones de IA** (p. ej. categorizar gastos con un LLM): trata la salida del modelo como **entrada no confiable** (valida y codifica), no envíes datos personales innecesarios, aísla instrucciones de datos del usuario (*prompt injection*), no des al modelo más permisos que el mínimo, y mantén un respaldo determinista (reglas por palabra clave). Ver sección de OWASP LLM en `docs/03-seguridad-owasp.md`.
@@ -191,7 +191,7 @@ Detalle y verificación en `docs/03-seguridad-owasp.md`. Resumen para escribir c
 - Los ids se generan en el **dominio** (`Guid.NewGuid()`); configura siempre `ValueGeneratedNever()`. Sin eso EF marca como "existente" a un hijo nuevo y falla al guardar.
 - Entidades con constructor privado sin parámetros (para EF), `private set` y fábrica estática `Create(...)`.
 - Colecciones expuestas como `IReadOnlyCollection<T>` sobre un `List<T>` privado, con `PropertyAccessMode.Field`.
-- Define `HasMaxLength`, `HasPrecision(18, 2)` para dinero, índices por `UserId` e índices únicos para invariantes (p. ej. un check-in por hábito y día).
+- Define `HasMaxLength`, `HasPrecision(18, 2)` para dinero, índices por `UserId` e índices únicos para invariantes (p. ej. un presupuesto por categoría y mes).
 - Los repositorios **no** llaman a `SaveChangesAsync`; lo hace el handler vía `IUnitOfWork`.
 - Cada entidad del usuario tiene FK a `AspNetUsers` con borrado en cascada (derecho al olvido).
 - Una migración por cambio de modelo, con nombre descriptivo. No edites migraciones ya aplicadas.
@@ -205,7 +205,7 @@ Detalle y verificación en `docs/03-seguridad-owasp.md`. Resumen para escribir c
 5. **Web:** controller delgado que inyecta **`ISender`** (y `ILogger<TController>`) y llama a `sender.Send(new <Verbo><Sustantivo>Command/Query(...), cancellationToken)`; nunca inyecta un handler concreto, ni `DbContext`, ni repositorios. El `InputModel` valida presencia y formato, y el controller captura `BusinessRuleException`/`ResourceNotFoundException`, nunca excepciones de `Domain`. `ViewModel` construido con su fábrica `From(...)` a partir del DTO devuelto, y vista Razor **sin lógica** (`<label>` en cada campo, mensajes de validación). Sigue `docs/09-estandar-vistas-mvc.md`.
 6. Ejecuta build + test + format. Revisa la lista de la sección 11.
 7. Si tomaste una decisión de arquitectura, añade un ADR en `docs/adr/`.
-8. Commit pequeño con *Conventional Commits* (`feat(habits): add check-in`).
+8. Commit pequeño con *Conventional Commits* (`feat(transactions): add create transaction`).
 
 ## 10. Pruebas
 

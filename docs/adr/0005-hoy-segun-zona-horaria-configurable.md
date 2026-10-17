@@ -4,7 +4,7 @@
 - **Fecha:** 2026-10-02
 
 ## Contexto
-Azure ejecuta la aplicación en UTC. Rachas de hábitos y la regla "sin fechas futuras" dependen del día local del usuario; con UTC, por la noche se rechazarían check-ins legítimos o se contarían en el día equivocado.
+Azure ejecuta la aplicación en UTC. La regla "sin fechas futuras" y la agrupación por mes dependen del día local del usuario; con UTC, por la noche se rechazarían movimientos legítimos o se contarían en el día equivocado.
 
 ## Decisión
 Se usa `TimeProvider` (BCL). En producción se registra un `ZonedTimeProvider` que sobrescribe `LocalTimeZone` con la zona de `App:TimeZoneId`. Los casos de uso obtienen la fecha con `timeProvider.Today()`. El dominio recibe `today` como parámetro, nunca consulta el reloj.

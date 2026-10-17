@@ -11,13 +11,11 @@ src/LifeTrack.Web/
 │   ├── DashboardController.cs
 │   ├── CategoriesController.cs
 │   ├── TransactionsController.cs
-│   ├── HabitsController.cs
 │   └── AccountController.cs
 ├── ViewModels/               # Un modelo por pantalla. Solo existen para pintar
 │   ├── Dashboard/
 │   ├── Categories/
 │   ├── Transactions/
-│   ├── Habits/
 │   └── Shared/
 ├── Views/
 │   ├── _ViewImports.cshtml
@@ -32,9 +30,6 @@ src/LifeTrack.Web/
 │   ├── Transactions/
 │   │   ├── Index.cshtml
 │   │   ├── Edit.cshtml
-│   │   └── Partials/
-│   ├── Habits/
-│   │   ├── Index.cshtml
 │   │   └── Partials/
 │   ├── Error/
 │   └── Shared/
@@ -89,7 +84,7 @@ mismo nombre de área, y por eso se localizan juntas.
 
 ## 4. Controllers
 
-- **Uno por área**, no uno por acción. Check-in, deshacer y archivar viven en `HabitsController`.
+- **Uno por área**, no uno por acción. Editar y eliminar viven en `TransactionsController`.
 - Los nombres van en inglés y en plural: `CategoriesController`, no `CategoryController`.
 - Inyectan **`ISender`** (MediatR) y **`ILogger<TController>`** (más `TimeProvider` si lo necesitan).
   **Nunca** un handler concreto, ni `DbContext`, ni repositorios, ni `UserManager` para datos de negocio.
@@ -121,7 +116,7 @@ public sealed class HabitsController : Controller
 }
 ```
 
-Las URLs van en **inglés** y son definitivas: `/habits`, `/transactions`, `/categories`, `/dashboard`.
+Las URLs van en **inglés** y son definitivas: `/transactions`, `/categories`, `/dashboard`.
 
 ## 5. ViewModels
 
@@ -250,8 +245,8 @@ prepara en el `ViewModel`, y esconde una regla de presentación que debería est
 }
 
 <partial name="_MonthlySummary" model="Model.Summary" />
-<partial name="_PendingHabits" model="Model.PendingHabits" />
-<partial name="_SpendingCorrelation" model="Model.Correlation" />
+<partial name="_BudgetStatus" model="Model.Budgets" />
+<partial name="_BalanceProjection" model="Model.Projection" />
 ```
 
 Cada bloque tiene su fichero en `Partials/`. La vista principal no repite el HTML de cada tarjeta,
@@ -269,7 +264,7 @@ no abre bucles anidados y no formatea importes.
 - Un parcial representa una tarjeta, una sección, un formulario, un estado vacío o una parte del layout.
 - **Prohibido** un parcial que reciba una entidad de `Domain`.
 - Un `ViewComponent` es la salida cuando hace falta una decisión: un bloque vacío, una insignia con
-  color según la racha, un badge de presupuesto según el porcentaje. Esa decisión vive en la clase,
+  color según el porcentaje. Esa decisión vive en la clase,
   nunca en la vista.
 
 ## 8. Layouts
@@ -330,11 +325,11 @@ Siguen el estándar de JavaScript: prefijo de la feature y nunca un literal suel
 | Prefijo | Se usa en |
 |---|---|
 | `app-*` | Elementos de un componente compartido |
-| `dashboard-*`, `categories-*`, `transactions-*`, `habits-*` | Pantallas propias |
+| `dashboard-*`, `categories-*`, `transactions-*` | Pantallas propias |
 
 ```html
-<button type="button" class="habits-checkin-button" data-modal-open="confirm-archive">
-    Archivar
+<button type="button" class="transactions-edit-button" data-modal-open="confirm-delete">
+    Eliminar
 </button>
 ```
 

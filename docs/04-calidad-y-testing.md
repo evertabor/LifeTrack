@@ -6,7 +6,7 @@ Complementa la sección 6 y 10 de `AGENTS.md` con el porqué y las puertas autom
 
 | Principio | Cómo se concreta en LifeTrack |
 |---|---|
-| **Nombres que revelan intención** | `CheckInHabitHandler`, `ResourceNotFoundException`, `Habit.CurrentStreak` |
+| **Nombres que revelan intención** | `CreateTransactionHandler`, `ResourceNotFoundException`, `Transaction.Create` |
 | **SRP** | Entidad = reglas; handler `IRequestHandler` = orquestación; repositorio = acceso a datos; controller = traducción HTTP; `ViewModel` = datos listos para pintar; vista = render |
 | **Funciones pequeñas** | ~20 líneas por método; más de 30 se divide |
 | **Pocos parámetros** | Máximo 4; si no, `record`. Un controller ya no inyecta un handler por acción, sino `ISender` y `ILogger<TController>` |
@@ -15,7 +15,7 @@ Complementa la sección 6 y 10 de `AGENTS.md` con el porqué y las puertas autom
 | **Inmutabilidad** | `record` para comandos/DTOs, `private set` en entidades |
 | **DRY sin sobre-abstraer** | Sin interfaces "por si acaso" (YAGNI). Aplicar la guarda de diseño de esta guía antes de extraer una abstracción |
 | **Cero comentarios** | Ni XML, ni `//`, ni `/* */`, ni `@* *@`, ni `TODO`. El código se explica con nombres, tipos y estructura; la razón que el código no puede defender va en `docs/` |
-| **Tell, don't ask** | `habit.CheckIn(...)` en vez de manipular su lista desde fuera |
+| **Tell, don't ask** | `transaction.Register(...)` en vez de manipular sus datos desde fuera |
 | **Fallar rápido** | Invariantes validados en la creación; excepciones tipadas |
 
 SOLID se aplica letra por letra contra este repositorio, con sus trampas concretas. **Solo D es exigible por herramienta**: el compilador y `LifeTrack.Architecture.Tests` comprueban el sentido de las dependencias; SRP, OCP, ISP y LSP se evalúan mediante revisión de diseño.
@@ -26,11 +26,11 @@ SOLID se aplica letra por letra contra este repositorio, con sus trampas concret
 
 **O — Abierto/cerrado.** Añadir un caso de uso debe ser un archivo nuevo, no un `switch` que crece. MediatR permite que un controller envíe un nuevo contrato por `ISender` sin añadir una dependencia por handler. Evita también sustituir un `switch` sencillo por jerarquías de herencia innecesarias.
 
-**L — Sustitutibilidad.** Cada implementación debe respetar el contrato de la interfaz. Si `IHabitRepository` promete devolver únicamente recursos del usuario, el repositorio real y el fake deben filtrar por el mismo `userId`; de lo contrario, el test puede pasar y producción quedar expuesta a IDOR.
+**L — Sustitutibilidad.** Cada implementación debe respetar el contrato de la interfaz. Si `ITransactionRepository` promete devolver únicamente recursos del usuario, el repositorio real y el fake deben filtrar por el mismo `userId`; de lo contrario, el test puede pasar y producción quedar expuesta a IDOR.
 
 **I — Segregación de interfaces.** Diseña la interfaz para quien la consume. `ICurrentUser` expone el identificador que necesita Application, no el `ClaimsPrincipal` completo. Evita interfaces generales que obliguen a consumidores y fakes a implementar operaciones que no usan.
 
-**D — Inversión de dependencias.** Las interfaces pertenecen a la capa que las consume. `IHabitRepository` vive en Application porque esa capa define el contrato que Infrastructure implementa; así las dependencias apuntan hacia dentro.
+**D — Inversión de dependencias.** Las interfaces pertenecen a la capa que las consume. `ITransactionRepository` vive en Application porque esa capa define el contrato que Infrastructure implementa; así las dependencias apuntan hacia dentro.
 
 ### Guarda anti-sobre-ingeniería
 
@@ -41,7 +41,7 @@ Antes de extraer una abstracción, responde sí a la primera pregunta:
 3. ¿La separación responde a una responsabilidad distinta o solo a una preferencia estética?
 4. ¿La abstracción evita filtrar EF, HTTP u otro concepto externo hacia Application?
 
-No crear una capa `IHabitService` que envuelva el handler, un `IHabitValidator` si la validación pertenece al dominio, un `IHabitMapper` para una proyección pequeña ni un behavior de MediatR sin una necesidad concreta. La testabilidad no sustituye la escritura de un test: un fake pequeño puede cubrir el caso sin introducir una abstracción permanente.
+No crear una capa `ITransactionService` que envuelva el handler, un `ITransactionValidator` si la validación pertenece al dominio, un `ITransactionMapper` para una proyección pequeña ni un behavior de MediatR sin una necesidad concreta. La testabilidad no sustituye la escritura de un test: un fake pequeño puede cubrir el caso sin introducir una abstracción permanente.
 
 ## 2. Puertas de calidad automáticas
 
@@ -77,7 +77,7 @@ una **regresión ya ocurrida**. No se escribe un test por cada rama ni por cada 
 
 | Categoría | Qué es | Cómo se prueba |
 |---|---|---|
-| **Fallo silencioso** | Un número incorrecto que se muestra al usuario y nadie detecta: una racha mal calculada, un total que no cuadra | Un `Assert` sobre el valor exacto |
+| **Fallo silencioso** | Un número incorrecto que se muestra al usuario y nadie detecta: un total que no cuadra, una proyección errónea | Un `Assert` sobre el valor exacto |
 | **Brecha de seguridad** | Cada handler que recibe un id | Test de IDOR que espera `ResourceNotFoundException` **y comprueba que no se persistió nada** (`SaveCount == 0`) |
 | **Regresión** | Cada bug ya corregido | El test que lo reproduce, escrito primero |
 
@@ -103,7 +103,7 @@ puede dejar un registro a medias y el test pasa.
   de verdad, y **IDOR** para los que reciben un id. También que **no se guardó nada** cuando falla.
 - **Architecture.Tests:** reglas de dependencia ejecutables. Es la puerta que hace exigible la **D** de
   SOLID; las otras cuatro letras son criterio de revisión.
-- **Integración (opcional, fase 6):** acceso anónimo redirige al login; cabeceras de seguridad presentes; un flujo completo (registro → crear hábito → marcar).
+- **Integración (opcional, fase 6):** acceso anónimo redirige al login; cabeceras de seguridad presentes; un flujo completo (registro → crear categoría → registrar movimiento).
 
 ### Cómo se prueba un caso de uso
 
@@ -114,12 +114,12 @@ real y los *fakes* en memoria registrados.
 var services = new ServiceCollection();
 services.AddSingleton<ICurrentUser>(new FakeCurrentUser(userId));
 services.AddSingleton(unitOfWork);
-services.AddSingleton<IHabitRepository>(habits);
+services.AddSingleton<ITransactionRepository>(transactions);
 services.AddSingleton(TimeProvider.System);
 services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyAnchor).Assembly));
 
 var sender = services.BuildServiceProvider().GetRequiredService<ISender>();
-var id = await sender.Send(new CreateHabitCommand("Meditar"), CancellationToken.None);
+var id = await sender.Send(new CreateTransactionCommand("Comida", 25.50m, DateOnly.FromDateTime(DateTime.Today)), CancellationToken.None);
 ```
 
 Por qué esta opción: es **exactamente lo que hace un controller**, así que el test cubre el enlace
@@ -135,7 +135,7 @@ En los dos casos: las **excepciones que se esperan son las de frontera** (`Busin
 **dominio**, que es donde nacen.
 
 ### Convenciones
-- Nombre: `Método_Condición_ResultadoEsperado` (p. ej. `CheckIn_InTheFuture_Throws`).
+- Nombre: `Método_Condición_ResultadoEsperado` (p. ej. `CreateTransaction_ZeroAmount_Throws`).
 - AAA: Arrange / Act / Assert. Un concepto por test.
 - Dobles: *fakes* a mano (`FakeCurrentUser`, `FakeUnitOfWork`, `FixedTimeProvider`, `InMemory…Repository`). Sin librerías de mocking salvo aprobación.
 - Determinismo: reloj fijo; sin `Thread.Sleep`; sin red; sin base de datos real en pruebas unitarias.
@@ -147,7 +147,6 @@ seguridad o un invariante cuya violación rompería el agregado.
 
 | Tema | Casos |
 |---|---|
-| Rachas | consecutivos hasta hoy; vivo con solo ayer; roto tras hueco > 1 día; mejor racha; duplicados |
 | Movimientos | monto 0, negativo, 3 decimales, > máximo; fecha de mañana; descripción larga; categoría ajena |
 | Categorías | nombre vacío, > 50, duplicado (con espacios al borde) |
 | Aislamiento | cada caso de uso con id: otro usuario ⇒ `ResourceNotFoundException` y `SaveCount == 0` |

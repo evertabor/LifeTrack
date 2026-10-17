@@ -133,7 +133,7 @@ funcionalidad, ni degradación.
 | Identificador de solicitud en la página de error para correlacionar | Web |
 | Alertas: Sentry o Azure Monitor/Application Insights (opcional) | Operación ☐ |
 
-**Reglas para la IA:** usa `LogWarning("Habit {HabitId} not found", id)`, **nunca** `LogWarning($"Habit {id} …")`. Sin datos personales en logs.
+**Reglas para la IA:** usa `LogWarning("Transaction {TransactionId} not found", id)`, **nunca** `LogWarning($"Transaction {id} …")`. Sin datos personales en logs.
 
 ## A10 — Mal manejo de condiciones excepcionales (*Mishandling of Exceptional Conditions*)
 | Control | Dónde |

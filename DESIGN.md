@@ -12,7 +12,7 @@
 
 - Existen layouts separados: `_Layout.cshtml` para páginas públicas y `_AuthenticatedLayout.cshtml` para áreas autenticadas. `_ViewStart.cshtml` conserva el layout público por defecto y los `_ViewStart.cshtml` anidados seleccionan el shell autenticado.
 - El shell autenticado incluye skip link, navegación lateral fija en escritorio, cajón móvil, topbar, contenido principal y pie. Sus bloques viven en `Views/Shared/Partials/`.
-- La navegación enlaza a `Transactions` y `Categories`, las áreas que disponen actualmente de controller y vista. Dashboard y Habits permanecen fuera de la navegación hasta que sus pantallas existan.
+- La navegación enlaza a `Transactions` y `Categories`, las áreas que disponen actualmente de controller y vista. Dashboard permanece fuera de la navegación hasta que su pantalla exista.
 - `tokens.css`, `bootstrap-overrides.css`, `components.css` y `site.css` existen y se cargan después de Bootstrap. No se han añadido assets externos, fuentes, iconos ni paquetes.
 - `site.js` contiene el comportamiento accesible del cajón móvil y el selector persistente de tema; Bootstrap y jQuery siguen siendo assets locales existentes.
 - La especificación establece una sola moneda y formato numérico de dos decimales, pero no identifica el símbolo. Los ejemplos de importes de esta guía no fijan una moneda ni un símbolo.
@@ -51,7 +51,7 @@ Si dos fuentes aplicables entran en conflicto, no uses esta lista para ignorar u
 |---|---|
 | Claro y fiable | El dinero, los presupuestos y la actividad se muestran de forma serena y predecible. |
 | Enfocado, no saturado | Los valores importantes tienen espacio. Nada decorativo compite con los datos. |
-| Alentador, nunca culpabilizador | Se muestra el progreso y el siguiente paso útil. Un hábito no cumplido o un gasto alto no se presentan como fracaso. |
+| Alentador, nunca culpabilizador | Se muestra el progreso y el siguiente paso útil. Un gasto alto no se presenta como fracaso. |
 | Consistente | Mismos colores, espaciados, tipografía e interacciones en todas las áreas. |
 | Accesible de serie | Teclado, táctil, lector de pantalla y contraste suficiente desde el primer cambio de interfaz. |
 
@@ -64,7 +64,7 @@ Si dos fuentes aplicables entran en conflicto, no uses esta lista para ignorar u
 ### Haz
 
 - Usa variables CSS `--app-*` para colores, espaciados, radios y sombras.
-- Usa `app-*` para componentes propios compartidos y el prefijo de la funcionalidad (`dashboard-*`, `categories-*`, `transactions-*` o `habits-*`) para clases y atributos `data-*` específicos de una pantalla.
+- Usa `app-*` para componentes propios compartidos y el prefijo de la funcionalidad (`dashboard-*`, `categories-*`, `transactions-*`) para clases y atributos `data-*` específicos de una pantalla.
 - Usa utilidades de Bootstrap para espaciado, `display`, flex y grid, sin cambiar la misma propiedad con una regla propia en el mismo elemento.
 - Acompaña todo estado (éxito, aviso, error, información) con texto o icono, además del color.
 - Usa `font-variant-numeric: tabular-nums` y alineación a la derecha en importes.
@@ -81,7 +81,6 @@ Si dos fuentes aplicables entran en conflicto, no uses esta lista para ignorar u
 - No añadas paquetes, fuentes remotas, frameworks CSS, librerías de iconos ni de gráficos sin aprobación explícita.
 - No pongas lógica de formato ni de negocio en la vista: fechas, importes, porcentajes y estados llegan preparados desde el `ViewModel`.
 - No enganches JavaScript a clases de estilo. Sigue los bloques de constantes de `docs/08-estandar-javascript.md` para selectores, clases y claves `data-*`.
-- No muestres un hábito no cumplido con estilo de error (rojo, alerta o tachado).
 - No derives el tema de `prefers-color-scheme`: el valor inicial es claro y solo cambia por la elección persistida del usuario.
 
 ---
@@ -257,7 +256,7 @@ Usa solo estas parejas texto/fondo. Valida cualquier combinación nueva antes de
 | Escritorio (`lg` y superior) | Barra lateral fija a la izquierda (`primary-800`, ancho `--app-sidebar-width`) y contenido a la derecha. |
 | Móvil y tableta | Cabecera superior con botón de menú que abre navegación accesible mediante `offcanvas` de Bootstrap. |
 
-- Separa la navegación de producto (Resumen (`Dashboard`), movimientos (`Transactions`), categorías (`Categories`) y hábitos (`Habits`)) de las acciones de cuenta que estén implementadas, como cerrar sesión. La eliminación de cuenta solo aparece si se implementa RF-A04.
+- Separa la navegación de producto (Resumen (`Dashboard`), movimientos (`Transactions`), categorías (`Categories`)) de las acciones de cuenta que estén implementadas, como cerrar sesión. La eliminación de cuenta solo aparece si se implementa RF-A04.
 - Todo destino esencial debe ser alcanzable en móvil.
 - Incluye un enlace “Saltar al contenido” como primer elemento enfocable.
 - La estructura está inspirada en la distribución de Gentelella, no en su código, assets, colores, fuentes o dependencias. LifeTrack conserva sus tokens y su identidad visual.
@@ -422,7 +421,7 @@ Bootstrap 5.3 utiliza `--bs-link-color-rgb` y `--bs-link-hover-color-rgb` para l
 ### Reglas
 
 - Reutiliza clases de Bootstrap para botones, formularios, modales, `offcanvas`, tablas y alertas; los colores de las variantes que usa esta guía deben mapearse explícitamente a tokens, como en el puente anterior.
-- Para elementos sin equivalente en Bootstrap (métricas, badges de estado, progreso de presupuesto y racha de hábitos) usa componentes `app-*`.
+- Para elementos sin equivalente en Bootstrap (métricas, badges de estado, progreso de presupuesto) usa componentes `app-*`.
 - No mezcles una utilidad de Bootstrap y una regla propia que cambien la misma propiedad del mismo elemento.
 - No uses `!important`. La única excepción es el bloque de movimiento reducido de la sección 12.
 
@@ -500,7 +499,7 @@ Cada métrica tiene etiqueta, valor y periodo o contexto. Las comparaciones se e
 
 - `Comparison.CssClass` llega preparado en el `ViewModel`; no codifiques una regla de presentación como ternario en Razor.
 - No uses rojo para representar “más gasto”. Un gasto mayor no es un error.
-- Destaca una o dos métricas clave. En el Dashboard, agrupa en este orden: resumen financiero, presupuesto si RF-F06 está implementado y progreso de hábitos.
+- Destaca una o dos métricas clave. En el Dashboard, agrupa en este orden: resumen financiero, presupuesto si RF-F06 está implementado y proyección de saldo si RF-D02 está implementado.
 
 ### 8.3 Insignia de estado
 
@@ -539,6 +538,7 @@ Siempre comunica el estado con icono, texto y color.
 .app-badge--info { background: var(--app-color-info-100); color: var(--app-color-info-700); }
 .app-badge--neutral { background: var(--app-color-surface-muted); color: var(--app-color-text-secondary); }
 .app-badge--progress { background: var(--app-color-accent-100); color: var(--app-color-accent-800); }
+
 ```
 
 ### 8.4 Formularios
@@ -651,39 +651,6 @@ Los umbrales los define `docs/01-especificacion.md` (RF-F06: aviso al 80 % y al 
 `ProgressBarValue` y `FillPercent` llegan limitados al rango 0–100 desde el `ViewModel`, incluso si el gasto supera el presupuesto. `UsageText` y `ProgressAccessibleValue` comunican el consumo real, que puede ser superior al 100 %. No calcules ni limites esos valores en Razor.
 
 El mecanismo para asignar el ancho sin `style="..."` sigue pendiente de decisión: clases discretas preparadas por el `ViewModel` o JavaScript. Si se elige JavaScript, respeta la IIFE y declara el selector y la clave de `data-app-percent` en el bloque `SELECTORS` de `docs/08-estandar-javascript.md`, no dentro de una función.
-
-### 8.7 Hábitos y progreso
-
-Principio: motivar, no castigar.
-
-- La racha y el avance se muestran de forma sencilla y fácil de leer.
-- El naranja se usa como acento de progreso ocasional: relleno de barra, icono de racha o botón de “Marcar hoy”.
-- Un día no cumplido es neutro: círculo vacío con borde. Nunca rojo, nunca “X”, nunca tachado.
-- El día de hoy se destaca con un anillo azul (`primary-600`).
-
-| Estado del día | Aspecto | Texto accesible |
-|---|---|---|
-| Cumplido | Círculo relleno `accent-600` con icono de check | “Completado” |
-| No cumplido | Círculo vacío, borde `border` | “Sin completar” |
-| Hoy, pendiente | Círculo vacío, anillo `primary-600` | “Hoy, pendiente” |
-
-```cshtml
-<li class="habits-day @Model.CssClass">
-  <span class="habits-day__mark" aria-hidden="true"></span>
-  <span class="visually-hidden">@Model.AccessibleLabel</span>
-  <span class="habits-day__name">@Model.DayLabel</span>
-</li>
-```
-
-Mensajes de apoyo (ejemplos de tono):
-
-| Situación | Texto |
-|---|---|
-| Racha activa | “Llevas 5 días seguidos. Sigue así.” |
-| Racha interrumpida | “Empieza una nueva racha hoy.” |
-| Sin hábitos | “Crea tu primer hábito y empieza a registrar tu progreso.” |
-
-Evita: “Has fallado”, “Perdiste tu racha” e “Incumplido”.
 
 ### 8.8 Navegación
 
@@ -831,7 +798,7 @@ Este bloque es el único uso permitido de `!important`, por ser una medida está
 
 - La librería de iconos o el uso de SVG propio sigue pendiente de decisión y aprobación; registra la decisión en `docs/adr/` si procede.
 - Hasta esa decisión, no añadas paquetes ni fuentes remotas. Si una vista necesita iconos, usa SVG inline mediante un parcial compartido como propuesta de implementación, no como un archivo que ya exista.
-- Iconos previstos cuando los estados correspondientes estén implementados: éxito, aviso, error, información, check de hábito, racha, flecha de comparación, menú y cerrar.
+- Iconos previstos cuando los estados correspondientes estén implementados: éxito, aviso, error, información, flecha de comparación, menú y cerrar.
 - Un icono nunca es la única forma de comunicar algo: acompáñalo de texto o, si es un botón iconográfico, de `aria-label`.
 
 ---
@@ -864,7 +831,7 @@ Este bloque es el único uso permitido de `!important`, por ser una medida está
 
 - [ ] Hay una sola acción primaria por pantalla.
 - [ ] El naranja se usa de forma controlada, nunca para errores ni para selección.
-- [ ] Un hábito no cumplido no aparece como error.
+- [ ] Un gasto alto no se presenta con estilo de error.
 
 ---
 

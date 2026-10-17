@@ -4,7 +4,7 @@
 
 ## Estado de verificación
 
-- **Domain:** compilado con .NET 10 SDK, `TreatWarningsAsErrors` y reglas de estilo activas, con cero warnings. La lógica de rachas y validaciones se comprobó con una consola de verificación.
+- **Domain:** compilado con .NET 10 SDK, `TreatWarningsAsErrors` y reglas de estilo activas, con cero warnings. La lógica de validaciones se comprobó con una consola de verificación.
 - **Application, Infrastructure, Web y tests:** los ejemplos no pudieron restaurarse ni compilarse cuando se generaron por falta de acceso a NuGet. Hay que validarlos al incorporarlos; los ejemplos de MediatR reflejan la API documentada de v13.
 
 ## Cómo usar estos ejemplos

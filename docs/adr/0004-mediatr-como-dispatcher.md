@@ -65,8 +65,8 @@ services.AddMediatR(cfg =>
 ### Envío desde un controller
 
 ```csharp
-var habits = await sender.Send(new ListHabitsQuery(), cancellationToken);
-await sender.Send(new CreateHabitCommand(input.Name), cancellationToken);
+var summary = await sender.Send(new ListMonthlyTransactionsQuery(2026, 10), cancellationToken);
+await sender.Send(new CreateTransactionCommand(categoryId, 25.50m, date), cancellationToken);
 ```
 
 ### Traducción de excepciones: sigue siendo explícita

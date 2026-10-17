@@ -8,7 +8,7 @@ Reglas generales en `/AGENTS.md` (secciones 6 y 10).
 
 | Categoría | Qué es | Cómo se prueba |
 |---|---|---|
-| **Fallo silencioso** | Un número incorrecto que se muestra al usuario y nadie detecta: una racha mal calculada, un total que no cuadra | Un `Assert` sobre el valor exacto |
+| **Fallo silencioso** | Un número incorrecto que se muestra al usuario y nadie detecta: un total que no cuadra, una proyección errónea | Un `Assert` sobre el valor exacto |
 | **Brecha de seguridad** | Cada handler que recibe un id | Test de IDOR que espera `ResourceNotFoundException` **y comprueba que no se persistió nada** (`SaveCount == 0`) |
 | **Regresión** | Cada bug ya corregido | El test que lo reproduce, escrito primero |
 
@@ -42,7 +42,7 @@ se rompe en cada refactor, no asserta nada y da una falsa sensación de segurida
 - Nombres de test, fixtures y clases en **inglés**.
 - `LifeTrack.Domain.Tests`: reglas de dominio puras, sin dobles, con `[Theory]` para los bordes.
 - `LifeTrack.Application.Tests`: casos de uso enviados por **`ISender`** con *fakes* en memoria (`Fakes/`): `FakeCurrentUser`, `FakeUnitOfWork`, `FixedTimeProvider`, `InMemory…Repository`. **Opción preferida: enviar el contrato por `ISender`** con `AddMediatR` sobre un `ServiceCollection` real, porque es exactamente lo que hace un controller y así el test cubre también el enlace contrato → handler (un contrato mal declarado se detecta en el propio test). Construir el handler directamente sigue siendo válido y es más rápido cuando el test se centra en un único handler y no necesita el dispatcher. Cada caso de uso con id incluye un **test de IDOR** que además comprueba `SaveCount == 0`. Sin librerías de mocking: los dobles son *fakes* escritos a mano.
-- Un *fake* es una implementación más de la interfaz, así que le aplica LSP: `InMemoryHabitRepository` filtra por `userId` igual que `HabitRepository`. Si no lo hiciera, el test de IDOR passing contra el *fake* fallaría en producción.
+- Un *fake* es una implementación más de la interfaz, así que le aplica LSP: `InMemoryTransactionRepository` filtra por `userId` igual que `TransactionRepository`. Si no lo hiciera, el test de IDOR passing contra el *fake* fallaría en producción.
 - `LifeTrack.Architecture.Tests` (NetArchTest.Rules): Domain sin dependencias; Application sin Infrastructure/Web/EF/ASP.NET; Infrastructure sin Web; **controllers sin `Domain` ni `Infrastructure`** y sin handlers concretos inyectados; ningún `ViewModel` heredando de `Domain`; handlers `sealed`. **No se modifican para "hacerlos pasar".** Son la puerta que hace exigible la **D** de SOLID; las otras cuatro son criterio de revisión.
 - Un test de arquitectura más comprueba que `Program.cs` registra **`AutoValidateAntiforgeryToken`** como filtro global. En MVC el anti-forgery no es automático; si alguien lo quita, los POST quedan sin token y debe fallar el build.
 - `ViewModels`: test de la fábrica `From(...)` que comprueba el formato y los valores de visibilidad, **cuando ese cálculo alimenta un número que el usuario ve**. Es la única lógica que las vistas ya no pueden hacer, así que un fallo ahí es silencioso.

@@ -1,71 +1,68 @@
-# Parte D — Infrastructure  ⚠️ sin compilar
+# Parte D — Infrastructure
 
-## Configuración EF (ValueGeneratedNever, colección por campo, índices, cascada)
+## Configuración EF (ValueGeneratedNever, índices, cascada)
 
-`src/LifeTrack.Infrastructure/Persistence/Configurations/HabitConfiguration.cs`
+`src/LifeTrack.Infrastructure/Persistence/Configurations/TransactionConfiguration.cs`
 
 ```csharp
-using LifeTrack.Domain.Habits;
+using LifeTrack.Domain.Finance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LifeTrack.Infrastructure.Persistence.Configurations;
 
-internal sealed class HabitConfiguration : IEntityTypeConfiguration<Habit>
+internal sealed class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
 {
-    public void Configure(EntityTypeBuilder<Habit> builder)
+    public void Configure(EntityTypeBuilder<Transaction> builder)
     {
-        builder.ToTable("Habits");
-        builder.HasKey(h => h.Id);
-        builder.Property(h => h.Id).ValueGeneratedNever();
+        builder.ToTable("Transactions");
+        builder.HasKey(t => t.Id);
+        builder.Property(t => t.Id).ValueGeneratedNever();
 
-        builder.Property(h => h.Name).HasMaxLength(Habit.NameMaxLength).IsRequired();
-        builder.HasIndex(h => h.UserId);
+        builder.Property(t => t.Description).HasMaxLength(Transaction.DescriptionMaxLength);
+        builder.Property(t => t.Amount).HasPrecision(18, 2);
+        builder.HasIndex(t => new { t.UserId, t.Date });
 
-        builder.HasMany(h => h.CheckIns)
-            .WithOne()
-            .HasForeignKey(c => c.HabitId)
-            .OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation(h => h.CheckIns).UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        builder.HasOne<ApplicationUser>().WithMany().HasForeignKey(h => h.UserId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Category>().WithMany().HasForeignKey(t => t.CategoryId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }
 ```
 
 ## Repositorio (la propiedad del recurso forma parte de la consulta)
 
-La consulta filtra por `h.UserId == userId`, así que el hábito de otro usuario **simplemente no se
+La consulta filtra por `t.UserId == userId`, así que la transacción de otro usuario **simplemente no se
 encuentra**: la respuesta es la misma que para un id inexistente y no se filtra nada por el camino
-(OWASP A01). `Include(h => h.CheckIns)` carga los check-ins en la misma consulta en lugar de disparar
-una por hábito (N+1), y las lecturas usan `AsNoTracking()` porque no van a modificar la entidad.
+(OWASP A01). Las lecturas usan `AsNoTracking()` porque no van a modificar la entidad.
 El repositorio **no** llama a `SaveChangesAsync`: eso lo hace el handler vía `IUnitOfWork`.
 
-`src/LifeTrack.Infrastructure/Persistence/Repositories/HabitRepository.cs`
+`src/LifeTrack.Infrastructure/Persistence/Repositories/TransactionRepository.cs`
 
 ```csharp
 using LifeTrack.Application.Abstractions;
-using LifeTrack.Domain.Habits;
+using LifeTrack.Domain.Finance;
 using Microsoft.EntityFrameworkCore;
 
 namespace LifeTrack.Infrastructure.Persistence.Repositories;
 
-internal sealed class HabitRepository(AppDbContext db) : IHabitRepository
+internal sealed class TransactionRepository(AppDbContext db) : ITransactionRepository
 {
-    public async Task AddAsync(Habit habit, CancellationToken cancellationToken) =>
-        await db.Habits.AddAsync(habit, cancellationToken);
+    public async Task AddAsync(Transaction transaction, CancellationToken cancellationToken) =>
+        await db.Transactions.AddAsync(transaction, cancellationToken);
 
-    public Task<Habit?> GetByIdAsync(Guid habitId, Guid userId, CancellationToken cancellationToken) =>
-        db.Habits
-            .Include(h => h.CheckIns)
-            .FirstOrDefaultAsync(h => h.Id == habitId && h.UserId == userId && !h.IsArchived, cancellationToken);
+    public Task<Transaction?> GetByIdAsync(Guid transactionId, Guid userId, CancellationToken cancellationToken) =>
+        db.Transactions
+            .FirstOrDefaultAsync(t => t.Id == transactionId && t.UserId == userId, cancellationToken);
 
-    public async Task<IReadOnlyList<Habit>> ListAsync(Guid userId, CancellationToken cancellationToken) =>
-        await db.Habits
+    public async Task<IReadOnlyList<Transaction>> ListByPeriodAsync(
+        Guid userId,
+        DateOnly from,
+        DateOnly to,
+        CancellationToken cancellationToken) =>
+        await db.Transactions
             .AsNoTracking()
-            .Include(h => h.CheckIns)
-            .Where(h => h.UserId == userId && !h.IsArchived)
-            .OrderBy(h => h.Name)
+            .Where(t => t.UserId == userId && t.Date >= from && t.Date < to)
+            .OrderByDescending(t => t.Date)
             .ToListAsync(cancellationToken);
 }
 ```
@@ -126,7 +123,6 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<AppDbContext>());
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
-        services.AddScoped<IHabitRepository, HabitRepository>();
 
         var zoneId = configuration["App:TimeZoneId"] ?? "UTC";
         services.AddSingleton<TimeProvider>(new ZonedTimeProvider(TimeZoneInfo.FindSystemTimeZoneById(zoneId)));
@@ -135,4 +131,3 @@ public static class DependencyInjection
     }
 }
 ```
-

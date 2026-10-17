@@ -9,7 +9,7 @@ Reglas generales en `/AGENTS.md`. Esta capa orquesta **casos de uso**.
 - Los *behaviors* (`IPipelineBehavior`) y los pre/post processors **no** se registran por escaneo: requieren un `Add…` explícito en `Program.cs`. Hoy no hay ninguno.
 
 ## Cómo se escribe un caso de uso
-- Carpeta por feature o agregado (`Identity/`, `Habits/`, `Transactions/`, `Categories/`). Cada comando o caso de uso tiene su propia carpeta bajo `Commands/`; el comando y su handler correspondiente permanecen juntos en archivos separados dentro de ella. Cada tipo público vive en su propio archivo.
+- Carpeta por feature o agregado (`Identity/`, `Transactions/`, `Categories/`). Cada comando o caso de uso tiene su propia carpeta bajo `Commands/`; el comando y su handler correspondiente permanecen juntos en archivos separados dentro de ella. Cada tipo público vive en su propio archivo.
 - Contrato: `public sealed record <Verbo><Sustantivo>Command(...) : ICommand<TResponse>` para escrituras con resultado, `IQuery<TResponse>` para lecturas, o `IRequest` para escrituras **sin** resultado.
 - Handler: `public sealed class <Verbo><Sustantivo>Handler(...) : IRequestHandler<TRequest, TResponse>` con constructor primario y `Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken)`. Sin resultado: `IRequestHandler<TRequest>` y `Task Handle(...)` — desde MediatR v12 `IRequestHandler<TRequest>` **no** hereda de `IRequestHandler<TRequest, Unit>`, así que no se devuelve `Unit`.
 - El handler usa constructor primario de C# 12. Ejemplo: `public sealed class CreateCategoryHandler(ICategoryRepository repository, IUnitOfWork unitOfWork, ICurrentUser currentUser) : IRequestHandler<...>`

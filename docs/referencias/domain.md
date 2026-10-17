@@ -129,105 +129,72 @@ public sealed class Transaction : Entity
 }
 ```
 
-## Habit (agregado: check-in, rachas)
+## Budget (fábrica con invariantes)
 
-`src/LifeTrack.Domain/Habits/Habit.cs`
+`src/LifeTrack.Domain/Finance/Budget.cs`
 
 ```csharp
 using LifeTrack.Domain.Common;
 
-namespace LifeTrack.Domain.Habits;
+namespace LifeTrack.Domain.Finance;
 
-public sealed class Habit : Entity
+public sealed class Budget : Entity
 {
-    public const int NameMaxLength = 80;
-
-    private readonly List<HabitCheckIn> _checkIns = [];
-
-    private Habit()
+    private Budget()
     {
     }
 
-    private Habit(Guid userId, string name)
+    private Budget(Guid userId, Guid categoryId, int year, int month, decimal limit)
         : base(Guid.NewGuid())
     {
         UserId = userId;
-        Name = name;
+        CategoryId = categoryId;
+        Year = year;
+        Month = month;
+        Limit = limit;
     }
 
     public Guid UserId { get; private set; }
 
-    public string Name { get; private set; } = string.Empty;
+    public Guid CategoryId { get; private set; }
 
-    public bool IsArchived { get; private set; }
+    public int Year { get; private set; }
 
-    public IReadOnlyCollection<HabitCheckIn> CheckIns => _checkIns;
+    public int Month { get; private set; }
 
-    public static Habit Create(Guid userId, string name) =>
-        new(Guard.NotEmpty(userId, "El usuario"), Guard.NotBlank(name, NameMaxLength, "El nombre"));
+    public decimal Limit { get; private set; }
 
-    public void Archive() => IsArchived = true;
-
-    public void CheckIn(DateOnly date, DateOnly today)
+    public static Budget Create(Guid userId, Guid categoryId, int year, int month, decimal limit)
     {
-        if (IsArchived)
+        Guard.NotEmpty(userId, "El usuario");
+        Guard.NotEmpty(categoryId, "La categoría");
+
+        if (year is < 2000 or > 2100)
         {
-            throw new DomainException("Un hábito archivado no admite registros.");
+            throw new DomainException("El año del presupuesto no es válido.");
         }
 
-        if (date > today)
+        if (month is < 1 or > 12)
         {
-            throw new DomainException("No se puede registrar un hábito en una fecha futura.");
+            throw new DomainException("El mes del presupuesto no es válido.");
         }
 
-        if (_checkIns.Any(c => c.Date == date))
+        if (limit <= 0)
         {
-            throw new DomainException("El hábito ya está registrado para esa fecha.");
+            throw new DomainException("El límite del presupuesto debe ser mayor que 0.");
         }
 
-        _checkIns.Add(HabitCheckIn.Create(Id, date));
-    }
-
-    public int CurrentStreak(DateOnly today)
-    {
-        var dates = _checkIns.Select(c => c.Date).ToHashSet();
-        var cursor = dates.Contains(today) ? today : today.AddDays(-1);
-        var streak = 0;
-
-        while (dates.Contains(cursor))
+        if (decimal.Round(limit, 2) != limit)
         {
-            streak++;
-            cursor = cursor.AddDays(-1);
+            throw new DomainException("El límite del presupuesto admite como máximo 2 decimales.");
         }
 
-        return streak;
-    }
-
-    public int BestStreak()
-    {
-        var best = 0;
-        var current = 0;
-        DateOnly? previous = null;
-
-        foreach (var date in _checkIns.Select(c => c.Date).Distinct().Order())
-        {
-            current = previous is not null && date == previous.Value.AddDays(1) ? current + 1 : 1;
-            best = Math.Max(best, current);
-            previous = date;
-        }
-
-        return best;
+        return new Budget(userId, categoryId, year, month, limit);
     }
 }
 ```
 
-`CurrentStreak` cuenta días consecutivos **terminados hoy o ayer**: si el usuario aún no ha marcado
-hoy, la racha sigue viva porque ayer sí lo hizo. Esa es la diferencia con una cuenta ingenua que
-contaría cero en cuanto fallara el check-in de hoy, y por eso el método recibe `today` en lugar de
-leer el reloj. `BestStreak` recorre los días distintos y ordenados y guarda la mayor serie, así que
-un hueco de un solo día ya la parte en dos.
-
-Los tres invariantes de `CheckIn` (hábito archivado, fecha futura, check-in duplicado) son **fallos
-silenciosos o de brecha de seguridad**, no ruido: por eso los tres tienen test de dominio, y por eso
+Los invariantes de `Budget.Create` (año y mes válidos, límite positivo con 2 decimales) son **fallos
+silenciosos o de brecha de seguridad**, no ruido: por eso tienen test de dominio, y por eso
 el mensaje es en español y seguro de mostrar (ver `AGENTS.md` §10, criterio de riesgo).
 

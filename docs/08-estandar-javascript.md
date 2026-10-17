@@ -17,26 +17,25 @@ wwwroot/js/
 └── pages/             # Un fichero por pantalla. Prefijo propio de la feature
     ├── dashboard.js
     ├── categories.js
-    ├── transactions.js
-    └── habits.js
+    └── transactions.js
 ```
 
 - Un fichero por pantalla o por componente. **Prohibido** un fichero "general" que mezcle features.
-- Los nombres de fichero van en `kebab-case` y describen la feature: `habits.js`, no `main.js`.
+- Los nombres de fichero van en `kebab-case` y describen la feature: `transactions.js`, no `main.js`.
 - No se carga JavaScript desde un CDN. Todo se auto-aloja en `wwwroot/lib` y `wwwroot/js`.
 
 ## 2. Cómo se incluye
 
 Cada script se etiqueta con su ámbito, para no arrastrar componentes a páginas que no los usan.
 
-La pantalla de hábitos, por ejemplo, necesita el dropdown, el toast y su propio script de página. Cada
+La pantalla de movimientos, por ejemplo, necesita el dropdown, el toast y su propio script de página. Cada
 etiqueta declara solo su ámbito: arrastrar un componente a una página que no lo usa es coste, no
 funcionalidad.
 
 ```html
 <script src="~/js/shared/dropdown.js" defer></script>
 <script src="~/js/shared/toast.js" defer></script>
-<script src="~/js/pages/habits.js" defer></script>
+<script src="~/js/pages/transactions.js" defer></script>
 ```
 
 Todos con `defer`. **Prohibido** `<script>` en línea: la CSP los bloquea.
@@ -46,7 +45,7 @@ Todos con `defer`. **Prohibido** `<script>` en línea: la CSP los bloquea.
 Todo JavaScript se encapsula en una IIFE. Ninguna variable de un script queda en el ámbito global.
 
 ```javascript
-const habitsPageScript = (function () {
+const transactionsPageScript = (function () {
     "use strict";
 
     return {};
@@ -66,7 +65,7 @@ Esta es la regla más importante del fichero.
 | `nombreFuncion` | **Pública.** Expuesta deliberadamente en el objeto global del componente |
 
 ```javascript
-const habitsPageScript = (function () {
+const transactionsPageScript = (function () {
     "use strict";
 
     function _preserveCurrentPage(form) {
@@ -91,7 +90,7 @@ No hay excepciones. Un nombre con `_` no se documenta como API.
 El script de una página tiene **un único** punto de entrada, `_initialize()`, invocado al final de la IIFE.
 
 ```javascript
-const habitsPageScript = (function () {
+const transactionsPageScript = (function () {
     "use strict";
 
     function _initialize() {
@@ -203,10 +202,10 @@ Los nombres de clase CSS y los atributos `data-*` llevan **prefijo de la feature
 | `dashboard-*` | Pantalla de resumen |
 | `categories-*` | Pantalla de categorías |
 | `transactions-*` | Pantalla de movimientos |
-| `habits-*` | Pantalla de hábitos |
+| `transactions-*` | Pantalla de movimientos |
 
 Así un selector de una pantalla no puede coincidir por accidente con el de otra, y el HTML se lee
-solo: `data-habits-checkin-button` dice qué hace sin abrir el fichero.
+solo: `data-transactions-edit-button` dice qué hace sin abrir el fichero.
 
 ## 6. Componentes compartidos
 
@@ -262,12 +261,12 @@ contenga el trigger si lo hay.
 
 ### `Tabs`
 
-Sin API pública. Se engancha con `data-habits-tabs`, `data-habits-tab` y `data-habits-tab-panel`,
+Sin API pública. Se engancha con `data-transactions-tabs`, `data-transactions-tab` y `data-transactions-tab-panel`,
 y mantiene sincronizados `aria-selected` y la visibilidad del panel.
 
 ### `FormValidation`
 
-Sin API pública. Se engancha con `data-habits-validate`. Valida los `required` del navegador, muestra
+Sin API pública. Se engancha con `data-transactions-validate`. Valida los `required` del navegador, muestra
 el error junto al campo y bloquea el envío. **No** decide reglas de negocio: eso ya lo hizo el
 dominio, y el mensaje llega al navegador desde el handler a través de su excepción de frontera.
 

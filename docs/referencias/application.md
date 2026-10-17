@@ -1,30 +1,30 @@
-# Parte C — Application  ⚠️ sin compilar (ahora con MediatR v13)
+# Parte C — Application
 
 ## Interfaz de repositorio (recibe siempre userId)
 
-`GetByIdAsync` devuelve el hábito **con sus check-ins** y **solo si pertenece al `userId`**; si no,
+`GetByIdAsync` devuelve la categoría **solo si pertenece al `userId`**; si no,
 devuelve `null`, de modo que un id de otro usuario es indistinguible de uno inexistente.
-`ListAsync` devuelve únicamente los hábitos **no archivados** del usuario, también con sus check-ins.
+`ListAsync` devuelve únicamente las categorías del usuario.
 
 El parámetro `userId` es **obligatorio en la interfaz**, no opcional: el filtro por usuario va
 **dentro de la consulta**, no en el handler. Si el handler filtrara, el recurso ajeno ya estaría en
 memoria y la brecha habría ocurrido. Por eso el repositorio real y el *fake* en memoria filtran
 ambos (ver **L — Sustitutibilidad** en [SOLID aplicado a LifeTrack](../04-calidad-y-testing.md#solid-aplicado-a-lifetrack)).
 
-`src/LifeTrack.Application/Abstractions/IHabitRepository.cs`
+`src/LifeTrack.Application/Abstractions/ICategoryRepository.cs`
 
 ```csharp
-using LifeTrack.Domain.Habits;
+using LifeTrack.Domain.Finance;
 
 namespace LifeTrack.Application.Abstractions;
 
-public interface IHabitRepository
+public interface ICategoryRepository
 {
-    Task AddAsync(Habit habit, CancellationToken cancellationToken);
+    Task AddAsync(Category category, CancellationToken cancellationToken);
 
-    Task<Habit?> GetByIdAsync(Guid habitId, Guid userId, CancellationToken cancellationToken);
+    Task<Category?> GetByIdAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken);
 
-    Task<IReadOnlyList<Habit>> ListAsync(Guid userId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<Category>> ListAsync(Guid userId, CancellationToken cancellationToken);
 }
 ```
 
@@ -131,39 +131,39 @@ MediatR v13 define tres contratos base que se heredan de `IRequest`:
 |---|---|---|
 | `ICommand<TResponse>` | Escritura con resultado (crear, actualizar) | `TResponse` |
 | `IQuery<TResponse>` | Lectura (listar, resumen) | `TResponse` |
-| `IRequest` | Escritura **sin** resultado (check-in, archivar) | `void` |
+| `IRequest` | Escritura **sin** resultado (eliminar) | `void` |
 
 ## Patrón canónico del handler
 
-`src/LifeTrack.Application/Habits/Commands/CreateHabit/`
+`src/LifeTrack.Application/Categories/Commands/CreateCategory/`
 
 ```csharp
 using LifeTrack.Application.Abstractions;
 using LifeTrack.Application.Common;
 using LifeTrack.Domain.Common;
-using LifeTrack.Domain.Habits;
+using LifeTrack.Domain.Finance;
 using MediatR;
 
-namespace LifeTrack.Application.Habits;
+namespace LifeTrack.Application.Categories;
 
-public sealed record CreateHabitCommand(string Name) : ICommand<Guid>;
+public sealed record CreateCategoryCommand(string Name, TransactionType Type) : ICommand<Guid>;
 
-public sealed class CreateHabitHandler(
-    IHabitRepository habits,
+public sealed class CreateCategoryHandler(
+    ICategoryRepository categories,
     IUnitOfWork unitOfWork,
     ICurrentUser currentUser)
-    : IRequestHandler<CreateHabitCommand, Guid>
+    : IRequestHandler<CreateCategoryCommand, Guid>
 {
-    public async Task<Guid> Handle(CreateHabitCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var habit = Habit.Create(currentUser.UserId, request.Name);
+            var category = Category.Create(currentUser.UserId, request.Name, request.Type);
 
-            await habits.AddAsync(habit, cancellationToken);
+            await categories.AddAsync(category, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return habit.Id;
+            return category.Id;
         }
         catch (DomainException ex)
         {
@@ -186,45 +186,59 @@ capturarla.
 
 ## Caso de uso con control de propiedad (anti-IDOR)
 
-`src/LifeTrack.Application/Habits/Commands/CheckInHabit/`
+`src/LifeTrack.Application/Transactions/Commands/CreateTransaction/`
 
 Este caso de uso produce las dos excepciones del dominio, así que es el ejemplo completo de la
 traducción.
 
-El repositorio **filtra por usuario**, de modo que un hábito de otro usuario es indistinguible de uno
+El repositorio **filtra por usuario**, de modo que una categoría de otro usuario es indistinguible de una
 inexistente: el `??` que lanza `NotFoundException` solo se alcanza si de verdad no hay nada que
-devolver. `Date` es opcional y, cuando llega `null`, se usa `today` calculado en la zona horaria
-configurada; el valor por defecto del contrato y el reloj inyectado son lo que hacen que el handler
-no lea la hora del servidor.
+devolver.
 
 ```csharp
 using LifeTrack.Application.Abstractions;
 using LifeTrack.Application.Common;
 using LifeTrack.Domain.Common;
+using LifeTrack.Domain.Finance;
 using MediatR;
 
-namespace LifeTrack.Application.Habits;
+namespace LifeTrack.Application.Transactions;
 
-public sealed record CheckInHabitCommand(Guid HabitId, DateOnly? Date = null) : IRequest;
+public sealed record CreateTransactionCommand(
+    Guid CategoryId,
+    decimal Amount,
+    DateOnly Date,
+    string? Description = null) : ICommand<Guid>;
 
-public sealed class CheckInHabitHandler(
-    IHabitRepository habits,
+public sealed class CreateTransactionHandler(
+    ITransactionRepository transactions,
+    ICategoryRepository categories,
     IUnitOfWork unitOfWork,
     ICurrentUser currentUser,
     TimeProvider timeProvider)
-    : IRequestHandler<CheckInHabitCommand>
+    : IRequestHandler<CreateTransactionCommand, Guid>
 {
-    public async Task Handle(CheckInHabitCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var habit = await habits.GetByIdAsync(request.HabitId, currentUser.UserId, cancellationToken)
-                ?? throw new NotFoundException("Habit not found.");
+            var category = await categories.GetByIdAsync(request.CategoryId, currentUser.UserId, cancellationToken)
+                ?? throw new NotFoundException("Category not found.");
 
             var today = timeProvider.Today();
-            habit.CheckIn(request.Date ?? today, today);
+            var transaction = Transaction.Create(
+                currentUser.UserId,
+                category.Id,
+                category.Type,
+                request.Amount,
+                request.Date,
+                request.Description,
+                today);
 
+            await transactions.AddAsync(transaction, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return transaction.Id;
         }
         catch (DomainException ex)
         {
@@ -319,7 +333,7 @@ public sealed class ListMonthlyTransactionsHandler(
 
 ## Caso de uso de lectura sin parámetros
 
-`src/LifeTrack.Application/Habits/Commands/ListHabits/`
+`src/LifeTrack.Application/Categories/Queries/ListCategories/`
 
 Un `Query` sin filtros es un `record` **sin propiedades**: el mensaje se identifica por su tipo. El DTO
 lo consume el `ViewModel` de la vista, así que el mapeo ocurre aquí y la vista no calcula nada.
@@ -327,52 +341,41 @@ lo consume el `ViewModel` de la vista, así que el mapeo ocurre aquí y la vista
 ```csharp
 using LifeTrack.Application.Abstractions;
 using LifeTrack.Application.Common;
-using LifeTrack.Domain.Habits;
+using LifeTrack.Domain.Finance;
 using MediatR;
 
-namespace LifeTrack.Application.Habits;
+namespace LifeTrack.Application.Categories;
 
-public sealed record ListHabitsQuery : IQuery<IReadOnlyList<HabitDto>>;
+public sealed record ListCategoriesQuery : IQuery<IReadOnlyList<CategoryDto>>;
 
-public sealed record HabitDto(
+public sealed record CategoryDto(
     Guid Id,
     string Name,
-    int CurrentStreak,
-    int BestStreak,
-    bool IsCheckedToday);
+    TransactionType Type);
 
-public sealed class ListHabitsHandler(
-    IHabitRepository habits,
-    ICurrentUser currentUser,
-    TimeProvider timeProvider)
-    : IRequestHandler<ListHabitsQuery, IReadOnlyList<HabitDto>>
+public sealed class ListCategoriesHandler(
+    ICategoryRepository categories,
+    ICurrentUser currentUser)
+    : IRequestHandler<ListCategoriesQuery, IReadOnlyList<CategoryDto>>
 {
-    public async Task<IReadOnlyList<HabitDto>> Handle(
-        ListHabitsQuery request,
+    public async Task<IReadOnlyList<CategoryDto>> Handle(
+        ListCategoriesQuery request,
         CancellationToken cancellationToken)
     {
-        var items = await habits.ListAsync(currentUser.UserId, cancellationToken);
-        var today = timeProvider.Today();
+        var items = await categories.ListAsync(currentUser.UserId, cancellationToken);
 
         return items
-            .Select(habit => new HabitDto(
-                habit.Id,
-                habit.Name,
-                habit.CurrentStreak(today),
-                habit.BestStreak(),
-                habit.CheckIns.Any(c => c.Date == today)))
+            .Select(category => new CategoryDto(
+                category.Id,
+                category.Name,
+                category.Type))
             .ToList();
     }
 }
 ```
 
-Fíjate en el contrato: `ListHabitsQuery` no lleva propiedades, así que el handler recibe **el
+Fíjate en el contrato: `ListCategoriesQuery` no lleva propiedades, así que el handler recibe **el
 contrato**, no un `CancellationToken` suelto. El `CancellationToken` es el segundo parámetro de
-`Handle`, como en todos los handlers. El repositorio filtra por usuario, así que los hábitos de otro
+`Handle`, como en todos los handlers. El repositorio filtra por usuario, así que las categorías de otro
 usuario nunca llegan a esta lista: es el control de acceso por propiedad (OWASP A01) aplicado antes
 de que exista cualquier dato en memoria.
-
-Las rachas que se calculan aquí (`CurrentStreak`, `BestStreak`) son **fallo silencioso** en su forma
-más pura: un número mal calculado se muestra al usuario y nadie lo detecta. Por eso el handler les
-pasa `today` en lugar de confiar en el reloj, y por eso llevan test de dominio con el valor exacto
-esperado.

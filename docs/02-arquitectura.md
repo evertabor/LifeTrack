@@ -35,7 +35,7 @@ Settings; nunca en el repositorio.
 ## 2. Responsabilidades
 
 - **Domain:** entidades, agregados, invariantes y `DomainException`. Código puro y síncrono.
-- **Application:** un caso de uso por archivo (el contrato `record` —`ICommand<T>`, `IQuery<T>` o `IRequest`— más sus DTOs y su handler `IRequestHandler<,>`). Define las interfaces que necesita (`IHabitRepository`, `IUnitOfWork`, `ICurrentUser`…). Aplica la autorización por propiedad (filtra por usuario). Publica `ApplicationAssemblyAnchor` para que `Web` pueda escanear este ensamblado.
+- **Application:** un caso de uso por archivo (el contrato `record` —`ICommand<T>`, `IQuery<T>` o `IRequest`— más sus DTOs y su handler `IRequestHandler<,>`). Define las interfaces que necesita (`ICategoryRepository`, `ITransactionRepository`, `IUnitOfWork`, `ICurrentUser`…). Aplica la autorización por propiedad (filtra por usuario). Publica `ApplicationAssemblyAnchor` para que `Web` pueda escanear este ensamblado.
 - **Infrastructure:** implementa persistencia (`AppDbContext`, configuraciones, repositorios, migraciones), Identity y el reloj con zona horaria.
 - **Web:** adaptador HTTP con **ASP.NET Core MVC**. Un controller delgado convierte un formulario en un contrato, envía el contrato con `ISender`, convierte el DTO devuelto en un `ViewModel`, y el `ViewModel` en una vista. Las vistas no calculan: renderizan. Aloja la **raíz de composición** (`Program.cs`), el registro de MediatR y la seguridad HTTP. No referencia `Domain`.
 
@@ -53,22 +53,22 @@ Navegador → [Route] → Controller → ISender (MediatR) → Handler de Applic
 partir del DTO del handler, y entrega los importes y las fechas ya formateados. Detalle en
 `docs/09-estandar-vistas-mvc.md`.
 
-## 3. Flujo de una petición (ejemplo: marcar un hábito)
+## 3. Flujo de una petición (ejemplo: registrar un movimiento)
 
 ```mermaid
 sequenceDiagram
     participant B as Navegador
-    participant C as HabitsController (Web)
+    participant C as TransactionsController (Web)
     participant M as MediatR (ISender)
-    participant H as CheckInHabitHandler (Application)
-    participant R as HabitRepository (Infrastructure)
-    participant D as Habit (Domain)
-    B->>C: POST /habits/check-in (anti-forgery + autorización fallback)
-    C->>M: Send(CheckInHabitCommand)
+    participant H as CreateTransactionHandler (Application)
+    participant R as TransactionRepository (Infrastructure)
+    participant D as Transaction (Domain)
+    B->>C: POST /transactions/create (anti-forgery + autorización fallback)
+    C->>M: Send(CreateTransactionCommand)
     M->>H: Handle(request, cancellationToken)
-    H->>R: GetByIdAsync(habitId, currentUser.UserId)
-    R-->>H: Habit con check-ins (solo si es del usuario)
-    H->>D: CheckIn(date, today)
+    H->>R: GetByIdAsync(categoryId, currentUser.UserId)
+    R-->>H: Category (solo si es del usuario)
+    H->>D: Transaction.Create(type, category, amount, date)
     D-->>H: ok o excepción de dominio
     H->>R: IUnitOfWork.SaveChangesAsync
     H-->>M: resultado o excepción de frontera
@@ -76,7 +76,7 @@ sequenceDiagram
     C-->>B: 302 Redirect (Post/Redirect/Get)
 ```
 
-El contrato se resuelve **en tiempo de ejecución**: `ISender` busca el `IRequestHandler<CheckInHabitCommand>`
+El contrato se resuelve **en tiempo de ejecución**: `ISender` busca el `IRequestHandler<CreateTransactionCommand>`
 registrado al arrancar. Ese registro lo hace `AddMediatR` escaneando el ensamblado de `Application`
 (vía `ApplicationAssemblyAnchor`), no el de `Program`.
 
@@ -84,7 +84,7 @@ La excepción del dominio **no cruza la frontera** y MediatR no cambia esa regla
 traduce a `BusinessRuleException` o `ResourceNotFoundException`, y solo esas dos llegan al controller.
 Cada error tiene un único camino hasta la vista.
 
-La ruta se declara con atributo (`[Route("habits")]` + `[HttpPost("check-in")]`). En MVC el
+La ruta se declara con atributo (`[Route("transactions")]` + `[HttpPost("create")]`). En MVC el
 anti-forgery no es automático: lo aplica el filtro global `AutoValidateAntiforgeryToken` registrado
 en `Program.cs`.
 
@@ -95,7 +95,6 @@ src/LifeTrack.Domain/
   Common/            Entity, Guard
     Exceptions/      DomainException, NotFoundException
   Finance/           Category, Transaction, Budget, TransactionType
-  Habits/            Habit, HabitCheckIn
 src/LifeTrack.Application/
   Abstractions/      ICurrentUser, IUnitOfWork, I…Repository
   Common/            ApplicationAssemblyAnchor, TimeProviderExtensions
