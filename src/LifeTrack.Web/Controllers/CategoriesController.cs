@@ -79,23 +79,30 @@ public sealed class CategoriesController(
     {
         if (ModelState.IsValid)
         {
-            try
+            if (input.Type is null)
             {
-                await sender.Send(new EditCategoryCommand(id, input.NewName), ct);
-                TempData["Message"] = "Categoría actualizada.";
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError("Type", "El tipo es obligatorio.");
             }
-            catch (BusinessRuleException ex)
+            else
             {
-                ModelState.AddModelError("NewName", ex.Message);
-            }
-            catch (ResourceNotFoundException ex)
-            {
-                logger.LogWarning(ex, "Unexpected resource not found during category edit");
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    await sender.Send(new EditCategoryCommand(id, input.NewName, input.Type.Value), ct);
+                    TempData["Message"] = "Categoría actualizada.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (BusinessRuleException ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    logger.LogWarning(ex, "Unexpected resource not found during category edit");
+                    return RedirectToAction(nameof(Index));
+                }
             }
         }
-        return View(nameof(Edit), new CategoryEditViewModel { Id = id, NewName = input.NewName });
+        return View(nameof(Edit), CategoryEditViewModel.From(id, input.NewName, input.Type is true));
     }
 
     [HttpPost("{id:guid}/delete")]

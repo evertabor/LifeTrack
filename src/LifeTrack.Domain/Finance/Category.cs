@@ -56,5 +56,14 @@ public sealed class Category : Entity
         Name = normalizedName;
     }
 
+    public void ChangeType(TransactionType type)
+    {
+        if (!Enum.IsDefined(type))
+        {
+            throw new DomainException("El tipo de la categoría no es válido.");
+        }
+        Type = type;
+    }
+
     private static string NormalizeName(string? name) => name?.Trim() ?? string.Empty;
 }

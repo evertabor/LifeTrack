@@ -111,4 +111,35 @@ public class CategoryTests
         var ex = Assert.Throws<DomainException>(() => category.EditName(name));
         Assert.Contains("50", ex.Message);
     }
+
+    [Fact]
+    public void ChangeType_WithValidType_UpdatesType()
+    {
+        var category = Category.Create("Comida", Guid.NewGuid(), TransactionType.Expense);
+
+        category.ChangeType(TransactionType.Income);
+
+        Assert.Equal(TransactionType.Income, category.Type);
+    }
+
+    [Fact]
+    public void ChangeType_WithSameType_KeepsType()
+    {
+        var category = Category.Create("Comida", Guid.NewGuid(), TransactionType.Expense);
+
+        category.ChangeType(TransactionType.Expense);
+
+        Assert.Equal(TransactionType.Expense, category.Type);
+    }
+
+    [Fact]
+    public void ChangeType_WithUndefinedType_ThrowsDomainException()
+    {
+        var category = Category.Create("Comida", Guid.NewGuid(), TransactionType.Expense);
+
+        var ex = Assert.Throws<DomainException>(() => category.ChangeType((TransactionType)99));
+
+        Assert.Contains("tipo", ex.Message);
+        Assert.Equal(TransactionType.Expense, category.Type);
+    }
 }

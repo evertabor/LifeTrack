@@ -110,7 +110,7 @@ Prioridad con MoSCoW: **M** (imprescindible), **S** (debería), **C** (podría).
 | RN-F01 | El monto de un movimiento es mayor que 0, no supera 1.000.000.000 y tiene como máximo 2 decimales |
 | RN-F02 | La fecha de un movimiento no puede ser futura (respecto a "hoy") |
 | RN-F03 | La descripción tiene como máximo 200 caracteres; se recorta con `Trim` |
-| RN-F04 | El nombre de categoría es obligatorio, de hasta 50 caracteres, y único por usuario. Toda categoría tiene un tipo fijo (Ingreso o Gasto) elegido al crearla |
+| RN-F04 | El nombre de categoría es obligatorio, de hasta 50 caracteres, y único por usuario. Toda categoría tiene un tipo (Ingreso o Gasto) elegido al crearla, que solo se puede cambiar si la categoría no tiene movimientos ni presupuestos asociados |
 | RN-F05 | Un movimiento solo puede usar categorías del mismo usuario y del mismo tipo |
 | RN-F06 | Un presupuesto es único por usuario + categoría + año + mes, con límite > 0 y 2 decimales. Solo las categorías de gasto admiten presupuesto |
 | RN-H01 | El nombre de un hábito es obligatorio y de hasta 80 caracteres |
@@ -213,7 +213,7 @@ erDiagram
 
 | Entidad | Atributos | Invariantes / índices |
 |---|---|---|
-| **Category** | `Id`, `UserId`, `Name(≤50)`, `Type(Income/Expense)` | Nombre obligatorio; único por (`UserId`,`Name`); tipo fijo desde su creación |
+| **Category** | `Id`, `UserId`, `Name(≤50)`, `Type(Income/Expense)` | Nombre obligatorio; único por (`UserId`,`Name`); el tipo solo cambia si no hay movimientos ni presupuestos |
 | **Transaction** | `Id`, `UserId`, `CategoryId`, `Type(Income/Expense)`, `Amount(18,2)`, `Date`, `Description(≤200)` | RN-F01..F03; índice (`UserId`,`Date`); FK a Category con `Restrict` |
 | **Budget** | `Id`, `UserId`, `CategoryId`, `Year`, `Month`, `Limit(18,2)` | RN-F06; único por (`UserId`,`CategoryId`,`Year`,`Month`) |
 | **Habit** *(raíz de agregado)* | `Id`, `UserId`, `Name(≤80)`, `IsArchived`, `CheckIns` | RN-H01..H05 |

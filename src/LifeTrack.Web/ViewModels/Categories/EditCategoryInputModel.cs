@@ -9,4 +9,7 @@ public sealed record EditCategoryInputModel
     [Required(ErrorMessage = "El nombre es obligatorio.")]
     [StringLength(NameMaxLength, ErrorMessage = "El nombre no puede superar los 50 caracteres.")]
     public string NewName { get; init; } = string.Empty;
+
+    [Required(ErrorMessage = "El tipo es obligatorio.")]
+    public bool? Type { get; init; }
 }
