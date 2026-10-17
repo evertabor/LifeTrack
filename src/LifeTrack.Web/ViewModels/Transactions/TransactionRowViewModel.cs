@@ -26,11 +26,19 @@ public sealed record TransactionRowViewModel
     public string DeleteModalId { get; init; } = string.Empty;
     public string DeleteModalTitleId { get; init; } = string.Empty;
     public string DeleteConfirmMessage { get; init; } = string.Empty;
+    public string MinEditDateText { get; init; } = string.Empty;
+    public string MaxEditDateText { get; init; } = string.Empty;
 
     public static TransactionRowViewModel From(
         TransactionSummary summary,
-        IReadOnlyList<CategorySummary> categories) =>
-        new()
+        IReadOnlyList<CategorySummary> categories,
+        DateOnly? today = null)
+    {
+        var monthStart = new DateOnly(summary.Date.Year, summary.Date.Month, 1);
+        var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+        var ceiling = today ?? summary.Date;
+        var maxDay = monthEnd <= ceiling ? monthEnd : ceiling;
+        return new()
         {
             Id = summary.Id,
             CategoryName = summary.CategoryName,
@@ -60,6 +68,9 @@ public sealed record TransactionRowViewModel
             DeleteLabel = "Eliminar movimiento",
             DeleteModalId = $"transaction-delete-modal-{summary.Id:D}",
             DeleteModalTitleId = $"transaction-delete-modal-title-{summary.Id:D}",
-            DeleteConfirmMessage = "¿Eliminar este movimiento? Esta acción no se puede deshacer."
+            DeleteConfirmMessage = "¿Eliminar este movimiento? Esta acción no se puede deshacer.",
+            MinEditDateText = monthStart.ToString("yyyy-MM-dd"),
+            MaxEditDateText = maxDay.ToString("yyyy-MM-dd")
         };
+    }
 }

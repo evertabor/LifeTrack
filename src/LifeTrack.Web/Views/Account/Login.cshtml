@@ -8,7 +8,7 @@
 <section class="app-auth app-auth--split" aria-labelledby="login-title">
     <div class="app-auth__shell app-auth__shell--split">
         <div class="app-auth__spotlight">
-            <p class="app-auth__brand">LifeTrack</p>
+            <p class="app-auth__brand"><img class="app-auth__brand-icon" src="~/favicon.svg" alt="" aria-hidden="true" />LifeTrack</p>
             <p class="app-auth__tagline">Tus finanzas y tus hábitos, en un solo lugar.</p>
             <ul class="app-auth__highlights">
                 <li><span aria-hidden="true">✓</span> Registra ingresos y gastos del mes.</li>
@@ -26,12 +26,12 @@
             <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
             <div class="app-form-field">
                 <label asp-for="Email" class="form-label">Correo electrónico</label>
-                <input asp-for="Email" class="form-control" type="email" autocomplete="email" aria-describedby="Email-error" required />
+                <input asp-for="Email" class="form-control" type="email" autocomplete="email" aria-describedby="Email-error" required maxlength="@LoginInputModel.EmailMaxLength" />
                 <span asp-validation-for="Email" id="Email-error" class="field-validation-error"></span>
             </div>
             <div class="app-form-field">
                 <label asp-for="Password" class="form-label">Contraseña</label>
-                <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" aria-describedby="Password-error" required />
+                <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" aria-describedby="Password-error" required maxlength="@LoginInputModel.PasswordMaxLength" />
                 <span asp-validation-for="Password" id="Password-error" class="field-validation-error"></span>
             </div>
             @if (Model.HasError)

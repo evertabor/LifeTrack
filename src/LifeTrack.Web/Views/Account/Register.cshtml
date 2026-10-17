@@ -2,55 +2,77 @@
 
 @{
     ViewData["Title"] = "Crear cuenta";
+    ViewData["HidePublicHeader"] = true;
 }
 
-<section class="app-auth" aria-labelledby="register-title">
-    <div class="app-auth__shell">
+<section class="app-auth app-auth--split" aria-labelledby="register-title">
+    <div class="app-auth__shell app-auth__shell--split app-auth__shell--register">
+        <div class="app-auth__spotlight">
+            <p class="app-auth__brand"><img class="app-auth__brand-icon" src="~/favicon.svg" alt="" aria-hidden="true" />LifeTrack</p>
+            <p class="app-auth__tagline">Tus finanzas y tus hábitos, en un solo lugar.</p>
+            <ul class="app-auth__highlights">
+                <li><span aria-hidden="true">✓</span> Registra ingresos y gastos del mes.</li>
+                <li><span aria-hidden="true">✓</span> Fija presupuestos por categoría.</li>
+                <li><span aria-hidden="true">✓</span> Crea hábitos y sigue tu racha.</li>
+            </ul>
+        </div>
         <div class="app-auth__card">
             <header class="app-auth__header">
                 <p class="app-auth__eyebrow">Empieza hoy</p>
                 <h1 id="register-title">Crear cuenta</h1>
-                <p class="app-auth__intro">Empieza a organizar tus finanzas y hábitos en un solo lugar.</p>
+                <p class="app-auth__intro">Empieza a organizar tus finanzas y hábitos en un solo lugar. Tu cuenta incluye 8 categorías iniciales que podrás renombrar o eliminar.</p>
             </header>
-        <form class="app-auth__form" method="post" asp-action="Register" data-app-validate novalidate>
-            <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
-            <div class="app-form-field">
+        <form class="app-auth__form app-auth__form--two-columns" method="post" asp-action="Register" data-app-validate data-register-form novalidate>
+            <div asp-validation-summary="ModelOnly" class="validation-summary app-auth__span" role="alert"></div>
+            <div class="app-form-field app-auth__span">
                 <label asp-for="Email" class="form-label">Correo electrónico</label>
-                <input asp-for="Email" class="form-control" type="email" autocomplete="email" aria-describedby="Email-error" required />
+                <input asp-for="Email" class="form-control" type="email" autocomplete="email" aria-describedby="Email-error" required maxlength="@RegisterInputModel.EmailMaxLength" />
                 <span asp-validation-for="Email" id="Email-error" class="field-validation-error"></span>
             </div>
             <div class="app-form-field">
                 <label asp-for="DisplayName" class="form-label">Nombre para mostrar</label>
-                <input asp-for="DisplayName" class="form-control" type="text" autocomplete="nickname" aria-describedby="DisplayName-help DisplayName-error" />
+                <input asp-for="DisplayName" class="form-control" type="text" autocomplete="nickname" aria-describedby="DisplayName-help DisplayName-error" maxlength="@RegisterInputModel.DisplayNameMaxLength" />
                 <div id="DisplayName-help" class="form-text">Opcional. Así aparecerá tu nombre.</div>
                 <span asp-validation-for="DisplayName" id="DisplayName-error" class="field-validation-error"></span>
             </div>
             <div class="app-form-field">
                 <label asp-for="PhoneNumber" class="form-label">Teléfono</label>
-                <input asp-for="PhoneNumber" class="form-control" type="tel" autocomplete="tel" aria-describedby="PhoneNumber-help PhoneNumber-error" />
+                <input asp-for="PhoneNumber" class="form-control" type="tel" autocomplete="tel" inputmode="tel" pattern="\+?[0-9\s\-.()]*" title="Solo números, espacios y los signos + - . ( )" aria-describedby="PhoneNumber-help PhoneNumber-error" maxlength="@RegisterInputModel.PhoneNumberMaxLength" />
                 <div id="PhoneNumber-help" class="form-text">Opcional. No se verifica por SMS.</div>
                 <span asp-validation-for="PhoneNumber" id="PhoneNumber-error" class="field-validation-error"></span>
             </div>
             <div class="app-form-field">
                 <label asp-for="Password" class="form-label">Contraseña</label>
-                <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" aria-describedby="Password-help Password-error" minlength="@RegisterInputModel.MinPasswordLength" required />
+                <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" aria-describedby="Password-help Password-error" minlength="@RegisterInputModel.MinPasswordLength" maxlength="@RegisterInputModel.MaxPasswordLength" required data-register-password />
                 <div id="Password-help" class="form-text">@Model.PasswordHelpText</div>
+                <ul class="app-password-checklist" data-register-checklist aria-live="polite">
+                    <li data-register-rule="length">Al menos 12 caracteres</li>
+                    <li data-register-rule="lower">Una letra minúscula</li>
+                    <li data-register-rule="upper">Una letra mayúscula</li>
+                    <li data-register-rule="digit">Un número</li>
+                    <li data-register-rule="symbol">Un símbolo (por ejemplo, !, ?, -)</li>
+                </ul>
                 <span asp-validation-for="Password" id="Password-error" class="field-validation-error"></span>
             </div>
             <div class="app-form-field">
                 <label asp-for="ConfirmPassword" class="form-label">Confirmar contraseña</label>
-                <input asp-for="ConfirmPassword" class="form-control" type="password" autocomplete="new-password" aria-describedby="ConfirmPassword-error" required />
+                <input asp-for="ConfirmPassword" class="form-control" type="password" autocomplete="new-password" aria-describedby="ConfirmPassword-help ConfirmPassword-error" maxlength="@RegisterInputModel.MaxPasswordLength" required data-register-confirm />
+                <div id="ConfirmPassword-help" class="form-text" data-register-confirm-hint>Repite la contraseña. Debe coincidir.</div>
                 <span asp-validation-for="ConfirmPassword" id="ConfirmPassword-error" class="field-validation-error"></span>
             </div>
             @if (Model.HasError)
             {
-                <div id="register-error" class="app-alert app-alert--error" role="alert" aria-live="assertive">
+                <div id="register-error" class="app-alert app-alert--error app-auth__span" role="alert" aria-live="assertive">
                     <span>@Model.ErrorMessage</span>
                 </div>
             }
-            <button class="btn btn-primary app-auth__submit" type="submit">Crear cuenta</button>
-            <p class="app-auth__switch">¿Ya tienes una cuenta? <a asp-controller="Account" asp-action="Login">Iniciar sesión</a></p>
+            <button class="btn btn-primary app-auth__submit app-auth__span" type="submit">Crear cuenta</button>
+            <p class="app-auth__switch app-auth__span">¿Ya tienes una cuenta? <a asp-controller="Account" asp-action="Login">Iniciar sesión</a></p>
         </form>
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script src="~/js/pages/account-register.js" asp-append-version="true" defer></script>
+}

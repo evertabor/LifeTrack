@@ -49,7 +49,7 @@ public sealed class BudgetsController(
 
         var safeYear = input.Year is >= SetBudgetInputModel.MinYear and <= SetBudgetInputModel.MaxYear ? input.Year : timeProvider.Today().Year;
         var safeMonth = input.Month is >= SetBudgetInputModel.MinMonth and <= SetBudgetInputModel.MaxMonth ? input.Month : timeProvider.Today().Month;
-        return await RenderTransactionsIndexAsync(new IndexRenderOptions(new DateOnly(safeYear, safeMonth, 1), null, input, null), ct);
+        return await RenderTransactionsIndexAsync(new IndexRenderOptions(new DateOnly(safeYear, safeMonth, 1), null, input, null, timeProvider.Today()), ct);
     }
 
     [HttpPost("{categoryId:guid}/delete")]

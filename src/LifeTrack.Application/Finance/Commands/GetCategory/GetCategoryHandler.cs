@@ -1,6 +1,7 @@
 using LifeTrack.Application.Abstractions;
 using LifeTrack.Application.Common;
 using LifeTrack.Application.Finance.Commands.ListCategories;
+using LifeTrack.Domain.Finance;
 using MediatR;
 
 namespace LifeTrack.Application.Finance.Commands.GetCategory;
@@ -23,6 +24,6 @@ public sealed class GetCategoryHandler(
             throw new ResourceNotFoundException("La categoría no existe.");
         }
 
-        return new CategorySummary(category.Id, category.Name);
+        return new CategorySummary(category.Id, category.Name, category.Type == TransactionType.Income);
     }
 }

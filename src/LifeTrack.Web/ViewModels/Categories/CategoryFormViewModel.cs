@@ -6,6 +6,7 @@ public sealed record CategoryFormViewModel
 {
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
+    public string TypeLabel { get; init; } = string.Empty;
     public string NewName { get; init; } = string.Empty;
     public string EditLabel { get; init; } = string.Empty;
     public string DeleteLabel { get; init; } = string.Empty;
@@ -21,6 +22,7 @@ public sealed record CategoryFormViewModel
         {
             Id = summary.Id,
             Name = summary.Name,
+            TypeLabel = summary.TypeLabel,
             NewName = summary.Name,
             EditLabel = $"Editar {summary.Name}",
             DeleteLabel = $"Eliminar {summary.Name}",

@@ -3,16 +3,77 @@
 
     const SELECTORS = {
         CREATE_MODAL: "[data-categories-create-modal]",
+        SEARCH_FORM: "[data-categories-search]",
+        SEARCH_INPUT: "[data-categories-search-input]",
+        LIST: "[data-categories-list]",
+        ROW: "[data-categories-row]",
+        NAME: "[data-categories-name]",
+        NO_RESULTS: "[data-categories-no-results]",
         VALIDATION_ERROR: ".field-validation-error"
     };
 
-    const CSS_CLASSES = {};
 
     const CONSTANTS = {
-        EMPTY: ""
+        EMPTY: "",
+        EVENT_INPUT: "input",
+        EVENT_SUBMIT: "submit",
+        NORMALIZE_FORM: "NFD",
+        DIACRITICS_PATTERN: /\p{Diacritic}/gu
     };
 
-    function _initialize() {
+    function _normalize(text) {
+        return text
+            .trim()
+            .toLowerCase()
+            .normalize(CONSTANTS.NORMALIZE_FORM)
+            .replace(CONSTANTS.DIACRITICS_PATTERN, CONSTANTS.EMPTY);
+    }
+
+    function _filterCategories() {
+        const input = document.querySelector(SELECTORS.SEARCH_INPUT);
+        const list = document.querySelector(SELECTORS.LIST);
+        const message = document.querySelector(SELECTORS.NO_RESULTS);
+
+        if (!input || !list) {
+            return;
+        }
+
+        const term = _normalize(input.value);
+        const rows = list.querySelectorAll(SELECTORS.ROW);
+        let visible = 0;
+
+        for (let index = 0; index < rows.length; index++) {
+            const name = rows[index].querySelector(SELECTORS.NAME);
+            const matches = term === CONSTANTS.EMPTY ||
+                (name && _normalize(name.textContent).includes(term));
+            rows[index].hidden = !matches;
+
+            if (matches) {
+                visible++;
+            }
+        }
+
+        list.hidden = visible === 0;
+
+        if (message) {
+            message.hidden = visible !== 0;
+        }
+    }
+
+    function _handleInput(event) {
+        if (event.target.matches(SELECTORS.SEARCH_INPUT)) {
+            _filterCategories();
+        }
+    }
+
+    function _handleSubmit(event) {
+        if (event.target.matches(SELECTORS.SEARCH_FORM)) {
+            event.preventDefault();
+            _filterCategories();
+        }
+    }
+
+    function _openCreateModalOnErrors() {
         const modal = document.querySelector(SELECTORS.CREATE_MODAL);
 
         if (!modal) {
@@ -24,6 +85,12 @@
         if (validationError && validationError.textContent.trim() !== CONSTANTS.EMPTY) {
             Modal.open(modal.id);
         }
+    }
+
+    function _initialize() {
+        _openCreateModalOnErrors();
+        document.addEventListener(CONSTANTS.EVENT_INPUT, _handleInput);
+        document.addEventListener(CONSTANTS.EVENT_SUBMIT, _handleSubmit);
     }
 
     _initialize();

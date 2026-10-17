@@ -31,19 +31,26 @@ public sealed class CategoriesController(
     {
         if (ModelState.IsValid)
         {
-            try
+            if (input.Type is null)
             {
-                await sender.Send(new CreateCategoryCommand(input.Name), ct);
-                TempData["Message"] = "Categoría creada.";
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError("Type", "El tipo es obligatorio.");
             }
-            catch (BusinessRuleException ex)
+            else
             {
-                ModelState.AddModelError("Name", ex.Message);
-            }
-            catch (ResourceNotFoundException ex)
-            {
-                logger.LogWarning(ex, "Unexpected resource not found during category creation");
+                try
+                {
+                    await sender.Send(new CreateCategoryCommand(input.Name, input.Type.Value), ct);
+                    TempData["Message"] = "Categoría creada.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (BusinessRuleException ex)
+                {
+                    ModelState.AddModelError("Name", ex.Message);
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    logger.LogWarning(ex, "Unexpected resource not found during category creation");
+                }
             }
         }
         return await RenderIndexAsync(input, ct);

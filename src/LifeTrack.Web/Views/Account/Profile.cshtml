@@ -26,12 +26,12 @@
             <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
             <div class="app-form-field">
                 <label asp-for="Input.DisplayName" class="form-label">Nombre para mostrar</label>
-                <input asp-for="Input.DisplayName" class="form-control" type="text" autocomplete="nickname" aria-describedby="DisplayName-error" />
+                <input asp-for="Input.DisplayName" class="form-control" type="text" autocomplete="nickname" aria-describedby="DisplayName-error" maxlength="@EditProfileInputModel.DisplayNameMaxLength" />
                 <span asp-validation-for="Input.DisplayName" id="DisplayName-error" class="field-validation-error"></span>
             </div>
             <div class="app-form-field">
                 <label asp-for="Input.PhoneNumber" class="form-label">Teléfono</label>
-                <input asp-for="Input.PhoneNumber" class="form-control" type="tel" autocomplete="tel" aria-describedby="PhoneNumber-help PhoneNumber-error" />
+                <input asp-for="Input.PhoneNumber" class="form-control" type="tel" autocomplete="tel" inputmode="tel" pattern="\+?[0-9\s\-.()]*" title="Solo números, espacios y los signos + - . ( )" aria-describedby="PhoneNumber-help PhoneNumber-error" maxlength="@EditProfileInputModel.PhoneNumberMaxLength" />
                 <div id="PhoneNumber-help" class="form-text">Opcional. No se verifica por SMS.</div>
                 <span asp-validation-for="Input.PhoneNumber" id="PhoneNumber-error" class="field-validation-error"></span>
             </div>

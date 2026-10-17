@@ -23,6 +23,10 @@
         INVALID: false,
         REQUIRED_MESSAGE: "Este campo es obligatorio.",
         EMAIL_MESSAGE: "Introduce un correo electrónico válido.",
+        PATTERN_MESSAGE: "El formato no es válido.",
+        RANGE_UNDERFLOW_PREFIX: "El valor mínimo permitido es ",
+        RANGE_OVERFLOW_PREFIX: "El valor máximo permitido es ",
+        RANGE_SUFFIX: ".",
         MIN_LENGTH_MESSAGE_PREFIX: "Introduce al menos ",
         MIN_LENGTH_MESSAGE_SUFFIX: " caracteres.",
         MAX_LENGTH_MESSAGE_PREFIX: "Introduce como máximo ",
@@ -39,12 +43,28 @@
             return CONSTANTS.EMAIL_MESSAGE;
         }
 
+        if (field.validity.patternMismatch) {
+            return field.title || CONSTANTS.PATTERN_MESSAGE;
+        }
+
+        if (field.validity.rangeUnderflow) {
+            return CONSTANTS.RANGE_UNDERFLOW_PREFIX + field.min + CONSTANTS.RANGE_SUFFIX;
+        }
+
+        if (field.validity.rangeOverflow) {
+            return CONSTANTS.RANGE_OVERFLOW_PREFIX + field.max + CONSTANTS.RANGE_SUFFIX;
+        }
+
         if (field.validity.tooShort) {
             return CONSTANTS.MIN_LENGTH_MESSAGE_PREFIX + field.minLength + CONSTANTS.MIN_LENGTH_MESSAGE_SUFFIX;
         }
 
         if (field.validity.tooLong) {
             return CONSTANTS.MAX_LENGTH_MESSAGE_PREFIX + field.maxLength + CONSTANTS.MAX_LENGTH_MESSAGE_SUFFIX;
+        }
+
+        if (field.validity.customError) {
+            return field.validationMessage || CONSTANTS.DEFAULT_MESSAGE;
         }
 
         return CONSTANTS.DEFAULT_MESSAGE;

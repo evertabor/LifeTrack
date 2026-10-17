@@ -31,7 +31,7 @@
         <form class="transactions-filter__form" method="get" asp-controller="Transactions" asp-action="Index">
             <div class="app-form-field transactions-filter__field">
                 <label class="form-label" for="transactions-filter-year">Año</label>
-                <input id="transactions-filter-year" name="year" class="form-control" type="number" value="@Model.Year" min="@SetBudgetInputModel.MinYear" max="@SetBudgetInputModel.MaxYear" required />
+                <input id="transactions-filter-year" name="year" class="form-control" type="number" value="@Model.Year" min="@SetBudgetInputModel.MinYear" max="@Model.MaxFilterYear" required />
             </div>
             <div class="app-form-field transactions-filter__field">
                 <label class="form-label" for="transactions-filter-month">Mes</label>

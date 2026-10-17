@@ -15,7 +15,7 @@ public class CreateCategoryHandlerTests
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
         var handler = new CreateCategoryHandler(repository, unitOfWork, currentUser);
-        var command = new CreateCategoryCommand("Comida");
+        var command = new CreateCategoryCommand("Comida", false);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
@@ -31,7 +31,7 @@ public class CreateCategoryHandlerTests
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
         var handler = new CreateCategoryHandler(repository, unitOfWork, currentUser);
-        var command = new CreateCategoryCommand("");
+        var command = new CreateCategoryCommand("", false);
 
         var ex = await Assert.ThrowsAsync<BusinessRuleException>(
             () => handler.Handle(command, CancellationToken.None));
@@ -46,7 +46,7 @@ public class CreateCategoryHandlerTests
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
         var handler = new CreateCategoryHandler(repository, unitOfWork, currentUser);
-        var command = new CreateCategoryCommand(new string('a', 51));
+        var command = new CreateCategoryCommand(new string('a', 51), false);
 
         var ex = await Assert.ThrowsAsync<BusinessRuleException>(
             () => handler.Handle(command, CancellationToken.None));
@@ -60,10 +60,10 @@ public class CreateCategoryHandlerTests
         var repository = new Fakes.FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
-        var existingCategory = Category.Create("Comida", userId);
+        var existingCategory = Category.Create("Comida", userId, TransactionType.Expense);
         await repository.AddAsync(existingCategory, CancellationToken.None);
         var handler = new CreateCategoryHandler(repository, unitOfWork, currentUser);
-        var command = new CreateCategoryCommand("  Comida  ");
+        var command = new CreateCategoryCommand("  Comida  ", false);
 
         var ex = await Assert.ThrowsAsync<BusinessRuleException>(
             () => handler.Handle(command, CancellationToken.None));
@@ -77,10 +77,10 @@ public class CreateCategoryHandlerTests
         var repository = new Fakes.FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
-        var existingCategory = Category.Create("Comida", userId);
+        var existingCategory = Category.Create("Comida", userId, TransactionType.Expense);
         await repository.AddAsync(existingCategory, CancellationToken.None);
         var handler = new CreateCategoryHandler(repository, unitOfWork, currentUser);
-        var command = new CreateCategoryCommand("COMIDA");
+        var command = new CreateCategoryCommand("COMIDA", false);
 
         var ex = await Assert.ThrowsAsync<BusinessRuleException>(
             () => handler.Handle(command, CancellationToken.None));
@@ -95,7 +95,7 @@ public class CreateCategoryHandlerTests
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
         var handler = new CreateCategoryHandler(repository, unitOfWork, currentUser);
-        var command = new CreateCategoryCommand("Transporte");
+        var command = new CreateCategoryCommand("Transporte", false);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
@@ -111,14 +111,29 @@ public class CreateCategoryHandlerTests
         var repository = new Fakes.FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userB);
-        var existingCategory = Category.Create("Comida", userA);
+        var existingCategory = Category.Create("Comida", userA, TransactionType.Expense);
         await repository.AddAsync(existingCategory, CancellationToken.None);
         var handler = new CreateCategoryHandler(repository, unitOfWork, currentUser);
-        var command = new CreateCategoryCommand("Comida");
+        var command = new CreateCategoryCommand("Comida", false);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
         Assert.Equal("Comida", result.Name);
+    }
+
+    [Fact]
+    public async Task Handle_IncomeType_StoresIncomeCategory()
+    {
+        var userId = Guid.NewGuid();
+        var repository = new Fakes.FakeCategoryRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var handler = new CreateCategoryHandler(repository, unitOfWork, new FakeCurrentUser(userId));
+        var command = new CreateCategoryCommand("Sueldo", true);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        var categories = await repository.ListAsync(userId, CancellationToken.None);
+        Assert.Contains(categories, c => c.Id == result.Id && c.Type == TransactionType.Income);
     }
 
     [Fact]
@@ -128,7 +143,7 @@ public class CreateCategoryHandlerTests
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(null);
         var handler = new CreateCategoryHandler(repository, unitOfWork, currentUser);
-        var command = new CreateCategoryCommand("Comida");
+        var command = new CreateCategoryCommand("Comida", false);
 
         var ex = await Assert.ThrowsAsync<BusinessRuleException>(
             () => handler.Handle(command, CancellationToken.None));

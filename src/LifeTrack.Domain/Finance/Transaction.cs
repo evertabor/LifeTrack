@@ -55,7 +55,8 @@ public sealed class Transaction : Entity
     public static Transaction Create(
         Guid userId,
         TransactionData data,
-        DateOnly today)
+        DateOnly today,
+        Category category)
     {
         if (userId == Guid.Empty)
         {
@@ -67,21 +68,22 @@ public sealed class Transaction : Entity
             throw new DomainException("La categoría es obligatoria.");
         }
 
-        var cleanDescription = Validate(data.Type, data.Amount, data.Date, data.Description, today);
+        var cleanDescription = Validate(data.Type, data.Amount, data.Date, data.Description, today, data.CategoryId, category);
 
         return new Transaction(Guid.NewGuid(), userId, data.CategoryId, data.Type, data.Amount, data.Date, cleanDescription);
     }
 
     public void Update(
         TransactionData data,
-        DateOnly today)
+        DateOnly today,
+        Category category)
     {
         if (data.CategoryId == Guid.Empty)
         {
             throw new DomainException("La categoría es obligatoria.");
         }
 
-        var cleanDescription = Validate(data.Type, data.Amount, data.Date, data.Description, today);
+        var cleanDescription = Validate(data.Type, data.Amount, data.Date, data.Description, today, data.CategoryId, category);
 
         CategoryId = data.CategoryId;
         Type = data.Type;
@@ -95,11 +97,24 @@ public sealed class Transaction : Entity
         decimal amount,
         DateOnly date,
         string? description,
-        DateOnly today)
+        DateOnly today,
+        Guid categoryId,
+        Category category)
     {
         if (!Enum.IsDefined(type))
         {
             throw new DomainException("El tipo de movimiento no es válido.");
+        }
+
+        if (categoryId != category.Id)
+        {
+            throw new DomainException("La categoría no es válida.");
+        }
+
+        if (type != category.Type)
+        {
+            var kind = category.Type == TransactionType.Income ? "ingresos" : "gastos";
+            throw new DomainException($"La categoría '{category.Name}' es de {kind}.");
         }
 
         if (amount <= 0 || amount > MaxAmount)

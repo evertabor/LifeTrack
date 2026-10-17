@@ -16,7 +16,7 @@ public class DeleteCategoryHandlerTests
         var budgets = new Fakes.FakeBudgetRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
-        var category = Category.Create("Comida", userId);
+        var category = Category.Create("Comida", userId, TransactionType.Expense);
         await repository.AddAsync(category, CancellationToken.None);
         var handler = new DeleteCategoryHandler(repository, transactions, budgets, unitOfWork, currentUser);
         var command = new DeleteCategoryCommand(category.Id);
@@ -55,7 +55,7 @@ public class DeleteCategoryHandlerTests
         var budgets = new Fakes.FakeBudgetRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userB);
-        var category = Category.Create("Comida", userA);
+        var category = Category.Create("Comida", userA, TransactionType.Expense);
         await repository.AddAsync(category, CancellationToken.None);
         var handler = new DeleteCategoryHandler(repository, transactions, budgets, unitOfWork, currentUser);
         var command = new DeleteCategoryCommand(category.Id);
@@ -93,12 +93,13 @@ public class DeleteCategoryHandlerTests
         var budgets = new Fakes.FakeBudgetRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
-        var category = Category.Create("Comida", userId);
+        var category = Category.Create("Comida", userId, TransactionType.Expense);
         await repository.AddAsync(category, CancellationToken.None);
         await transactions.AddAsync(Transaction.Create(
             userId,
             new TransactionData(category.Id, TransactionType.Expense, 25.50m, today, null),
-            today), CancellationToken.None);
+            today,
+            category), CancellationToken.None);
         var handler = new DeleteCategoryHandler(repository, transactions, budgets, unitOfWork, currentUser);
         var command = new DeleteCategoryCommand(category.Id);
 
@@ -118,9 +119,9 @@ public class DeleteCategoryHandlerTests
         var budgets = new Fakes.FakeBudgetRepository();
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(userId);
-        var category = Category.Create("Comida", userId);
+        var category = Category.Create("Comida", userId, TransactionType.Expense);
         await repository.AddAsync(category, CancellationToken.None);
-        await budgets.AddAsync(Budget.Create(userId, category.Id, new BudgetPeriod(2026, 10), 100m), CancellationToken.None);
+        await budgets.AddAsync(Budget.Create(userId, category.Id, new BudgetPeriod(2026, 10), 100m, category), CancellationToken.None);
         var handler = new DeleteCategoryHandler(repository, transactions, budgets, unitOfWork, currentUser);
         var command = new DeleteCategoryCommand(category.Id);
 

@@ -34,7 +34,8 @@ public sealed class SetBudgetHandler(
                     currentUser.UserId.Value,
                     request.CategoryId,
                     new BudgetPeriod(request.Year, request.Month),
-                    request.Limit), ct);
+                    request.Limit,
+                    category), ct);
             }
             else
             {

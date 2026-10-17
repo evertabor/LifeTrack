@@ -36,7 +36,8 @@ public sealed class CreateTransactionHandler(
                     request.Amount,
                     request.Date,
                     request.Description),
-                timeProvider.Today());
+                timeProvider.Today(),
+                category);
 
             await transactions.AddAsync(transaction, ct);
             await unitOfWork.SaveChangesAsync(ct);

@@ -16,7 +16,7 @@
                 <span asp-validation-for="NewTransaction" class="field-validation-error" role="alert"></span>
                 <div class="app-form-field">
                     <label asp-for="NewTransaction.Type" class="form-label">Tipo</label>
-                    <select asp-for="NewTransaction.Type" class="form-select">
+                    <select asp-for="NewTransaction.Type" class="form-select" data-transactions-type>
                         @if (Model.IsIncomeSelected)
                         {
                             <option value="true" selected>Ingreso</option>
@@ -32,17 +32,17 @@
                 </div>
                 <div class="app-form-field">
                     <label asp-for="NewTransaction.CategoryId" class="form-label">Categoría</label>
-                    <select asp-for="NewTransaction.CategoryId" class="form-select" aria-describedby="transaction-category-help" required>
+                    <select asp-for="NewTransaction.CategoryId" class="form-select" aria-describedby="transaction-category-help" required data-transactions-category>
                         <option value="">Selecciona una categoría</option>
                         @foreach (var option in Model.CreateCategoryOptions)
                         {
                             @if (option.IsSelected)
                             {
-                                <option value="@option.Id" selected>@option.Name</option>
+                                <option value="@option.Id" data-transactions-kind="@option.KindText" selected>@option.Name</option>
                             }
                             else
                             {
-                                <option value="@option.Id">@option.Name</option>
+                                <option value="@option.Id" data-transactions-kind="@option.KindText">@option.Name</option>
                             }
                         }
                     </select>
@@ -51,13 +51,14 @@
                 </div>
                 <div class="app-form-field">
                     <label asp-for="NewTransaction.Amount" class="form-label">Importe</label>
-                    <input asp-for="NewTransaction.Amount" class="form-control" type="text" inputmode="decimal" autocomplete="off" data-app-money aria-describedby="transaction-amount-help" required />
+                    <input asp-for="NewTransaction.Amount" class="form-control" type="text" inputmode="decimal" autocomplete="off" data-app-money aria-describedby="transaction-amount-help" required maxlength="16" />
                     <div id="transaction-amount-help" class="form-text">Introduce el importe sin símbolo de moneda.</div>
                     <span asp-validation-for="NewTransaction.Amount" class="field-validation-error"></span>
                 </div>
                 <div class="app-form-field">
                     <label asp-for="NewTransaction.Date" class="form-label">Fecha</label>
-                    <input asp-for="NewTransaction.Date" class="form-control" type="date" required />
+                    <input asp-for="NewTransaction.Date" class="form-control" type="date" min="@Model.MinTransactionDateText" max="@Model.MaxTransactionDateText" aria-describedby="transaction-date-help" required />
+                    <div id="transaction-date-help" class="form-text">@Model.TransactionDateHelpText</div>
                     <span asp-validation-for="NewTransaction.Date" class="field-validation-error"></span>
                 </div>
                 <div class="app-form-field">

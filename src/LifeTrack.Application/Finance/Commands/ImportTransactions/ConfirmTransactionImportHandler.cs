@@ -39,7 +39,7 @@ public sealed class ConfirmTransactionImportHandler(
 
         var userId = currentUser.UserId.Value;
         var names = (await categories.ListAsync(userId, ct))
-            .ToDictionary(c => c.Name.Trim(), c => c.Id, StringComparer.OrdinalIgnoreCase);
+            .ToDictionary(c => c.Name.Trim(), c => c, StringComparer.OrdinalIgnoreCase);
         var today = timeProvider.Today();
 
         var imported = 0;
@@ -57,7 +57,7 @@ public sealed class ConfirmTransactionImportHandler(
                 continue;
             }
 
-            if (!names.TryGetValue(row.CategoryName.Trim(), out var categoryId))
+            if (!names.TryGetValue(row.CategoryName.Trim(), out var category))
             {
                 skipped++;
                 continue;
@@ -68,12 +68,13 @@ public sealed class ConfirmTransactionImportHandler(
                 await transactions.AddAsync(Transaction.Create(
                     userId,
                     new TransactionData(
-                        categoryId,
+                        category.Id,
                         row.IsIncome ? TransactionType.Income : TransactionType.Expense,
                         row.Amount,
                         row.Date.Value,
                         row.Description),
-                    today), ct);
+                    today,
+                    category), ct);
                 imported++;
             }
             catch (DomainException)

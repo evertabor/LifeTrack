@@ -19,7 +19,7 @@ public sealed class CreateCategoryHandler(
         }
         try
         {
-            var category = Category.Create(request.Name, currentUser.UserId.Value);
+            var category = Category.Create(request.Name, currentUser.UserId.Value, request.IsIncome ? TransactionType.Income : TransactionType.Expense);
             if (await repository.ExistsAsync(category.Name, category.UserId, ct))
             {
                 throw new DomainException("Ya existe una categoría con ese nombre.");

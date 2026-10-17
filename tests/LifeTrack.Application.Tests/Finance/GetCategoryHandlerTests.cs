@@ -13,7 +13,7 @@ public class GetCategoryHandlerTests
         var userId = Guid.NewGuid();
         var repository = new Fakes.FakeCategoryRepository();
         var currentUser = new FakeCurrentUser(userId);
-        var category = Category.Create("Comida", userId);
+        var category = Category.Create("Comida", userId, TransactionType.Expense);
         await repository.AddAsync(category, CancellationToken.None);
         var handler = new GetCategoryHandler(repository, currentUser);
         var query = new GetCategoryQuery(category.Id);
@@ -44,7 +44,7 @@ public class GetCategoryHandlerTests
         var userB = Guid.NewGuid();
         var repository = new Fakes.FakeCategoryRepository();
         var currentUser = new FakeCurrentUser(userB);
-        var category = Category.Create("Comida", userA);
+        var category = Category.Create("Comida", userA, TransactionType.Expense);
         await repository.AddAsync(category, CancellationToken.None);
         var handler = new GetCategoryHandler(repository, currentUser);
         var query = new GetCategoryQuery(category.Id);

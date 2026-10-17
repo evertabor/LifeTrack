@@ -18,7 +18,7 @@ public class CreateTransactionHandlerTests
         var unitOfWork = new FakeUnitOfWork();
         var currentUser = new FakeCurrentUser(owner);
         var timeProvider = new FixedTimeProvider(Today);
-        var category = Category.Create("Comida", owner);
+        var category = Category.Create("Comida", owner, TransactionType.Expense);
         categories.AddAsync(category, CancellationToken.None).GetAwaiter().GetResult();
         var handler = new CreateTransactionHandler(transactions, categories, unitOfWork, currentUser, timeProvider);
         return (handler, transactions, unitOfWork, owner, category.Id);
@@ -59,6 +59,18 @@ public class CreateTransactionHandlerTests
     }
 
     [Fact]
+    public async Task Handle_MismatchedCategoryType_ThrowsBusinessRuleAndDoesNotSave()
+    {
+        var arranged = Arrange();
+        var command = new CreateTransactionCommand(arranged.CategoryId, true, 1000m, Today, "Sueldo");
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(
+            () => arranged.Handler.Handle(command, CancellationToken.None));
+        Assert.Contains("Comida", ex.Message);
+        Assert.Equal(0, arranged.UnitOfWork.SaveCount);
+    }
+
+    [Fact]
     public async Task Handle_CategoryOfAnotherUser_ThrowsResourceNotFoundAndDoesNotSave()
     {
         var owner = Guid.NewGuid();
@@ -66,7 +78,7 @@ public class CreateTransactionHandlerTests
         var transactions = new FakeTransactionRepository();
         var categories = new FakeCategoryRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var foreign = Category.Create("Comida", owner);
+        var foreign = Category.Create("Comida", owner, TransactionType.Expense);
         await categories.AddAsync(foreign, CancellationToken.None);
         var handler = new CreateTransactionHandler(
             transactions, categories, unitOfWork, new FakeCurrentUser(attacker), new FixedTimeProvider(Today));

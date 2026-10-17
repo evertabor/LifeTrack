@@ -15,7 +15,7 @@ public static class ImportRowValidator
 
     public static ImportPreviewRowDto Validate(
         ImportRow row,
-        IReadOnlyDictionary<string, Guid> categoriesByName,
+        IReadOnlyDictionary<string, Category> categoriesByName,
         Guid userId,
         DateOnly today)
     {
@@ -32,7 +32,7 @@ public static class ImportRowValidator
         }
 
         var categoryName = fields[1].Trim();
-        if (!categoriesByName.TryGetValue(categoryName, out var categoryId))
+        if (!categoriesByName.TryGetValue(categoryName, out var category))
         {
             return Invalid(lineNumber, "La categoría no es válida.");
         }
@@ -52,12 +52,13 @@ public static class ImportRowValidator
             var movement = Transaction.Create(
                 userId,
                 new TransactionData(
-                    categoryId,
+                    category.Id,
                     isIncome ? TransactionType.Income : TransactionType.Expense,
                     amount,
                     date,
                     fields[4]),
-                today);
+                today,
+                category);
 
             return new ImportPreviewRowDto(
                 lineNumber,
