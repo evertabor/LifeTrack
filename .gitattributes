@@ -1,0 +1,16 @@
+# Normaliza los finales de línea en el repositorio.
+#
+# Regla: todo el texto se guarda en el índice con LF y se escribe en disco con
+# LF, también en Windows. Sin esto, core.autocrlf=true metía CRLF en los
+# archivos y `dotnet format --verify-no-changes` fallaba con ENDOFLINE porque
+# .editorconfig exige end_of_line = lf.
+#
+# Renormaliza el árbol existente una sola vez con:
+#   git add --renormalize .
+
+* text=auto eol=lf
+
+# Scripts de Windows: requieren CRLF para ejecutarse.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
