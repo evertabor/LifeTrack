@@ -740,7 +740,7 @@
         "type": "Project",
         "dependencies": {
           "LifeTrack.Domain": "[1.0.0, )",
-          "MediatR": "[13.*, )"
+          "MediatR": "[14.*, )"
         }
       },
       "lifetrack.domain": {
@@ -759,19 +759,19 @@
         "dependencies": {
           "LifeTrack.Application": "[1.0.0, )",
           "LifeTrack.Infrastructure": "[1.0.0, )",
-          "MediatR": "[13.*, )",
+          "MediatR": "[14.*, )",
           "Microsoft.AspNetCore.Identity.UI": "[10.0.*, )"
         }
       },
       "MediatR": {
         "type": "CentralTransitive",
-        "requested": "[13.*, )",
-        "resolved": "13.1.0",
-        "contentHash": "YkKqc0a5ZyZ7ccVyf+cuO2M6UYLduldVTN5oI0nvk3SnthyLD0nSy6vhpPQtf3ovcNOsPo+qjMqaUThe4wGeCA==",
+        "requested": "[14.*, )",
+        "resolved": "14.2.0",
+        "contentHash": "1vqNVS6ijU0IF78vDfIE99pi0iTa+M/1ztRlM98P+KL+Loi/O4knaR2+ex0AqbT5xBl01VFryjuYUAFtvGwzOQ==",
         "dependencies": {
           "MediatR.Contracts": "[2.0.1, 3.0.0)",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0",
-          "Microsoft.Extensions.Logging.Abstractions": "8.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.0",
           "Microsoft.IdentityModel.JsonWebTokens": "8.14.0"
         }
       },
