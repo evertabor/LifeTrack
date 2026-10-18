@@ -5,6 +5,7 @@ using LifeTrack.Infrastructure;
 using LifeTrack.Web.Filters;
 using LifeTrack.Web.Security;
 using LifeTrack.Web.Services;
+using LifeTrack.Web.Services.Dashboard;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -64,6 +65,7 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUserService>();
 builder.Services.AddScoped<UserBadgeService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 var app = builder.Build();
 
@@ -93,7 +95,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .AllowAnonymous();
 
 app.MapGet("/", (HttpContext context) => Results.Redirect(
-    context.User.Identity?.IsAuthenticated == true ? "/transactions" : "/account/login"))
+    context.User.Identity?.IsAuthenticated == true ? "/dashboard" : "/account/login"))
     .AllowAnonymous();
 
 app.MapControllers();

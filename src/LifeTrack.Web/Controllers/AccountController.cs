@@ -28,7 +28,7 @@ public sealed class AccountController(
         {
             var result = await sender.Send(new RegisterAccountCommand(input.Email, input.Password, input.DisplayName, input.PhoneNumber), ct);
             if (result.Succeeded)
-                return RedirectToAction("Index", "Transactions");
+                return RedirectToAction("Index", "Dashboard");
 
             return View(RegisterViewModel.From(input, "No se pudo crear la cuenta. Revisa el correo y la contraseña."));
         }
@@ -60,7 +60,7 @@ public sealed class AccountController(
         {
             var result = await sender.Send(new LoginCommand(input.Email, input.Password), ct);
             if (result.Succeeded)
-                return RedirectToAction("Index", "Transactions");
+                return RedirectToAction("Index", "Dashboard");
 
             return View(LoginViewModel.From(input, "Correo o contraseña no válidos."));
         }

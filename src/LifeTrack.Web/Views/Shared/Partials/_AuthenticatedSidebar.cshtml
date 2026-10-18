@@ -11,6 +11,14 @@
     <nav class="app-nav" aria-label="Navegación principal">
         <p class="app-nav__heading">Finanzas</p>
         <ul class="app-nav__list">
+            @if (ViewData["ActiveSection"] as string == "Dashboard")
+            {
+                <li><a class="app-nav__link" asp-controller="Dashboard" asp-action="Index" aria-current="page"><span class="app-nav__icon" aria-hidden="true">◔</span><span>Dashboard</span><span class="app-nav__chevron" aria-hidden="true">›</span></a></li>
+            }
+            else
+            {
+                <li><a class="app-nav__link" asp-controller="Dashboard" asp-action="Index"><span class="app-nav__icon" aria-hidden="true">◔</span><span>Dashboard</span><span class="app-nav__chevron" aria-hidden="true">›</span></a></li>
+            }
             @if (ViewData["ActiveSection"] as string == "Transactions")
             {
                 <li><a class="app-nav__link" asp-controller="Transactions" asp-action="Index" aria-current="page"><span class="app-nav__icon" aria-hidden="true">≣</span><span>Movimientos</span><span class="app-nav__chevron" aria-hidden="true">›</span></a></li>

@@ -82,7 +82,7 @@ public class AccountRedirectTests : IClassFixture<RedirectWebApplicationFactory>
         }));
 
         Assert.Equal(302, (int)response.StatusCode);
-        Assert.Equal("/transactions", response.Headers.Location?.ToString());
+        Assert.Equal("/dashboard", response.Headers.Location?.ToString());
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public class AccountRedirectTests : IClassFixture<RedirectWebApplicationFactory>
         }));
 
         Assert.Equal(302, (int)response.StatusCode);
-        Assert.Equal("/transactions", response.Headers.Location?.ToString());
+        Assert.Equal("/dashboard", response.Headers.Location?.ToString());
     }
 
     [Fact]
@@ -141,7 +141,7 @@ public class AccountRedirectTests : IClassFixture<RedirectWebApplicationFactory>
         }));
 
         Assert.Equal(302, (int)response.StatusCode);
-        Assert.Equal("/transactions", response.Headers.Location?.ToString());
+        Assert.Equal("/dashboard", response.Headers.Location?.ToString());
     }
 
     private HttpClient CreateClient() =>

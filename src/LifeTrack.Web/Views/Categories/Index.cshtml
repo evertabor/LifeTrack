@@ -26,12 +26,25 @@
         <section class="app-card categories-panel" aria-labelledby="categories-list-title">
             <h2 id="categories-list-title" class="visually-hidden">Tus categorías</h2>
             <div class="categories-panel__toolbar">
-                <form class="categories-panel__search" method="get" asp-controller="Categories" asp-action="Index" role="search" data-categories-search>
+                <div class="categories-panel__search" role="search" data-categories-search>
                     <label class="visually-hidden" for="categories-search-input">Buscar en categorías</label>
                     <input id="categories-search-input" name="q" type="search" value="@Model.SearchTerm" placeholder="Buscar" autocomplete="off" maxlength="@CreateCategoryInputModel.NameMaxLength" data-categories-search-input />
-                    <button type="submit" aria-label="Buscar"><span aria-hidden="true">⌕</span></button>
-                </form>
-                <span class="categories-panel__hint">Vista actual</span>
+                    <button type="button" aria-label="Limpiar búsqueda" data-categories-search-clear hidden><span aria-hidden="true">✕</span></button>
+                </div>
+                <select id="categories-type-filter" class="categories-panel__type-filter form-select form-select-sm" aria-label="Filtrar por tipo" data-categories-type-filter>
+                    <option value="0">Todos</option>
+                    <option value="1">Ingresos</option>
+                    <option value="2">Gastos</option>
+                </select>
+                <script>
+                    (function() {
+                        var filter = document.getElementById('categories-type-filter');
+                        var type = '@((int)Model.TypeFilter)';
+                        if (filter && type) {
+                            filter.value = type;
+                        }
+                    })();
+                </script>
             </div>
 
             @if (Model.HasCategories)
@@ -45,7 +58,7 @@
                         <tbody>
                     @foreach (var category in Model.Categories)
                     {
-                            <tr tabindex="0" data-categories-row>
+                            <tr tabindex="0" data-categories-row data-category-type="@(category.Type.HasValue && category.Type.Value ? 1 : 2)">
                                 <td><span class="categories-table__name" data-categories-name><span class="categories-list__marker" aria-hidden="true"></span>@category.Name</span></td>
                                 <td>@category.TypeLabel</td>
                                 <td>

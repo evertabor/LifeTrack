@@ -1,0 +1,154 @@
+@model LifeTrack.Web.ViewModels.Dashboard.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Resumen";
+    ViewData["ActiveSection"] = "Dashboard";
+}
+
+<div class="app-dashboard">
+    <header class="app-page-header">
+        <div>
+            <p class="app-page-header__eyebrow">@Model.MonthLabel</p>
+            <h1 class="app-page-header__title">Resumen</h1>
+        </div>
+        <form class="app-page-header__filters" method="get" asp-action="Index">
+            <select asp-for="Period.Month" name="month" class="form-select form-select-sm" aria-label="Mes">
+                @foreach (var option in Model.MonthOptions)
+                {
+                    <option value="@option.Month" selected="@(option.IsSelected ? "selected" : null)">@option.Name</option>
+                }
+            </select>
+            <select asp-for="Period.Year" name="year" class="form-select form-select-sm" aria-label="Año">
+                @foreach (var option in Model.YearOptions)
+                {
+                    <option value="@option.Year" selected="@(option.IsSelected ? "selected" : null)">@option.Year</option>
+                }
+            </select>
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Filtrar</button>
+        </form>
+    </header>
+
+    <section class="app-metrics-grid" aria-label="Resumen del mes">
+        <article class="app-stat-card">
+            <div class="app-stat-card__body">
+                <div class="app-stat-card__icon app-stat-card__icon--income">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 7l-5 5-3-3-5 5"/><path d="M21 12h-6"/></svg>
+                </div>
+                <div class="app-stat-card__content">
+                    <p class="app-stat-card__label">Ingresos</p>
+                    <p class="app-stat-card__value">
+                        @Model.TotalIncomeText
+                        @if (Model.HasIncomeTrend)
+                        {
+                            <span class="app-stat-card__trend @Model.IncomeTrendClass">@Model.IncomeTrendText</span>
+                        }
+                    </p>
+                    <p class="app-stat-card__context">@Model.IncomeContextText</p>
+                </div>
+            </div>
+            <div class="app-stat-card__footer">
+                <div class="app-stat-card__progress">
+                    <div class="app-stat-card__progress-fill app-stat-card__progress-fill--income" style="width: @Model.IncomeProgressPercent%"></div>
+                </div>
+            </div>
+        </article>
+
+        <article class="app-stat-card">
+            <div class="app-stat-card__body">
+                <div class="app-stat-card__icon app-stat-card__icon--expense">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17l5-5 3 3 5-5"/><path d="M3 12h6"/></svg>
+                </div>
+                <div class="app-stat-card__content">
+                    <p class="app-stat-card__label">Gastos</p>
+                    <p class="app-stat-card__value">
+                        @Model.TotalExpenseText
+                        @if (Model.HasExpenseTrend)
+                        {
+                            <span class="app-stat-card__trend @Model.ExpenseTrendClass">@Model.ExpenseTrendText</span>
+                        }
+                    </p>
+                    <p class="app-stat-card__context">@Model.ExpenseContextText</p>
+                </div>
+            </div>
+            <div class="app-stat-card__footer">
+                <div class="app-stat-card__progress">
+                    <div class="app-stat-card__progress-fill app-stat-card__progress-fill--expense" style="width: @Model.ExpenseProgressPercent%"></div>
+                </div>
+            </div>
+        </article>
+
+        <article class="app-stat-card">
+            <div class="app-stat-card__body">
+                <div class="app-stat-card__icon app-stat-card__icon--balance">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <div class="app-stat-card__content">
+                    <p class="app-stat-card__label">Balance</p>
+                    <p class="app-stat-card__value @(Model.BalanceText.StartsWith("-") ? "app-amount--danger" : "app-amount--success")">@Model.BalanceText</p>
+                    <p class="app-stat-card__context">Ingresos menos gastos</p>
+                </div>
+            </div>
+            <div class="app-stat-card__footer">
+                <div class="app-stat-card__progress">
+                    <div class="app-stat-card__progress-fill app-stat-card__progress-fill--balance" style="width: @Model.BalanceProgressPercent%"></div>
+                </div>
+            </div>
+        </article>
+
+        <article class="app-stat-card">
+            <div class="app-stat-card__body">
+                <div class="app-stat-card__icon app-stat-card__icon--projection">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+                </div>
+                <div class="app-stat-card__content">
+                    <p class="app-stat-card__label">Proyección</p>
+                    <p class="app-stat-card__value @(Model.ProjectedBalanceText.StartsWith("-") ? "app-amount--danger" : "app-amount--success")">@Model.ProjectedBalanceText</p>
+                    <p class="app-stat-card__context">@Model.DaysRemainingText días restantes</p>
+                </div>
+            </div>
+            <div class="app-stat-card__footer">
+                <div class="app-stat-card__progress">
+                    <div class="app-stat-card__progress-fill app-stat-card__progress-fill--projection" style="width: @Model.ProjectionProgressPercent%"></div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <partial name="Partials/_AlertsSection" model="Model.Alerts" />
+
+    @if (Model.HasExpenses)
+    {
+        <section class="app-card app-dashboard__chart" aria-labelledby="chart-title">
+            <div class="app-card__header">
+                <h2 id="chart-title" class="app-card__title">Gasto por categoría</h2>
+                <span class="app-badge app-badge--info">@Model.DonutSegments.Count @(Model.DonutSegments.Count == 1 ? "categoría" : "categorías")</span>
+            </div>
+            <div class="app-donut-layout">
+                <partial name="Partials/_CategoryDonut" model="Model" />
+                <ul class="app-donut-legend">
+                    @foreach (var segment in Model.DonutSegments)
+                    {
+                        <li class="app-donut-legend__item">
+                            <span class="app-donut-legend__swatch" style="--segment-color: @segment.Color" aria-hidden="true"></span>
+                            <div class="app-donut-legend__content">
+                                <span class="app-donut-legend__label">@segment.CategoryName</span>
+                                <div class="app-donut-legend__bar">
+                                    <div class="app-donut-legend__bar-fill" style="--segment-color: @segment.Color; width: @(segment.Percent * 100)%"></div>
+                                </div>
+                            </div>
+                            <span class="app-donut-legend__value">@segment.AmountText (@segment.PercentText)</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </section>
+    }
+    else
+    {
+        <section class="app-card app-empty-state" aria-labelledby="empty-expenses-title">
+            <h2 id="empty-expenses-title" class="app-empty-state__title">Sin gastos este mes</h2>
+            <p class="app-empty-state__text">Registra tu primer gasto para ver el desglose por categoría.</p>
+            <a class="btn btn-primary" asp-controller="Transactions" asp-action="Index" asp-route-month="@Model.Month" asp-route-year="@Model.Year">Ir a movimientos</a>
+        </section>
+    }
+</div>

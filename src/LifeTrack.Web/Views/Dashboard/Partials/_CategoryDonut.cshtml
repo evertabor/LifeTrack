@@ -1,0 +1,23 @@
+@model LifeTrack.Web.ViewModels.Dashboard.DashboardViewModel
+
+<div class="app-donut" role="img" aria-label="Gráfico circular de gastos por categoría. Total: @Model.DonutTotalText">
+    <svg class="app-donut__svg" viewBox="0 0 42 42" aria-hidden="true">
+        <circle class="app-donut__track" cx="21" cy="21" r="15.9155" />
+        @foreach (var segment in Model.DonutSegments)
+        {
+            <circle class="app-donut__segment"
+                    cx="21" cy="21" r="15.9155"
+                    fill="transparent"
+                    stroke="@segment.Color"
+                    stroke-width="3.5"
+                    stroke-dasharray="@segment.StrokeDashArrayText"
+                    transform="rotate(@segment.RotationText 21 21)"
+                    data-category="@segment.CategoryName" />
+        }
+    </svg>
+    <div class="app-donut__center">
+        <span class="app-donut__center-month">@Model.MonthLabel</span>
+        <span class="app-donut__center-value">@Model.DonutTotalText</span>
+        <span class="app-donut__center-label">@Model.DonutCenterLabel</span>
+    </div>
+</div>

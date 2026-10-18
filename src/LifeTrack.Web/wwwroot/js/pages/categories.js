@@ -5,6 +5,8 @@
         CREATE_MODAL: "[data-categories-create-modal]",
         SEARCH_FORM: "[data-categories-search]",
         SEARCH_INPUT: "[data-categories-search-input]",
+        SEARCH_CLEAR: "[data-categories-search-clear]",
+        TYPE_FILTER: "[data-categories-type-filter]",
         LIST: "[data-categories-list]",
         ROW: "[data-categories-row]",
         NAME: "[data-categories-name]",
@@ -31,21 +33,31 @@
 
     function _filterCategories() {
         const input = document.querySelector(SELECTORS.SEARCH_INPUT);
+        const typeFilter = document.querySelector(SELECTORS.TYPE_FILTER);
         const list = document.querySelector(SELECTORS.LIST);
         const message = document.querySelector(SELECTORS.NO_RESULTS);
 
-        if (!input || !list) {
+        if (!input || !list || !typeFilter) {
             return;
         }
 
         const term = _normalize(input.value);
+        const typeValue = parseInt(typeFilter.value, 10);
         const rows = list.querySelectorAll(SELECTORS.ROW);
         let visible = 0;
 
         for (let index = 0; index < rows.length; index++) {
             const name = rows[index].querySelector(SELECTORS.NAME);
-            const matches = term === CONSTANTS.EMPTY ||
+            const typeAttr = rows[index].getAttribute("data-category-type");
+            const categoryType = typeAttr ? parseInt(typeAttr, 10) : null;
+
+            const nameMatches = term === CONSTANTS.EMPTY ||
                 (name && _normalize(name.textContent).includes(term));
+
+            const typeMatches = typeValue === 0 ||
+                (categoryType !== null && categoryType === typeValue);
+
+            const matches = nameMatches && typeMatches;
             rows[index].hidden = !matches;
 
             if (matches) {
@@ -63,6 +75,23 @@
     function _handleInput(event) {
         if (event.target.matches(SELECTORS.SEARCH_INPUT)) {
             _filterCategories();
+        }
+    }
+
+    function _handleTypeChange(event) {
+        if (event.target.matches(SELECTORS.TYPE_FILTER)) {
+            _filterCategories();
+        }
+    }
+
+    function _handleSearchClear(event) {
+        if (event.target.matches(SELECTORS.SEARCH_CLEAR)) {
+            const input = document.querySelector(SELECTORS.SEARCH_INPUT);
+            if (input) {
+                input.value = CONSTANTS.EMPTY;
+                input.focus();
+                _filterCategories();
+            }
         }
     }
 
@@ -91,6 +120,8 @@
         _openCreateModalOnErrors();
         document.addEventListener(CONSTANTS.EVENT_INPUT, _handleInput);
         document.addEventListener(CONSTANTS.EVENT_SUBMIT, _handleSubmit);
+        document.addEventListener("change", _handleTypeChange);
+        document.addEventListener("click", _handleSearchClear);
     }
 
     _initialize();

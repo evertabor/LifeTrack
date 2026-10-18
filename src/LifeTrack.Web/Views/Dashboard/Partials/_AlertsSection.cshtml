@@ -1,0 +1,34 @@
+@model IReadOnlyList<LifeTrack.Web.ViewModels.Dashboard.AlertItemViewModel>
+
+@if (Model.Count > 0)
+{
+    <section class="app-alerts" aria-labelledby="alerts-title">
+        <div class="app-alerts__header">
+            <h2 id="alerts-title" class="app-alerts__title">Alertas</h2>
+            <span class="app-badge app-badge--neutral">@Model.Count @(Model.Count == 1 ? "alerta" : "alertas")</span>
+        </div>
+        <ul class="app-alerts__list">
+            @foreach (var alert in Model)
+            {
+                <li class="app-alert-card">
+                    <span class="app-alert-card__icon app-alert-card__icon--@alert.Type" aria-hidden="true">
+                        @switch (alert.Type)
+                        {
+                            case "danger": <span>!</span>; break;
+                            case "warning": <span>▲</span>; break;
+                            default: <span>i</span>; break;
+                        }
+                    </span>
+                    <div class="app-alert-card__content">
+                        <p class="app-alert-card__title">@alert.Title</p>
+                        <p class="app-alert-card__message">@alert.Message</p>
+                    </div>
+                    @if (!string.IsNullOrEmpty(alert.ActionController))
+                    {
+                        <a class="app-alert-card__action" asp-controller="@alert.ActionController" asp-action="Index" asp-route-month="@alert.Month" asp-route-year="@alert.Year">@alert.ActionLabel</a>
+                    }
+                </li>
+            }
+        </ul>
+    </section>
+}
