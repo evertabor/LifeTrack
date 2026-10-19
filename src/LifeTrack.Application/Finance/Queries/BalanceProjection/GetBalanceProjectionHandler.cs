@@ -31,7 +31,7 @@ public sealed class GetBalanceProjectionHandler(
         var to = from.AddMonths(1);
 
         var items = await transactions.ListByPeriodAsync(userId, from, to, ct);
-        var daysInMonth = DateTime.DaysInMonth(year, month);
+        var daysInMonth = GetDaysInMonth(year, month);
         var daysElapsed = GetDaysElapsed(year, month, daysInMonth, today);
         var daysRemaining = daysInMonth - daysElapsed;
 
@@ -62,5 +62,21 @@ public sealed class GetBalanceProjectionHandler(
         }
 
         return 0;
+    }
+
+    private static int GetDaysInMonth(int year, int month)
+    {
+        return month switch
+        {
+            1 or 3 or 5 or 7 or 8 or 10 or 12 => 31,
+            4 or 6 or 9 or 11 => 30,
+            2 => IsLeapYear(year) ? 29 : 28,
+            _ => 0
+        };
+    }
+
+    private static bool IsLeapYear(int year)
+    {
+        return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
     }
 }

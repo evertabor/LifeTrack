@@ -7,4 +7,5 @@ public interface IAccountService
     Task LogoutAsync(CancellationToken cancellationToken);
     Task<UserProfileDto?> GetProfileAsync(Guid userId, CancellationToken cancellationToken);
     Task<AccountOperationResult> UpdateProfileAsync(Guid userId, string? displayName, string? phoneNumber, CancellationToken cancellationToken);
+    Task<AccountOperationResult> DeleteAccountAsync(Guid userId, CancellationToken cancellationToken);
 }

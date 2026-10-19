@@ -76,4 +76,17 @@ public sealed class AccountService(
             result.Succeeded,
             result.Errors.Select(e => e.Description).ToArray());
     }
+
+    public async Task<AccountOperationResult> DeleteAccountAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+            return new AccountOperationResult(false, new[] { "No se encontró la cuenta." });
+
+        await signInManager.SignOutAsync();
+        var result = await userManager.DeleteAsync(user);
+        return new AccountOperationResult(
+            result.Succeeded,
+            result.Errors.Select(e => e.Description).ToArray());
+    }
 }

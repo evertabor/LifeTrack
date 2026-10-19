@@ -1,0 +1,35 @@
+@model LifeTrack.Web.ViewModels.Account.DeleteAccountViewModel
+
+@{
+    Layout = "_AuthenticatedLayout";
+    ViewData["Title"] = "Eliminar cuenta";
+    ViewData["Breadcrumb"] = "Cuenta / Eliminar cuenta";
+}
+
+<section class="app-auth" aria-labelledby="delete-account-title">
+    <div class="app-auth__shell">
+        <div class="app-auth__card">
+            <header class="app-auth__header">
+                <p class="app-auth__eyebrow">Cuenta</p>
+                <h1 id="delete-account-title">Eliminar mi cuenta</h1>
+                <p class="app-auth__intro">Esta acción eliminará <strong>permanentemente</strong> tu cuenta y todos tus datos: categorías, movimientos, presupuestos y preferencias. No se puede deshacer.</p>
+            </header>
+            <dl class="app-form-field">
+                <dt class="form-label">Correo electrónico</dt>
+                <dd>@Model.Email</dd>
+            </dl>
+            <form class="app-auth__form" method="post" asp-controller="Account" asp-action="DeleteAccountConfirmed" data-app-validate novalidate aria-labelledby="delete-account-title">
+                <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+                <p class="app-auth__confirmation">Escribe <strong>"ELIMINAR"</strong> para confirmar que quieres borrar tu cuenta y todos tus datos.</p>
+                <div class="app-form-field">
+                    <label asp-for="Confirmation" class="form-label">Confirmación</label>
+                    <input asp-for="Confirmation" class="form-control" type="text" autocomplete="off" aria-describedby="Confirmation-help Confirmation-error" />
+                    <div id="Confirmation-help" class="form-text">Escribe ELIMINAR en mayúsculas.</div>
+                    <span asp-validation-for="Confirmation" id="Confirmation-error" class="field-validation-error"></span>
+                </div>
+                <button class="btn btn-danger app-auth__submit" type="submit">Eliminar mi cuenta</button>
+                <p class="app-auth__switch"><a asp-controller="Account" asp-action="Profile">Cancelar y volver al perfil</a></p>
+            </form>
+        </div>
+    </div>
+</section>

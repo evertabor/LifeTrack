@@ -2,13 +2,18 @@ using System.Threading.RateLimiting;
 using LifeTrack.Application.Abstractions;
 using LifeTrack.Application.Common;
 using LifeTrack.Infrastructure;
+using LifeTrack.Infrastructure.Persistence;
 using LifeTrack.Web.Filters;
 using LifeTrack.Web.Security;
 using LifeTrack.Web.Services;
 using LifeTrack.Web.Services.Dashboard;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +56,17 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("auth", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
         RateLimitPartition.GetFixedWindowLimiter(
             context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
@@ -62,10 +78,21 @@ builder.Services.AddRateLimiter(options =>
             }));
 });
 
+builder.Services.Configure<HstsOptions>(options =>
+{
+    options.MaxAge = TimeSpan.FromDays(365);
+    options.IncludeSubDomains = true;
+    options.Preload = true;
+});
+
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>();
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUserService>();
 builder.Services.AddScoped<UserBadgeService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<ICspNonceService, CspNonceService>();
 
 var app = builder.Build();
 
@@ -73,6 +100,10 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
+}
+else
+{
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseMiddleware<SecurityHeadersMiddleware>();
@@ -89,9 +120,7 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
-    .WithTags("Health")
-    .ExcludeFromDescription()
+app.MapHealthChecks("/health")
     .AllowAnonymous();
 
 app.MapGet("/", (HttpContext context) => Results.Redirect(

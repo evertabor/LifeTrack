@@ -8,21 +8,25 @@ public sealed class FakeAccountService : IAccountService
         AccountOperationResult registerResult,
         LoginOperationResult loginResult,
         UserProfileDto? profileResult = null,
-        AccountOperationResult? updateResult = null)
+        AccountOperationResult? updateResult = null,
+        AccountOperationResult? deleteResult = null)
     {
         RegisterResult = registerResult;
         LoginResult = loginResult;
         ProfileResult = profileResult;
         UpdateResult = updateResult ?? new AccountOperationResult(true, null);
+        DeleteResult = deleteResult ?? new AccountOperationResult(true, null);
     }
 
     public AccountOperationResult RegisterResult { get; set; }
     public LoginOperationResult LoginResult { get; set; }
     public UserProfileDto? ProfileResult { get; set; }
     public AccountOperationResult UpdateResult { get; set; }
+    public AccountOperationResult DeleteResult { get; set; }
     public bool LogoutCalled { get; private set; }
     public (string Email, string Password, string? DisplayName, string? PhoneNumber)? LastRegister { get; private set; }
     public (Guid UserId, string? DisplayName, string? PhoneNumber)? LastUpdate { get; private set; }
+    public Guid? LastDeleteUserId { get; private set; }
 
     public Task<AccountOperationResult> RegisterAsync(string email, string password, string? displayName, string? phoneNumber, CancellationToken cancellationToken)
     {
@@ -46,5 +50,11 @@ public sealed class FakeAccountService : IAccountService
     {
         LastUpdate = (userId, displayName, phoneNumber);
         return Task.FromResult(UpdateResult);
+    }
+
+    public Task<AccountOperationResult> DeleteAccountAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        LastDeleteUserId = userId;
+        return Task.FromResult(DeleteResult);
     }
 }

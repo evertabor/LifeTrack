@@ -25,13 +25,14 @@ public sealed class GetTransactionHandler(
             throw new ResourceNotFoundException("El movimiento no existe.");
         }
 
-        var names = (await categories.ListAsync(currentUser.UserId.Value, ct)).ToDictionary(c => c.Id, c => c.Name);
+        var category = await categories.GetByIdAsync(transaction.CategoryId, currentUser.UserId.Value, ct);
+        var categoryName = category?.Name ?? "Sin categoría";
         var isIncome = transaction.Type == TransactionType.Income;
 
         return new TransactionSummary(
             transaction.Id,
             transaction.CategoryId,
-            names.GetValueOrDefault(transaction.CategoryId, "Sin categoría"),
+            categoryName,
             isIncome,
             isIncome ? "Ingreso" : "Gasto",
             transaction.Amount,

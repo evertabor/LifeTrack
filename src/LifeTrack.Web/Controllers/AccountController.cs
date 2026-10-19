@@ -4,6 +4,7 @@ using LifeTrack.Web.ViewModels.Account;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace LifeTrack.Web.Controllers;
 
@@ -19,6 +20,7 @@ public sealed class AccountController(
 
     [HttpPost("Register")]
     [AllowAnonymous]
+    [EnableRateLimiting("auth")]
     public async Task<IActionResult> Register(RegisterInputModel input, CancellationToken ct)
     {
         if (!ModelState.IsValid)
@@ -51,6 +53,7 @@ public sealed class AccountController(
 
     [HttpPost("Login")]
     [AllowAnonymous]
+    [EnableRateLimiting("auth")]
     public async Task<IActionResult> Login(LoginInputModel input, CancellationToken ct)
     {
         if (!ModelState.IsValid)
@@ -133,6 +136,41 @@ public sealed class AccountController(
         catch (ResourceNotFoundException ex)
         {
             logger.LogWarning(ex, "Profile requested with unknown account");
+            return RedirectToAction("Index", "Transactions");
+        }
+    }
+
+    [HttpGet("Delete")]
+    public async Task<IActionResult> DeleteAccount(CancellationToken ct)
+    {
+        try
+        {
+            var profile = await sender.Send(new GetProfileQuery(), ct);
+            return View(DeleteAccountViewModel.From(profile));
+        }
+        catch (ResourceNotFoundException ex)
+        {
+            logger.LogWarning(ex, "Delete account requested with unknown account");
+            return RedirectToAction("Index", "Transactions");
+        }
+    }
+
+    [HttpPost("Delete")]
+    public async Task<IActionResult> DeleteAccountConfirmed(CancellationToken ct)
+    {
+        try
+        {
+            await sender.Send(new DeleteAccountCommand(), ct);
+            return RedirectToAction("Login");
+        }
+        catch (BusinessRuleException ex)
+        {
+            logger.LogWarning(ex, "Delete account failed");
+            return RedirectToAction("Index", "Transactions");
+        }
+        catch (ResourceNotFoundException ex)
+        {
+            logger.LogWarning(ex, "Delete account requested with unknown account");
             return RedirectToAction("Index", "Transactions");
         }
     }
