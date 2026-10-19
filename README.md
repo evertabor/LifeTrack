@@ -1,6 +1,6 @@
 # LifeTrack
 
-Finanzas personales + hábitos con un dashboard que cruza ambos. Proyecto final (TFM) de un máster de desarrollo con IA.
+Finanzas personales con dashboard inteligente. Proyecto final (TFM) de un máster de desarrollo con IA.
 **.NET 10 · Clean Architecture · ASP.NET Core MVC · EF Core · Azure SQL (gratis) · OWASP Top 10:2025**
 
 Este paquete contiene **solo la estructura de carpetas y los documentos de reglas**. El código lo genera la IA siguiendo esas reglas.

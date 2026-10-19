@@ -29,9 +29,13 @@
                 <input asp-for="Email" class="form-control" type="email" autocomplete="email" aria-describedby="Email-error" required maxlength="@LoginInputModel.EmailMaxLength" />
                 <span asp-validation-for="Email" id="Email-error" class="field-validation-error"></span>
             </div>
-            <div class="app-form-field">
+            <div class="app-form-field app-password-field" data-password-field>
                 <label asp-for="Password" class="form-label">Contraseña</label>
-                <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" aria-describedby="Password-error" required maxlength="@LoginInputModel.PasswordMaxLength" />
+                <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" aria-describedby="Password-error" required maxlength="@LoginInputModel.PasswordMaxLength" data-password-input />
+                <button type="button" class="app-password-toggle" aria-label="Mostrar contraseña" aria-pressed="false" data-password-toggle>
+                    <svg data-password-toggle-show xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg data-password-toggle-hide xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
                 <span asp-validation-for="Password" id="Password-error" class="field-validation-error"></span>
             </div>
             @if (Model.HasError)
@@ -46,3 +50,7 @@
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script src="~/js/shared/password-toggle.js" asp-append-version="true" defer></script>
+}

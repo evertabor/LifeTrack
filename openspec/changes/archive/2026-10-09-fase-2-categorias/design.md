@@ -25,7 +25,7 @@ Implementación del vertical slice de HU-04 (crear y listar categorías) siguien
 - Filtrar en el handler tras obtener todas las categorías: rechazado porque los datos de otro usuario ya estarían en memoria.
 - Delegar el filtro a la capa Web: rechazado porque la autorización por propiedad es una responsabilidad de la capa Application según AGENTS.md.
 
-**Justificación**: `ICategoryRepository` es el primer contrato de repositorio de negocio en la capa Application, por lo que no existe un `IHabitRepository` previo que lo preceda. Aplicar el filtro por `UserId` en el repositorio —y no en el handler ni en la capa Web— garantiza que ningún dato ajeno llega a la capa Application ni a la capa Web, haciendo imposible una brecha de IDOR por construcción. Este patrón será replicable en futuros repositorios del mismo agregado.
+**Justificación**: `ICategoryRepository` es el primer contrato de repositorio de negocio en la capa Application. Aplicar el filtro por `UserId` en el repositorio —y no en el handler ni en la capa Web— garantiza que ningún dato ajeno llega a la capa Application ni a la capa Web, haciendo imposible una brecha de IDOR por construcción. Este patrón será replicable en futuros repositorios del mismo agregado.
 
 ### Decisión: Índice único compuesto (UserId, Name) sobre la columna almacenada
 

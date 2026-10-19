@@ -60,7 +60,7 @@ You are an expert code reviewer for the **LifeTrack** solution (personal finance
 - [ ] IDs generated in Domain (`Guid.NewGuid()`), configured `ValueGeneratedNever()`.
 - [ ] Entities: private parameterless ctor (EF), `private set`, static `Create(...)` factory.
 - [ ] Collections: `IReadOnlyCollection<T>` over private `List<T>`, `PropertyAccessMode.Field`.
-- [ ] `HasMaxLength`, `HasPrecision(18,2)` for money, indexes on `UserId`, unique indexes for invariants (e.g., one check-in per habit/day).
+- [ ] `HasMaxLength`, `HasPrecision(18,2)` for money, indexes on `UserId`, unique indexes for invariants (e.g., one budget per user/category/month).
 - [ ] Repositories **don't** call `SaveChangesAsync`; handler does via `IUnitOfWork`.
 - [ ] User entities have FK to `AspNetUsers` with cascade delete (right to be forgotten).
 - [ ] One descriptive migration per model change. No editing applied migrations.

@@ -1,135 +1,161 @@
-# Parte F — Tests  ⚠️ sin ejecutar con xUnit
+# Referencia de patrones de pruebas
 
-Los tests de este documento son **casos de riesgo real**, no cobertura: cada uno cubre un fallo que
-sería silencioso, una brecha de seguridad o un invariante cuya violación rompería el agregado. No
-son un ejemplo de "un test por rama", y no se escribe un test solo para tocar una línea.
+Este documento muestra los patrones aprobados para tests en LifeTrack. No es un sustituto de la especificación ni de `AGENTS.md`; es un catálogo de **cómo se escribe un test** en cada capa.
 
-| Test | Categoría de riesgo |
-|---|---|
-| Rachas (`CurrentStreak`, `BestStreak`) | Fallo silencioso: un número mal calculado se muestra y nadie lo nota |
-| Fecha futura y hábito archivado | Invariante del agregado: si no se bloquea, se corrompe el histórico |
-| Check-in duplicado | Invariante con índice único en base de datos: la entidad debe rechazarlo antes |
-| IDOR (`SaveCount == 0`) | Brecha de seguridad: además de la excepción, comprueba que no se persistió nada |
+## Tests de dominio
 
-## Tests de dominio (rachas)
+Se prueba por **criterio de riesgo**: todo invariante que, si falla, produce un número o estado incorrecto que el usuario ve sin notar (un total que no cuadra, una proyección errónea) es un fallo silencioso y por tanto tiene test.
 
-`tests/LifeTrack.Domain.Tests/HabitTests.cs`
+`tests/LifeTrack.Domain.Tests/CategoryTests.cs`
 
 ```csharp
-using LifeTrack.Domain.Common;
-using LifeTrack.Domain.Habits;
+using LifeTrack.Domain.Finance;
+using Xunit;
 
 namespace LifeTrack.Domain.Tests;
 
-public class HabitTests
+public class CategoryTests
 {
-    private static readonly DateOnly Today = new(2026, 10, 2);
     private static readonly Guid UserId = Guid.NewGuid();
 
-    private static Habit NewHabit() => Habit.Create(UserId, "Leer 20 minutos");
-
-    private static Habit HabitWithCheckIns(params int[] daysFromToday)
+    [Fact]
+    public void Create_WithValidNameAndType_CreatesCategory()
     {
-        var habit = NewHabit();
-        foreach (var offset in daysFromToday)
-        {
-            habit.CheckIn(Today.AddDays(offset), Today);
-        }
+        var category = Category.Create("Comida", UserId, TransactionType.Expense);
 
-        return habit;
+        Assert.Equal("Comida", category.Name);
+        Assert.Equal(TransactionType.Expense, category.Type);
+        Assert.Equal(UserId, category.UserId);
     }
 
     [Fact]
-    public void CheckIn_AddsCheckIn()
+    public void Create_WithBlankName_ThrowsDomainException()
     {
-        var habit = NewHabit();
-
-        habit.CheckIn(Today, Today);
-
-        Assert.Single(habit.CheckIns);
+        Assert.Throws<DomainException>(() => Category.Create("   ", UserId, TransactionType.Expense));
     }
 
     [Fact]
-    public void CheckIn_InTheFuture_Throws()
+    public void EditName_WithValidName_UpdatesName()
     {
-        var habit = NewHabit();
+        var category = Category.Create("Comida", UserId, TransactionType.Expense);
 
-        Assert.Throws<DomainException>(() => habit.CheckIn(Today.AddDays(1), Today));
+        category.EditName("Transporte");
+
+        Assert.Equal("Transporte", category.Name);
     }
 
     [Fact]
-    public void CheckIn_SameDateTwice_Throws()
+    public void EditName_WithBlankName_ThrowsDomainException()
     {
-        var habit = HabitWithCheckIns(0);
+        var category = Category.Create("Comida", UserId, TransactionType.Expense);
 
-        Assert.Throws<DomainException>(() => habit.CheckIn(Today, Today));
+        Assert.Throws<DomainException>(() => category.EditName("   "));
     }
 
     [Fact]
-    public void CheckIn_OnArchivedHabit_Throws()
+    public void ChangeType_FromExpenseToIncome_UpdatesType()
     {
-        var habit = NewHabit();
-        habit.Archive();
+        var category = Category.Create("Comida", UserId, TransactionType.Expense);
 
-        Assert.Throws<DomainException>(() => habit.CheckIn(Today, Today));
+        category.ChangeType(TransactionType.Income);
+
+        Assert.Equal(TransactionType.Income, category.Type);
+    }
+}
+```
+
+`tests/LifeTrack.Domain.Tests/TransactionTests.cs`
+
+```csharp
+using LifeTrack.Domain.Finance;
+using Xunit;
+
+namespace LifeTrack.Domain.Tests;
+
+public class TransactionTests
+{
+    private static readonly Guid UserId = Guid.NewGuid();
+    private static readonly DateOnly Today = new(2026, 10, 2);
+    private static readonly Guid CategoryId = Guid.NewGuid();
+
+    private static Category CreateCategory(TransactionType type) =>
+        Category.Create(type == TransactionType.Income ? "Sueldo" : "Comida", UserId, type);
+
+    [Fact]
+    public void Create_WithValidData_CreatesTransaction()
+    {
+        var category = CreateCategory(TransactionType.Expense);
+
+        var transaction = Transaction.Create(TransactionType.Expense, category, 50.25m, Today, "Almuerzo");
+
+        Assert.Equal(50.25m, transaction.Amount);
+        Assert.Equal(Today, transaction.Date);
+        Assert.Equal("Almuerzo", transaction.Description);
     }
 
     [Fact]
-    public void Create_WithBlankName_Throws()
+    public void Create_WithZeroAmount_ThrowsDomainException()
     {
-        Assert.Throws<DomainException>(() => Habit.Create(UserId, "   "));
+        var category = CreateCategory(TransactionType.Expense);
+
+        Assert.Throws<DomainException>(() => Transaction.Create(TransactionType.Expense, category, 0m, Today, null));
     }
 
     [Fact]
-    public void CurrentStreak_CountsConsecutiveDaysEndingToday()
+    public void Create_WithNegativeAmount_ThrowsDomainException()
     {
-        var habit = HabitWithCheckIns(-5, -4, -3, -1, 0);
+        var category = CreateCategory(TransactionType.Expense);
 
-        Assert.Equal(2, habit.CurrentStreak(Today));
+        Assert.Throws<DomainException>(() => Transaction.Create(TransactionType.Expense, category, -10m, Today, null));
     }
 
     [Fact]
-    public void CurrentStreak_IsStillAliveWhenOnlyYesterdayIsChecked()
+    public void Create_WithFutureDate_ThrowsDomainException()
     {
-        var habit = HabitWithCheckIns(-2, -1);
+        var category = CreateCategory(TransactionType.Expense);
+        var tomorrow = Today.AddDays(1);
 
-        Assert.Equal(2, habit.CurrentStreak(Today));
+        Assert.Throws<DomainException>(() => Transaction.Create(TransactionType.Expense, category, 50m, tomorrow, null));
     }
 
     [Fact]
-    public void CurrentStreak_IsZeroAfterAGapOfMoreThanOneDay()
+    public void Create_WithTooManyDecimals_ThrowsDomainException()
     {
-        var habit = HabitWithCheckIns(-4, -3);
+        var category = CreateCategory(TransactionType.Expense);
 
-        Assert.Equal(0, habit.CurrentStreak(Today));
+        Assert.Throws<DomainException>(() => Transaction.Create(TransactionType.Expense, category, 50.123m, Today, null));
     }
 
     [Fact]
-    public void BestStreak_ReturnsTheLongestRun()
+    public void Create_IncomeTransactionWithExpenseCategory_ThrowsDomainException()
     {
-        var habit = HabitWithCheckIns(-5, -4, -3, -1, 0);
+        var expenseCategory = CreateCategory(TransactionType.Expense);
 
-        Assert.Equal(3, habit.BestStreak());
+        Assert.Throws<DomainException>(() => Transaction.Create(TransactionType.Income, expenseCategory, 50m, Today, null));
+    }
+
+    [Fact]
+    public void Create_ExpenseTransactionWithIncomeCategory_ThrowsDomainException()
+    {
+        var incomeCategory = CreateCategory(TransactionType.Income);
+
+        Assert.Throws<DomainException>(() => Transaction.Create(TransactionType.Expense, incomeCategory, 50m, Today, null));
     }
 }
 ```
 
 ## Fakes para Application
 
-`FixedTimeProvider` fija la zona en **UTC** a propósito: así `Today()` es determinista y el test no
-depende de la zona horaria de la máquina que lo ejecuta.
+`FixedTimeProvider` fija la zona en **UTC** a propósito: así `Today()` es determinista y el test no depende de la zona horaria de la máquina que lo ejecuta.
 
-`InMemoryHabitRepository` **filtra por `userId` y excluye archivados**, exactamente igual que
-`HabitRepository`. No es un detalle: el *fake* es una implementación más de `IHabitRepository`, así
-que le aplica LSP. Si devolviera todos los hábitos, el test de IDOR **pasaría contra el *fake* y
-fallaría en producción**, que es exactamente el fallo que el test de IDOR existe para detectar.
+`InMemoryCategoryRepository` **filtra por `userId`**, exactamente igual que `CategoryRepository`. No es un detalle: el *fake* es una implementación más de `ICategoryRepository`, así que le aplica LSP. Si devolviera todas las categorías, el test de IDOR **pasaría contra el *fake* y fallaría en producción**, que es exactamente el fallo que el test de IDOR existe para detectar.
 
 `tests/LifeTrack.Application.Tests/Fakes/Fakes.cs`
 
 ```csharp
 using LifeTrack.Application.Abstractions;
 using LifeTrack.Domain.Finance;
-using LifeTrack.Domain.Habits;
+using MediatR;
 
 namespace LifeTrack.Application.Tests.Fakes;
 
@@ -156,23 +182,6 @@ internal sealed class FixedTimeProvider(DateOnly today) : TimeProvider
     public override TimeZoneInfo LocalTimeZone => TimeZoneInfo.Utc;
 }
 
-internal sealed class InMemoryHabitRepository : IHabitRepository
-{
-    public List<Habit> Items { get; } = [];
-
-    public Task AddAsync(Habit habit, CancellationToken cancellationToken)
-    {
-        Items.Add(habit);
-        return Task.CompletedTask;
-    }
-
-    public Task<Habit?> GetByIdAsync(Guid habitId, Guid userId, CancellationToken cancellationToken) =>
-        Task.FromResult(Items.FirstOrDefault(h => h.Id == habitId && h.UserId == userId && !h.IsArchived));
-
-    public Task<IReadOnlyList<Habit>> ListAsync(Guid userId, CancellationToken cancellationToken) =>
-        Task.FromResult<IReadOnlyList<Habit>>(Items.Where(h => h.UserId == userId && !h.IsArchived).ToList());
-}
-
 internal sealed class InMemoryCategoryRepository : ICategoryRepository
 {
     public List<Category> Items { get; } = [];
@@ -186,11 +195,13 @@ internal sealed class InMemoryCategoryRepository : ICategoryRepository
     public Task<IReadOnlyList<Category>> ListAsync(Guid userId, CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<Category>>(Items.Where(c => c.UserId == userId).ToList());
 
-    public Task<bool> ExistsAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken) =>
-        Task.FromResult(Items.Any(c => c.Id == categoryId && c.UserId == userId));
+    public Task<bool> ExistsAsync(string normalizedName, Guid userId, CancellationToken cancellationToken) =>
+        Task.FromResult(Items.Any(c => c.UserId == userId && c.Name.ToUpper() == normalizedName.ToUpper()));
 
-    public Task<bool> NameExistsAsync(Guid userId, string name, CancellationToken cancellationToken) =>
-        Task.FromResult(Items.Any(c => c.UserId == userId && c.Name == name));
+    public Task<Category?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken) =>
+        Task.FromResult(Items.FirstOrDefault(c => c.Id == id && c.UserId == userId));
+
+    public void Remove(Category category) => Items.Remove(category);
 }
 
 internal sealed class InMemoryTransactionRepository : ITransactionRepository
@@ -210,121 +221,118 @@ internal sealed class InMemoryTransactionRepository : ITransactionRepository
         CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<Transaction>>(
             Items.Where(t => t.UserId == userId && t.Date >= from && t.Date < toExclusive).ToList());
+
+    public Task<bool> ExistsForCategoryAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken) =>
+        Task.FromResult(Items.Any(t => t.CategoryId == categoryId && t.UserId == userId));
+}
+
+internal sealed class InMemoryBudgetRepository : IBudgetRepository
+{
+    public List<Budget> Items { get; } = [];
+
+    public Task AddAsync(Budget budget, CancellationToken cancellationToken)
+    {
+        Items.Add(budget);
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyList<Budget>> ListByPeriodAsync(Guid userId, int year, int month, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<Budget>>(
+            Items.Where(b => b.UserId == userId && b.Year == year && b.Month == month).ToList());
+
+    public Task<bool> ExistsForCategoryAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken) =>
+        Task.FromResult(Items.Any(b => b.CategoryId == categoryId && b.UserId == userId));
+
+    public void Remove(Budget budget) => Items.Remove(budget);
 }
 ```
 
 ## Test de un caso de uso enviándolo por `ISender`
 
-`tests/LifeTrack.Application.Tests/CheckInHabitTests.cs`
+**Preferido:** enviar el contrato por `ISender`, igual que un controller. El test cubre entonces el enlace contrato → handler, y un contrato mal declarado o un handler sin registrar falla aquí y no en producción. Los dobles siguen **escritos a mano**: MediatR solo resuelve el contrato → handler, y meter una librería de *mocking* solo aportaría una dependencia que auditar.
 
-**Preferido:** enviar el contrato por `ISender`, igual que un controller. El test cubre entonces el
-enlace contrato → handler, y un contrato mal declarado o un handler sin registrar falla aquí y no en
-producción. Los dobles siguen **escritos a mano**: MediatR solo resuelve el contrato → handler, y meter
-una librería de *mocking* solo aportaría una dependencia que auditar.
+`tests/LifeTrack.Application.Tests/Finance/CreateCategoryHandlerTests.cs`
 
 ```csharp
 using LifeTrack.Application.Abstractions;
 using LifeTrack.Application.Common;
-using LifeTrack.Application.Habits;
+using LifeTrack.Application.Finance.Commands.CreateCategory;
 using LifeTrack.Application.Tests.Fakes;
-using LifeTrack.Domain.Habits;
+using LifeTrack.Domain.Finance;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LifeTrack.Application.Tests;
+namespace LifeTrack.Application.Tests.Finance;
 
-public class CheckInHabitTests
+public class CreateCategoryHandlerTests
 {
-    private static readonly DateOnly Today = new(2026, 10, 2);
-    private readonly Guid _owner = Guid.NewGuid();
-    private readonly InMemoryHabitRepository _habits = new();
+    private static readonly Guid UserId = Guid.NewGuid();
+    private readonly InMemoryCategoryRepository _categories = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
     private ISender SenderFor(Guid userId)
     {
         var services = new ServiceCollection();
-        services.AddSingleton<IHabitRepository>(_habits);
+        services.AddSingleton<ICategoryRepository>(_categories);
         services.AddSingleton<IUnitOfWork>(_unitOfWork);
         services.AddSingleton<ICurrentUser>(new FakeCurrentUser(userId));
-        services.AddSingleton<TimeProvider>(new FixedTimeProvider(Today));
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyAnchor).Assembly));
 
         return services.BuildServiceProvider().GetRequiredService<ISender>();
     }
 
-    private Habit ExistingHabit()
-    {
-        var habit = Habit.Create(_owner, "Meditar");
-        _habits.Items.Add(habit);
-        return habit;
-    }
-
     [Fact]
-    public async Task Handle_RegistersTodayAndSaves()
+    public async Task Handle_ValidNameAndType_CreatesCategoryAndSaves()
     {
-        var habit = ExistingHabit();
+        var sender = SenderFor(UserId);
 
-        await SenderFor(_owner).Send(new CheckInHabitCommand(habit.Id), CancellationToken.None);
+        var result = await sender.Send(new CreateCategoryCommand("Comida", TransactionType.Expense), CancellationToken.None);
 
-        Assert.Equal(1, habit.CurrentStreak(Today));
+        Assert.Equal("Comida", result.Name);
+        Assert.Equal(TransactionType.Expense, result.Type);
         Assert.Equal(1, _unitOfWork.SaveCount);
     }
 
     [Fact]
-    public async Task Handle_HabitOfAnotherUser_ThrowsResourceNotFoundAndDoesNotSave()
+    public async Task Handle_DuplicateName_ThrowsBusinessRuleException()
     {
-        var habit = ExistingHabit();
-        var attacker = Guid.NewGuid();
+        var sender = SenderFor(UserId);
+        _categories.Items.Add(Category.Create("Comida", UserId, TransactionType.Expense));
 
-        await Assert.ThrowsAsync<ResourceNotFoundException>(() =>
-            SenderFor(attacker).Send(new CheckInHabitCommand(habit.Id), CancellationToken.None));
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            sender.Send(new CreateCategoryCommand("Comida", TransactionType.Expense), CancellationToken.None));
 
-        Assert.Empty(habit.CheckIns);
         Assert.Equal(0, _unitOfWork.SaveCount);
     }
 
     [Fact]
-    public async Task Handle_TwiceOnTheSameDay_ThrowsBusinessRule()
+    public async Task Handle_EmptyName_ThrowsBusinessRuleException()
     {
-        var habit = ExistingHabit();
-        var sender = SenderFor(_owner);
-        await sender.Send(new CheckInHabitCommand(habit.Id), CancellationToken.None);
+        var sender = SenderFor(UserId);
 
         await Assert.ThrowsAsync<BusinessRuleException>(() =>
-            sender.Send(new CheckInHabitCommand(habit.Id), CancellationToken.None));
+            sender.Send(new CreateCategoryCommand("   ", TransactionType.Expense), CancellationToken.None));
     }
 }
 ```
 
-**Alternativa válida** para un test centrado en un único handler: construirlo directamente y llamar a
-`Handle(request, cancellationToken)`. Es más rápido porque no monta el dispatcher, pero no cubre el
-enlace contrato → handler.
+**Alternativa válida** para un test centrado en un único handler: construirlo directamente y llamar a `Handle(request, cancellationToken)`. Es más rápido porque no monta el dispatcher, pero no cubre el enlace contrato → handler.
 
 ```csharp
-var handler = new CheckInHabitHandler(_habits, _unitOfWork, new FakeCurrentUser(_owner), new FixedTimeProvider(Today));
+var handler = new CreateCategoryHandler(_categories, _unitOfWork, new FakeCurrentUser(UserId));
 
-await handler.Handle(new CheckInHabitCommand(habit.Id), CancellationToken.None);
+await handler.Handle(new CreateCategoryCommand("Comida", TransactionType.Expense), CancellationToken.None);
 ```
 
-Un test de Application espera **excepciones de frontera**: el handler ya tradujo las del dominio, así
-que `ResourceNotFoundException` y `BusinessRuleException` son lo que sale del caso de uso.
-`DomainException` y `NotFoundException` solo se esperan en los tests de **dominio**.
+Un test de Application espera **excepciones de frontera**: el handler ya tradujo las del dominio, así que `ResourceNotFoundException` y `BusinessRuleException` son lo que sale del caso de uso. `DomainException` y `NotFoundException` solo se esperan en los tests de **dominio**.
 
-El test de IDOR no se conforma con comprobar la excepción: además mira `SaveCount == 0` y que no se
-añadiera ningún *check-in*. Un test que solo mira la excepción no verifica que el sistema quedó
-consistente, y una brecha puede dejar un registro a medias sin que el test se entere.
+El test de IDOR no se conforma con comprobar la excepción: además mira `SaveCount == 0` y que no se guardó nada. Un test que solo mira la excepción no verifica que el sistema quedó consistente, y una brecha puede dejar un registro a medias sin que el test se entere.
 
 ## Tests de arquitectura (regla de dependencias ejecutable)
 
-Esta clase es la **versión ejecutable de la regla de dependencias de `AGENTS.md`**: si alguien rompe
-el *layering*, el CI falla aquí. Es la única puerta automática de SOLID, y cubre exactamente la
-**D** (inversión de dependencias), porque es la única letra cuyo *sentido* se puede verificar
-automáticamente. SRP, OCP, ISP y LSP no se comprueban aquí: son criterio de revisión.
+Esta clase es la **versión ejecutable de la regla de dependencias de `AGENTS.md`**: si alguien rompe el *layering*, el CI falla aquí. Es la única puerta automática de SOLID, y cubre exactamente la **D** (inversión de dependencias), porque es la única letra cuyo *sentido* se puede verificar automáticamente. SRP, OCP, ISP y LSP no se comprueban aquí: son criterio de revisión.
 
-Los dos tests que leen `Program.cs` comprueban cosas que **no** se pueden expresar con NetArchTest:
-que el filtro anti-forgery global siga registrado y que el escaneo de MediatR apunte al ensamblado de
-`Application`. Ambos leen el código fuente porque el registro ocurre en un archivo de compositions,
-no en un atributo de tipo.
+Los dos tests que leen `Program.cs` comprueban cosas que **no** se pueden expresar con NetArchTest: que el filtro anti-forgery global siga registrado y que el escaneo de MediatR apunte al ensamblado de `Application`. Ambos leen el código fuente porque el registro ocurre en un archivo de compositions, no en un atributo de tipo.
 
 `tests/LifeTrack.Architecture.Tests/DependencyRulesTests.cs`
 
@@ -418,7 +426,7 @@ public class DependencyRulesTests
             .That()
             .HaveNameEndingWith("Controller")
             .ShouldNot()
-            .HaveDependencyOn("LifeTrack.Application.Habits.CreateHabitHandler")
+            .HaveDependencyOn("LifeTrack.Application.Finance.Commands.CreateCategory.CreateCategoryHandler")
             .GetResult();
 
         AssertSuccessful(result);
@@ -469,4 +477,3 @@ public class DependencyRulesTests
     }
 }
 ```
-

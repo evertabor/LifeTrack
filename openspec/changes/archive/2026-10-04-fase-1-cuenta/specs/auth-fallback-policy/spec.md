@@ -70,15 +70,15 @@ Any action annotated with `[AllowAnonymous]` MUST be accessible without authenti
 
 ### Requirement: Fallback Policy Blocks Access to Dashboard and All Business Controllers
 
-The system SHALL deny unauthenticated access to all business entity controllers (habits, accounts, categories) until a user is authenticated.
+The system SHALL deny unauthenticated access to all protected business controllers that expose user data.
 
 Controllers created in subsequent phases that do not have `[AllowAnonymous]` MUST inherit the fallback authentication requirement from the global policy.
 
-#### Scenario: Unauthenticated Request to Future Habit Controller Denied
+#### Scenario: Unauthenticated Request to Future Protected Controller Denied
 
 - GIVEN no user is authenticated
-- AND a `HabitController` exists without `[AllowAnonymous]`
-- WHEN an unauthenticated request is made to any action on `HabitController`
+- AND a future business controller has no `[AllowAnonymous]` attribute
+- WHEN an unauthenticated request is made to any action on that controller
 - THEN the server returns HTTP 401 Unauthorized or redirects to login
 
 ### Requirement: Authorization Failure Redirects to Login Page

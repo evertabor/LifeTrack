@@ -336,6 +336,56 @@
   border-color: var(--app-color-danger-700);
 }
 
+.app-password-field {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.app-password-field .form-label {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.app-password-field .form-control {
+  grid-column: 1;
+  grid-row: 2;
+  padding-right: 3rem;
+}
+
+.app-password-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--app-color-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  grid-column: 1;
+  grid-row: 2;
+  height: var(--app-control-min-size);
+  justify-content: center;
+  justify-self: end;
+  min-width: 3rem;
+  padding: 0 var(--app-space-3);
+  transition: color var(--app-transition-fast);
+}
+
+.app-password-toggle:hover {
+  color: var(--app-color-text-primary);
+}
+
+.app-password-toggle:focus {
+  outline: none;
+  color: var(--app-color-primary-700);
+}
+
+.app-password-toggle svg[hidden] {
+  display: none;
+}
+
+.app-password-toggle svg {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
 .app-auth__shell--register {
   max-width: 64rem;
 }
@@ -1253,7 +1303,7 @@
 .app-page-header__filters {
   align-items: center;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--app-space-3);
   padding: var(--app-space-3) var(--app-space-4);
   background: var(--app-color-surface);
@@ -1304,19 +1354,6 @@
 .app-page-header__filters .btn:hover {
   transform: translateY(-1px);
   box-shadow: var(--app-shadow-md);
-}
-
-@media (max-width: 480px) {
-  .app-page-header__filters {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .app-page-header__filters .form-select {
-    width: 100%;
-  }
-  .app-page-header__filters .btn {
-    width: 100%;
-  }
 }
 
 .app-metrics-grid {
@@ -1684,9 +1721,24 @@
 
 @media (max-width: 575.98px) {
   .app-page-header {
-    align-items: start;
+    align-items: stretch;
     flex-direction: column;
     gap: var(--app-space-2);
+  }
+
+  .app-page-header__filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-page-header__filters .form-select {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .app-page-header__filters .btn {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 
   .app-alert-card {

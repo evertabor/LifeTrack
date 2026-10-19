@@ -1,7 +1,7 @@
 schema: spec-driven
 
 context: |
-  Proyecto: LifeTrack, aplicación personal de finanzas y hábitos.
+  Proyecto: LifeTrack, aplicación personal de finanzas.
   Stack: .NET 10, ASP.NET Core MVC con Razor, EF Core, MediatR 13.*, Identity y SQL Server/Azure SQL.
   Arquitectura: Clean Architecture; dependencias hacia Domain.
   Documentación y artefactos SDD en español; identificadores y código en inglés.

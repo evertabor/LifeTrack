@@ -104,15 +104,15 @@ Con atributo, sobre el controller o sobre la acción. **Prohibido** registrar ru
 fichero de extensiones, y **prohibida** la ruta convencional `{controller}/{action}` como referencia.
 
 ```csharp
-[Route("habits")]
-public sealed class HabitsController : Controller
+[Route("transactions")]
+public sealed class TransactionsController : Controller
 {
     [HttpGet("")]
     public async Task<IActionResult> Index(CancellationToken cancellationToken) { /* ... */ }
 
-    [HttpPost("check-in")]
+    [HttpPost("create")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CheckIn(CheckInInputModel input, CancellationToken cancellationToken) { /* ... */ }
+    public async Task<IActionResult> Create(CreateTransactionInputModel input, CancellationToken cancellationToken) { /* ... */ }
 }
 ```
 

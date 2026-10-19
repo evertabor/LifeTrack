@@ -74,7 +74,7 @@ Handlers that require authentication MUST check `ICurrentUser.UserId` and MUST N
 
 #### Scenario: Handler Fails Closed When UserId Is Null
 
-- GIVEN a query handler requires user context (e.g., fetching habits for the current user)
+- GIVEN a query handler requires user context (e.g., listing transactions for the current user)
 - AND `ICurrentUser.UserId` is `null`
 - WHEN the handler is invoked
 - THEN the handler raises `ResourceNotFoundException` or returns an empty result set rather than executing an unfiltered query

@@ -519,7 +519,6 @@ Siempre comunica el estado con icono, texto y color.
 | `danger` | `danger-100` | `danger-700` | “Límite superado” |
 | `info` | `info-100` | `info-700` | “Pendiente de revisar” |
 | `neutral` | `surface-muted` | `text-secondary` | “Sin actividad” |
-| `progress` | `accent-100` | `accent-800` | “En racha” |
 
 ```css
 .app-badge {
@@ -537,7 +536,6 @@ Siempre comunica el estado con icono, texto y color.
 .app-badge--danger { background: var(--app-color-danger-100); color: var(--app-color-danger-700); }
 .app-badge--info { background: var(--app-color-info-100); color: var(--app-color-info-700); }
 .app-badge--neutral { background: var(--app-color-surface-muted); color: var(--app-color-text-secondary); }
-.app-badge--progress { background: var(--app-color-accent-100); color: var(--app-color-accent-800); }
 
 ```
 

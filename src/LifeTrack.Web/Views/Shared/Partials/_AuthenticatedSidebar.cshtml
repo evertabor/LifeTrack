@@ -13,11 +13,11 @@
         <ul class="app-nav__list">
             @if (ViewData["ActiveSection"] as string == "Dashboard")
             {
-                <li><a class="app-nav__link" asp-controller="Dashboard" asp-action="Index" aria-current="page"><span class="app-nav__icon" aria-hidden="true">◔</span><span>Dashboard</span><span class="app-nav__chevron" aria-hidden="true">›</span></a></li>
+                <li><a class="app-nav__link" asp-controller="Dashboard" asp-action="Index" aria-current="page"><span class="app-nav__icon" aria-hidden="true">◔</span><span>Resumen</span><span class="app-nav__chevron" aria-hidden="true">›</span></a></li>
             }
             else
             {
-                <li><a class="app-nav__link" asp-controller="Dashboard" asp-action="Index"><span class="app-nav__icon" aria-hidden="true">◔</span><span>Dashboard</span><span class="app-nav__chevron" aria-hidden="true">›</span></a></li>
+                <li><a class="app-nav__link" asp-controller="Dashboard" asp-action="Index"><span class="app-nav__icon" aria-hidden="true">◔</span><span>Resumen</span><span class="app-nav__chevron" aria-hidden="true">›</span></a></li>
             }
             @if (ViewData["ActiveSection"] as string == "Transactions")
             {

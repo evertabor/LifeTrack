@@ -16,9 +16,8 @@ Completar el módulo de finanzas con el valor añadido de Fase 5: editar y elimi
 
 ### Out of Scope
 
-- Correlación hábito–gasto (RF-D03, dashboard)
 - Borrado de cuenta (RF-A04)
-- Hábitos (Fase 3) y despliegue (Fase 4)
+- Despliegue (Fase 4)
 - Librería de gráficos o iconos (pendientes en `DESIGN.md`)
 
 ## Capabilities

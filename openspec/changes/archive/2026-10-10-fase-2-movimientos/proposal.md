@@ -27,8 +27,6 @@ Se implementó el núcleo de movimientos de finanzas en LifeTrack: HU-05 (regist
 - Editar y eliminar movimientos (RF-F04, Fase 5)
 - Presupuestos mensuales por categoría (RF-F06, Fase 5)
 - Importación CSV (RF-F07, opcional)
-- Correlación hábito–gasto (RF-D03, dashboard, Fase 5)
-- Funcionalidad de hábitos (Fase 3)
 
 ## Capabilities
 

@@ -22,7 +22,6 @@ Implementar el primer vertical slice de Finance en LifeTrack: HU-04 (crear y lis
 - Eliminar categoría (RF-F01 indica que no se elimina si tiene movimientos, pero falta el flujo completo)
 - Iconos o colores asignados a categorías (DESIGN.md sección 8.6 indica no presuponer estos datos)
 - Cualquier pantalla de transacciones, presupuestos o resumen mensual
-- Funcionalidad de hábitos (será fase 3)
 
 ## Capabilities
 
