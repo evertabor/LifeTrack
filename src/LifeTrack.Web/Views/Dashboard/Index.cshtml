@@ -1,5 +1,4 @@
 @model LifeTrack.Web.ViewModels.Dashboard.DashboardViewModel
-@inject LifeTrack.Web.Security.ICspNonceService CspNonce
 
 @{
     ViewData["Title"] = "Resumen";
@@ -49,7 +48,7 @@
             </div>
             <div class="app-stat-card__footer">
                 <div class="app-stat-card__progress">
-                    <div class="app-stat-card__progress-fill app-stat-card__progress-fill--income" style="width: @Model.IncomeProgressPercent%" nonce="@CspNonce.Nonce"></div>
+                    <progress class="app-stat-card__progress-fill app-stat-card__progress-fill--income" value="@Model.IncomeProgressPercent" max="100" aria-label="Ingresos"></progress>
                 </div>
             </div>
         </article>
@@ -73,7 +72,7 @@
             </div>
             <div class="app-stat-card__footer">
                 <div class="app-stat-card__progress">
-                    <div class="app-stat-card__progress-fill app-stat-card__progress-fill--expense" style="width: @Model.ExpenseProgressPercent%" nonce="@CspNonce.Nonce"></div>
+                    <progress class="app-stat-card__progress-fill app-stat-card__progress-fill--expense" value="@Model.ExpenseProgressPercent" max="100" aria-label="Gastos"></progress>
                 </div>
             </div>
         </article>
@@ -91,7 +90,7 @@
             </div>
             <div class="app-stat-card__footer">
                 <div class="app-stat-card__progress">
-                    <div class="app-stat-card__progress-fill app-stat-card__progress-fill--balance" style="width: @Model.BalanceProgressPercent%" nonce="@CspNonce.Nonce"></div>
+                    <progress class="app-stat-card__progress-fill app-stat-card__progress-fill--balance" value="@Model.BalanceProgressPercent" max="100" aria-label="Balance"></progress>
                 </div>
             </div>
         </article>
@@ -109,7 +108,7 @@
             </div>
             <div class="app-stat-card__footer">
                 <div class="app-stat-card__progress">
-                    <div class="app-stat-card__progress-fill app-stat-card__progress-fill--projection" style="width: @Model.ProjectionProgressPercent%" nonce="@CspNonce.Nonce"></div>
+                    <progress class="app-stat-card__progress-fill app-stat-card__progress-fill--projection" value="@Model.ProjectionProgressPercent" max="100" aria-label="Proyección de saldo"></progress>
                 </div>
             </div>
         </article>
@@ -130,11 +129,11 @@
                     @foreach (var segment in Model.DonutSegments)
                     {
                         <li class="app-donut-legend__item">
-                            <span class="app-donut-legend__swatch" style="--segment-color: @segment.Color" aria-hidden="true" nonce="@CspNonce.Nonce"></span>
+                            <span class="app-donut-legend__swatch" data-dashboard-color="@segment.Color" aria-hidden="true"></span>
                             <div class="app-donut-legend__content">
                                 <span class="app-donut-legend__label">@segment.CategoryName</span>
                                 <div class="app-donut-legend__bar">
-                                    <div class="app-donut-legend__bar-fill" style="--segment-color: @segment.Color; width: @(segment.Percent * 100)%" nonce="@CspNonce.Nonce"></div>
+                                    <progress class="app-donut-legend__bar-fill" data-dashboard-color="@segment.Color" value="@segment.FillPercent" max="100" aria-label="@segment.ProgressAriaLabel"></progress>
                                 </div>
                             </div>
                             <span class="app-donut-legend__value">@segment.AmountText (@segment.PercentText)</span>

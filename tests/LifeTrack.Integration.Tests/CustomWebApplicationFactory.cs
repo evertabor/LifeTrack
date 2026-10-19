@@ -2,6 +2,7 @@ using LifeTrack.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LifeTrack.Integration.Tests;
@@ -16,8 +17,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         {
             var removeTypes = new[]
             {
+                typeof(AppDbContext),
                 typeof(DbContextOptions<AppDbContext>),
-                typeof(DbContextOptions<>)
+                typeof(DbContextOptions<>),
+                typeof(IDbContextOptionsConfiguration<AppDbContext>)
             };
 
             foreach (var removeType in removeTypes)

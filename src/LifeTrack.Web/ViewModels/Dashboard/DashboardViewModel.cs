@@ -48,6 +48,8 @@ public sealed record DonutSegmentViewModel
     public double EndAngle { get; init; }
     public double Percent { get; init; }
     public bool IsSmallSegment { get; init; }
+    public int FillPercent => Math.Clamp((int)Math.Round(Percent * 100, MidpointRounding.AwayFromZero), 0, 100);
+    public string ProgressAriaLabel => $"Gasto en {CategoryName}: {PercentText}";
     public string StrokeDashArrayText => FormattableString.Invariant($"{VisualPercent:F4} {100.0 - VisualPercent:F4}");
     public string RotationText => (StartAngle - 90.0).ToString("F4", CultureInfo.InvariantCulture);
 

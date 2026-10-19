@@ -1227,24 +1227,43 @@
 }
 
 .app-stat-card__progress-fill {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  display: block;
   height: 100%;
+  margin: 0;
+  width: 100%;
+}
+
+.app-stat-card__progress-fill::-webkit-progress-bar {
+  background: transparent;
+}
+
+.app-stat-card__progress-fill::-webkit-progress-value {
+  background: var(--app-progress-color);
+  transition: width 0.3s ease;
+}
+
+.app-stat-card__progress-fill::-moz-progress-bar {
+  background: var(--app-progress-color);
   transition: width 0.3s ease;
 }
 
 .app-stat-card__progress-fill--income {
-  background: #2e7d32;
+  --app-progress-color: #2e7d32;
 }
 
 .app-stat-card__progress-fill--expense {
-  background: #c62828;
+  --app-progress-color: #c62828;
 }
 
 .app-stat-card__progress-fill--balance {
-  background: #1565c0;
+  --app-progress-color: #1565c0;
 }
 
 .app-stat-card__progress-fill--projection {
-  background: #e65100;
+  --app-progress-color: #e65100;
 }
 
 .app-metrics-grid {
@@ -1525,6 +1544,30 @@
   box-shadow: 0 1px 3px rgba(16, 42, 67, 0.15);
 }
 
+.app-donut-legend [data-dashboard-color="#2878B5"] {
+  --segment-color: #2878B5;
+}
+
+.app-donut-legend [data-dashboard-color="#EA580C"] {
+  --segment-color: #EA580C;
+}
+
+.app-donut-legend [data-dashboard-color="#15803D"] {
+  --segment-color: #15803D;
+}
+
+.app-donut-legend [data-dashboard-color="#9A3412"] {
+  --segment-color: #9A3412;
+}
+
+.app-donut-legend [data-dashboard-color="#0369A1"] {
+  --segment-color: #0369A1;
+}
+
+.app-donut-legend [data-dashboard-color="#C2410C"] {
+  --segment-color: #C2410C;
+}
+
 .app-donut-legend__label {
   font-weight: var(--app-font-weight-medium);
 }
@@ -1539,9 +1582,27 @@
 }
 
 .app-donut-legend__bar-fill {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  display: block;
+  height: 100%;
+  margin: 0;
+  width: 100%;
+}
+
+.app-donut-legend__bar-fill::-webkit-progress-bar {
+  background: transparent;
+}
+
+.app-donut-legend__bar-fill::-webkit-progress-value {
   background: var(--segment-color);
   border-radius: var(--app-radius-pill);
-  height: 100%;
+}
+
+.app-donut-legend__bar-fill::-moz-progress-bar {
+  background: var(--segment-color);
+  border-radius: var(--app-radius-pill);
 }
 
 .app-donut-legend__value {

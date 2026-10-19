@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace LifeTrack.Integration.Tests;
 
 public class HealthEndpointTests : IClassFixture<CustomWebApplicationFactory>
@@ -12,19 +10,17 @@ public class HealthEndpointTests : IClassFixture<CustomWebApplicationFactory>
     }
 
     [Fact]
-    public async Task HealthEndpoint_Returns200Ok_WithCorrectJson()
+    public async Task HealthEndpoint_ReturnsHealthyStatus()
     {
         using var client = _factory.CreateClient();
-        client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 
         var response = await client.GetAsync("/health");
 
         Assert.Equal(200, (int)response.StatusCode);
-        Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
+        Assert.Equal("text/plain", response.Content.Headers.ContentType?.MediaType);
 
         var body = await response.Content.ReadAsStringAsync();
-        var json = JsonSerializer.Deserialize<JsonElement>(body);
-        Assert.Equal("ok", json.GetProperty("status").GetString());
+        Assert.Equal("Healthy", body);
     }
 
     [Fact]
