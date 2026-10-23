@@ -60,6 +60,13 @@ La guía de pruebas propone validar el flujo completo de alta, creación de cate
 - Instalar Chromium con el script Playwright generado para el proyecto y ejecutar el proyecto UX contra SQL Server local desechable.
 - Confirmar que la ejecución elimina la base de pruebas y que no cambia los archivos sin seguimiento preexistentes.
 
+## Evidencia de trabajo
+
+- Commit de implementación: `1923fa4a81a88141159085bc0d9f9d4edd97caf8` — `test(ux): add Playwright browser journeys`.
+- Hooks del commit: pruebas de arquitectura, solución y formato pasaron; 255 tests pasaron y los dos tests Playwright se omitieron por falta de SQL local; compilación sin warnings y auditoría NuGet sin paquetes vulnerables.
+- Verificación manual adicional: `dotnet restore --locked-mode` pasó. El workflow CI y el runtime con SQL Server/Chromium no se ejecutaron desde este entorno.
+- Reversión: revertir el commit anterior elimina el proyecto Playwright, la corrección del filtro CSP, la configuración CI y la guía; no afecta los documentos de defensa preexistentes.
+
 ## Progreso y siguiente paso
 
 - Estado: UX-01, UX-02 y UX-03 están implementadas. UX-04 queda pendiente porque no hay una conexión SQL Server local configurada ni Chromium instalado.
