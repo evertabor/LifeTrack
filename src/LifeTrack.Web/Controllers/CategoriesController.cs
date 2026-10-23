@@ -18,10 +18,10 @@ public sealed class CategoriesController(
     ILogger<CategoriesController> logger) : Controller
 {
     [HttpGet("")]
-    public async Task<IActionResult> Index(CancellationToken ct)
+    public async Task<IActionResult> Index(CategoryTypeFilter typeFilter, CancellationToken ct)
     {
         var categories = await sender.Send(new ListCategoriesQuery(), ct);
-        return View(CategoryListViewModel.From(categories, TempData["Message"] as string));
+        return View(CategoryListViewModel.From(categories, TempData["Message"] as string, typeFilter: typeFilter));
     }
 
     [HttpPost("create")]

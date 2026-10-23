@@ -18,6 +18,9 @@ public sealed record CategoryListViewModel
     public string CategoryCount { get; init; } = "0";
     public string SearchTerm { get; init; } = string.Empty;
     public CategoryTypeFilter TypeFilter { get; init; }
+    public bool IsAllTypeFilterSelected => TypeFilter == CategoryTypeFilter.All;
+    public bool IsIncomeTypeFilterSelected => TypeFilter == CategoryTypeFilter.Income;
+    public bool IsExpenseTypeFilterSelected => TypeFilter == CategoryTypeFilter.Expense;
     public string NoResultsMessage { get; init; } = string.Empty;
 
     public bool HasSuccessMessage => !string.IsNullOrEmpty(SuccessMessage);

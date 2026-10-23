@@ -180,3 +180,50 @@ riesgo, no por porcentaje.
 7. Workflow aparte de **CodeQL** (C#) y **Dependabot** (NuGet y GitHub Actions).
 8. Permisos del workflow: `contents: read` por defecto.
 Plantilla de YAML en `docs/06-despliegue-azure.md`.
+
+## 6. Pruebas UX de navegador (Playwright)
+
+La suite Playwright ejecuta recorridos de humo dirigidos contra LifeTrack en Kestrel y Chromium, con una base SQL Server local desechable.
+
+### Requisitos locales
+
+- SDK de .NET 10 y PowerShell 7 (`pwsh`).
+- SQL Server local accesible por `localhost`/loopback y una cuenta con permisos para crear y eliminar bases de datos desde `master`.
+- Chromium instalado con el script Playwright generado para el proyecto.
+- La variable `LIFETRACK_UX_TESTS_SQLSERVER_CONNECTION_STRING` debe apuntar a SQL Server local y seleccionar `master`. La cadena debe incluir `Encrypt=True;TrustServerCertificate=True` para una instancia local con certificado no confiable.
+
+Sustituye localmente los marcadores de usuario y contraseña del ejemplo. No compartas la cadena ni las credenciales por chat y no las guardes en archivos versionados.
+
+### Ejecución local (PowerShell 7)
+
+Desde la raíz del repositorio:
+
+```powershell
+$env:LIFETRACK_UX_TESTS_SQLSERVER_CONNECTION_STRING = "Server=localhost,1433;Initial Catalog=master;User ID=<LOCAL_SQL_USER>;Password=<LOCAL_SQL_PASSWORD>;Encrypt=True;TrustServerCertificate=True;Connect Timeout=30"
+try {
+    dotnet restore
+    if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed with exit code $LASTEXITCODE." }
+
+    dotnet build -c Release
+    if ($LASTEXITCODE -ne 0) { throw "dotnet build failed with exit code $LASTEXITCODE." }
+
+    pwsh .\tests\LifeTrack.Playwright.Tests\bin\Release\net10.0\playwright.ps1 install chromium
+    if ($LASTEXITCODE -ne 0) { throw "Playwright Chromium installation failed with exit code $LASTEXITCODE." }
+
+    dotnet test .\tests\LifeTrack.Playwright.Tests\LifeTrack.Playwright.Tests.csproj -c Release --no-build
+    if ($LASTEXITCODE -ne 0) { throw "Playwright UX tests failed with exit code $LASTEXITCODE." }
+}
+finally {
+    Remove-Item Env:LIFETRACK_UX_TESTS_SQLSERVER_CONNECTION_STRING
+}
+```
+
+En Linux, añade `--with-deps` al comando `install chromium` para instalar las dependencias del sistema requeridas por Chromium.
+
+Una ejecución normal de `dotnet test` omite los dos tests UX cuando la variable SQL no está definida o está vacía; no inicializa su fixture. Una cadena no vacía pero inválida o la ausencia de Chromium producen un fallo, no una omisión.
+
+### Aislamiento y alcance
+
+El fixture valida que el destino SQL sea local y rechaza `Failover Partner`. Usa la conexión a `master` para crear una base `LifeTrackUxTests_<GUID>`, aplica las migraciones existentes y, al terminar, detiene Kestrel, limpia solo el pool de esa base y elimina únicamente esa base desechable. No usa Azure ni una base de desarrollo. En CI, SQL Server usa la imagen `mcr.microsoft.com/mssql/server:2022-latest`, se publica solo en loopback, recibe una contraseña aleatoria en tiempo de ejecución y se elimina siempre; no se monta ningún volumen persistente.
+
+Estas comprobaciones automatizadas son cobertura UX de humo para los recorridos indicados; no son una certificación completa de conformidad WCAG 2.2 AA.
