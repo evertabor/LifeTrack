@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Presentación breve del proyecto LifeTrack">
+  <title>LifeTrack — Presentación</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", Arial, sans-serif;
+      --ink: #11243a;
+      --muted: #5d6c7d;
+      --paper: #f4f7f8;
+      --white: #ffffff;
+      --green: #b8f36d;
+      --green-dark: #345c20;
+      --blue: #dcecff;
+      --line: #dce4e8;
+      --navy: #0c1c2d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--navy);
+    }
+
+    .slide {
+      position: relative;
+      display: flex;
+      min-height: 100svh;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      padding: clamp(2rem, 6vw, 5.5rem) clamp(1.5rem, 8vw, 7rem) clamp(1.5rem, 4vw, 3rem);
+      scroll-snap-align: start;
+      background: var(--paper);
+    }
+
+    .slide--cover,
+    .slide--closing {
+      color: var(--white);
+      background: var(--navy);
+    }
+
+    .slide--cover::after,
+    .slide--closing::after {
+      position: absolute;
+      right: -10rem;
+      bottom: -18rem;
+      width: 40rem;
+      height: 40rem;
+      border: 1px solid rgb(184 243 109 / 22%);
+      border-radius: 50%;
+      box-shadow: 0 0 0 3rem rgb(184 243 109 / 4%), 0 0 0 7rem rgb(184 243 109 / 3%);
+      content: "";
+      pointer-events: none;
+    }
+
+    .slide--cover::before {
+      position: absolute;
+      top: 20%;
+      right: 14%;
+      width: 9rem;
+      height: 9rem;
+      border: 1px solid rgb(184 243 109 / 55%);
+      border-radius: 2.5rem;
+      content: "";
+      transform: rotate(18deg);
+    }
+
+    .slide-header,
+    .slide-footer {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand,
+    .eyebrow,
+    .slide-count {
+      font-size: 0.75rem;
+      font-weight: 750;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .brand-mark {
+      display: inline-block;
+      width: 0.7rem;
+      height: 0.7rem;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .slide-count,
+    .eyebrow {
+      color: var(--muted);
+    }
+
+    .slide--cover .slide-count,
+    .slide--closing .slide-count,
+    .slide--cover .eyebrow,
+    .slide--closing .eyebrow {
+      color: #b9c7d4;
+    }
+
+    .slide-content {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 75rem);
+      margin: 2.5rem auto;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 12ch;
+      margin-bottom: 1.2rem;
+      font-size: clamp(3.5rem, 10vw, 7.5rem);
+      letter-spacing: -0.075em;
+      line-height: 0.95;
+    }
+
+    h2 {
+      max-width: 18ch;
+      margin: 0.6rem 0 2.5rem;
+      font-size: clamp(2.2rem, 5vw, 4.5rem);
+      letter-spacing: -0.06em;
+      line-height: 1.02;
+    }
+
+    h3 {
+      margin-bottom: 0.6rem;
+      font-size: clamp(1.1rem, 2vw, 1.5rem);
+      letter-spacing: -0.025em;
+    }
+
+    .cover-subtitle {
+      max-width: 35rem;
+      margin-bottom: 2.5rem;
+      color: #d0dbe5;
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      line-height: 1.45;
+    }
+
+    .cover-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgb(255 255 255 / 18%);
+      border-radius: 999px;
+      color: var(--white);
+      font-size: 0.9rem;
+    }
+
+    .cover-label strong {
+      color: var(--green);
+    }
+
+    .accent {
+      color: var(--green);
+    }
+
+    .lead {
+      max-width: 48rem;
+      color: var(--muted);
+      font-size: clamp(1.1rem, 2vw, 1.45rem);
+      line-height: 1.55;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .card-grid--four {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card {
+      min-height: 10rem;
+      padding: 1.4rem;
+      border: 1px solid var(--line);
+      border-radius: 1.2rem;
+      background: var(--white);
+    }
+
+    .card p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.5;
+    }
+
+    .card-number {
+      display: inline-grid;
+      width: 2.25rem;
+      height: 2.25rem;
+      margin-bottom: 1.2rem;
+      place-items: center;
+      border-radius: 0.7rem;
+      color: var(--green-dark);
+      background: #e9f8d9;
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .objective {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding: 1rem 1.2rem;
+      border-left: 4px solid #7ebd45;
+      border-radius: 0 0.8rem 0.8rem 0;
+      background: #e9f1e3;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .objective strong {
+      flex: 0 0 auto;
+    }
+
+    .feature-card {
+      min-height: 11.5rem;
+    }
+
+    .feature-card .card-number {
+      border-radius: 50%;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.1rem;
+      margin: 1.5rem 0 1rem;
+      counter-reset: flow-step;
+    }
+
+    .flow-step {
+      position: relative;
+      min-height: 13rem;
+      padding: 1.5rem;
+      border-radius: 1.2rem;
+      background: var(--white);
+      counter-increment: flow-step;
+    }
+
+    .flow-step::before {
+      display: grid;
+      width: 2.8rem;
+      height: 2.8rem;
+      margin-bottom: 2.5rem;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--navy);
+      background: var(--green);
+      content: counter(flow-step, decimal-leading-zero);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .flow-step:not(:last-child)::after {
+      position: absolute;
+      top: 2.75rem;
+      right: -1.2rem;
+      z-index: 1;
+      width: 1.3rem;
+      height: 1px;
+      background: #90a0ad;
+      content: "";
+    }
+
+    .flow-step p {
+      margin-bottom: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .signal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .signal-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 1.1rem;
+      border: 1px solid #d9e9c9;
+      border-radius: 0.9rem;
+      background: #e9f8d9;
+    }
+
+    .signal-card span {
+      flex: 0 0 auto;
+      color: var(--green-dark);
+      font-size: 0.85rem;
+      font-weight: 750;
+    }
+
+    .signal-card strong {
+      font-size: 0.9rem;
+      line-height: 1.35;
+      text-align: right;
+    }
+
+    .insight {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1.25rem 1.5rem;
+      border-radius: 1rem;
+      color: var(--white);
+      background: var(--navy);
+    }
+
+    .insight strong {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      line-height: 1.4;
+    }
+
+    .insight-tag {
+      flex: 0 0 auto;
+      padding: 0.55rem 0.8rem;
+      border-radius: 999px;
+      color: var(--green);
+      background: rgb(255 255 255 / 10%);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .build-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 1.2rem;
+    }
+
+    .build-panel {
+      padding: 1.5rem;
+      border: 1px solid var(--line);
+      border-radius: 1.2rem;
+      background: var(--white);
+    }
+
+    .layer-list {
+      display: grid;
+      gap: 0.55rem;
+      margin-top: 1rem;
+    }
+
+    .layer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.8rem 1rem;
+      border-radius: 0.7rem;
+      background: var(--paper);
+    }
+
+    .layer strong {
+      font-size: 0.95rem;
+    }
+
+    .layer span {
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: right;
+    }
+
+    .build-panel p,
+    .build-panel li {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .build-panel ul {
+      display: grid;
+      gap: 0.75rem;
+      margin: 1rem 0 0;
+      padding-left: 1.1rem;
+    }
+
+    .method-note {
+      margin-top: 1rem;
+      padding: 0.9rem 1rem;
+      border-radius: 0.8rem;
+      background: var(--blue);
+      color: var(--ink);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .verification-note {
+      margin-top: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-left: 3px solid #7ebd45;
+      color: var(--muted);
+      background: var(--paper);
+      font-size: 0.82rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .closing-title {
+      max-width: 16ch;
+      margin-bottom: 1.5rem;
+      font-size: clamp(2.7rem, 7vw, 6rem);
+      letter-spacing: -0.07em;
+      line-height: 1;
+    }
+
+    .closing-copy {
+      max-width: 45rem;
+      color: #c8d3dd;
+      font-size: clamp(1.1rem, 2.3vw, 1.5rem);
+      line-height: 1.55;
+    }
+
+    .closing-points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin: 2rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .closing-points li {
+      padding: 0.7rem 1rem;
+      border: 1px solid rgb(255 255 255 / 20%);
+      border-radius: 999px;
+      color: #e5edf4;
+      font-size: 0.9rem;
+    }
+
+    .slide-nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-link {
+      padding: 0.6rem 0.85rem;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      color: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .nav-link:hover,
+    .nav-link:focus-visible {
+      color: var(--navy);
+      background: var(--green);
+      outline: none;
+    }
+
+    .slide--cover .nav-link,
+    .slide--closing .nav-link {
+      border-color: rgb(255 255 255 / 35%);
+    }
+
+    .future-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .future-card {
+      padding: 1.4rem;
+      border: 1px dashed var(--line);
+      border-radius: 1.2rem;
+      background: var(--paper);
+    }
+
+    .future-card h3 {
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .future-card p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .process-step {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-radius: 0.8rem;
+      background: var(--white);
+      border: 1px solid var(--line);
+    }
+
+    .process-step-number {
+      flex: 0 0 auto;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      background: var(--green);
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .process-step-content h3 {
+      margin: 0 0 0.3rem;
+      font-size: 1rem;
+    }
+
+    .process-step-content p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 760px) {
+      .slide {
+        min-height: 100svh;
+        padding: 1.5rem;
+      }
+
+      .card-grid,
+      .card-grid--four,
+      .flow,
+      .signal-grid,
+      .build-grid,
+      .future-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card,
+      .feature-card,
+      .flow-step,
+      .future-card {
+        min-height: auto;
+      }
+
+      .flow-step::before {
+        margin-bottom: 1.2rem;
+      }
+
+      .flow-step:not(:last-child)::after {
+        top: auto;
+        right: 50%;
+        bottom: -0.9rem;
+        width: 1px;
+        height: 1rem;
+      }
+
+      .objective,
+      .insight {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .layer {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .layer span {
+        text-align: left;
+      }
+
+      .signal-card {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .signal-card strong {
+        text-align: left;
+      }
+
+      .slide-footer {
+        align-items: flex-end;
+      }
+
+      .slide-nav {
+        gap: 0.45rem;
+      }
+
+      .nav-link {
+        padding: 0.5rem 0.65rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .slide-header .eyebrow {
+        display: none;
+      }
+
+      .slide-count {
+        font-size: 0.65rem;
+      }
+
+      .slide-footer .eyebrow {
+        max-width: 9rem;
+        font-size: 0.62rem;
+        line-height: 1.4;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+    }
+
+    @media print {
+      @page {
+        size: 13.333in 7.5in;
+        margin: 0;
+      }
+
+      html,
+      body {
+        width: 13.333in;
+        background: white;
+        scroll-snap-type: none;
+      }
+
+      .slide {
+        width: 13.333in;
+        height: 7.5in;
+        min-height: 0;
+        padding: 0.65in 0.85in 0.4in;
+        break-after: page;
+        page-break-after: always;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .slide:last-child {
+        break-after: auto;
+        page-break-after: auto;
+      }
+
+      .slide-nav {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="slide slide--cover" id="slide-1" aria-labelledby="title-1">
+      <header class="slide-header">
+        <span class="brand"><span class="brand-mark" aria-hidden="true"></span> LifeTrack</span>
+        <span class="eyebrow">Proyecto final</span>
+      </header>
+      <div class="slide-content">
+        <p class="eyebrow">Finanzas personales</p>
+        <h1 id="title-1">Una visión más clara <span class="accent">de tu mes.</span></h1>
+        <p class="cover-subtitle">Aplicación web para registrar movimientos, seguir presupuestos y entender mejor los gastos. Diseñada para simplificar mi día a día financiero.</p>
+        <span class="cover-label"><strong>TFM</strong> · Máster de desarrollo con IA</span>
+      </div>
+      <footer class="slide-footer">
+        <span class="slide-count">01 / 08</span>
+        <nav class="slide-nav" aria-label="Navegación de diapositivas">
+          <a class="nav-link" href="#slide-2">Empezar →</a>
+        </nav>
+      </footer>
+    </section>
+
+    <section class="slide" id="slide-2" aria-labelledby="title-2">
+      <header class="slide-header">
+        <span class="brand"><span class="brand-mark" aria-hidden="true"></span> LifeTrack</span>
+        <span class="slide-count">02 / 08</span>
+      </header>
+      <div class="slide-content">
+        <p class="eyebrow">El reto</p>
+        <h2 id="title-2">Anotar gastos no siempre ayuda a entenderlos.</h2>
+        <div class="card-grid">
+          <article class="card">
+            <span class="card-number">01</span>
+            <h3>Información dispersa</h3>
+            <p>Ingresos y gastos quedan repartidos entre apuntes, apps y hojas de cálculo.</p>
+          </article>
+          <article class="card">
+            <span class="card-number">02</span>
+            <h3>Poca visión del mes</h3>
+            <p>Sin un resumen unificado, cuesta ver el balance real y qué categorías concentran el gasto.</p>
+          </article>
+          <article class="card">
+            <span class="card-number">03</span>
+            <h3>Alertas tardías</h3>
+            <p>Un presupuesto sirve si avisa <strong>antes</strong> de agotarse, no cuando ya no hay remedio.</p>
+          </article>
+        </div>
+        <div class="objective"><strong>Objetivo</strong><span>Una sola aplicación que una registro y análisis mensual, con alertas tempranas y proyecciones útiles para mi día a día.</span></div>
+      </div>
+      <footer class="slide-footer">
+        <span class="eyebrow">De registrar a comprender</span>
+        <nav class="slide-nav" aria-label="Navegación de diapositivas">
+          <a class="nav-link" href="#slide-1">← Anterior</a>
+          <a class="nav-link" href="#slide-3">Siguiente →</a>
+        </nav>
+      </footer>
+    </section>
+
+    <section class="slide" id="slide-3" aria-labelledby="title-3">
+      <header class="slide-header">
+        <span class="brand"><span class="brand-mark" aria-hidden="true"></span> LifeTrack</span>
+        <span class="slide-count">03 / 08</span>
+      </header>
+      <div class="slide-content">
+        <p class="eyebrow">La propuesta</p>
+        <h2 id="title-3">Lo esencial para seguir mis finanzas.</h2>
+        <div class="card-grid card-grid--four">
+          <article class="card feature-card">
+            <span class="card-number">01</span>
+            <h3>Cuenta y movimientos</h3>
+            <p>Registro ingresos y gastos por categoría con validación en tiempo real.</p>
+          </article>
+          <article class="card feature-card">
+            <span class="card-number">02</span>
+            <h3>Presupuestos con avisos</h3>
+            <p>Límites mensuales por categoría; alertas al 80 % y al 100 % de consumo.</p>
+          </article>
+          <article class="card feature-card">
+            <span class="card-number">03</span>
+            <h3>Dashboard inteligente</h3>
+            <p>Balance, proyección a fin de mes y detección de gastos inusuales automática.</p>
+          </article>
+          <article class="card feature-card">
+            <span class="card-number">04</span>
+            <h3>Importación CSV + borrado total</h3>
+            <p>Carga masiva con vista previa y opción de eliminar mi cuenta y todos mis datos.</p>
+          </article>
+        </div>
+      </div>
+      <footer class="slide-footer">
+        <span class="eyebrow">Una aplicación, una visión mensual completa</span>
+        <nav class="slide-nav" aria-label="Navegación de diapositivas">
+          <a class="nav-link" href="#slide-2">← Anterior</a>
+          <a class="nav-link" href="#slide-4">Siguiente →</a>
+        </nav>
+      </footer>
+    </section>
+
+    <section class="slide" id="slide-4" aria-labelledby="title-4">
+      <header class="slide-header">
+        <span class="brand"><span class="brand-mark" aria-hidden="true"></span> LifeTrack</span>
+        <span class="slide-count">04 / 08</span>
+      </header>
+      <div class="slide-content">
+        <p class="eyebrow">Cómo funciona</p>
+        <h2 id="title-4">Del movimiento a una decisión informada.</h2>
+        <div class="flow">
+          <article class="flow-step">
+            <h3>1. Registra</h3>
+            <p>Añades un ingreso o gasto con fecha, categoría, monto y descripción opcional. Validación inmediata: monto > 0, máx 2 decimales, fecha no futura.</p>
+          </article>
+          <article class="flow-step">
+            <h3>2. Revisa</h3>
+            <p>El dashboard muestra ingresos, gastos, balance del mes y desglose por categoría. Compara con el mes anterior para detectar tendencias.</p>
+          </article>
+          <article class="flow-step">
+            <h3>3. Anticípate</h3>
+            <p>Presupuestos con semáforo visual. Proyección: balance actual − gasto medio diario × días restantes. Alertas: gasto ≥ 2,5× la media de su categoría (mín. 5 movimientos).</p>
+          </article>
+        </div>
+        <div class="signal-grid">
+          <div class="signal-card"><span>Proyección</span><strong>Balance − gasto diario medio × días restantes</strong></div>
+          <div class="signal-card"><span>Gasto inusual</span><strong>≥ 2,5× promedio · mínimo 5 movimientos</strong></div>
+        </div>
+        <div class="insight">
+          <strong>Reglas deterministas y explicables. Sin modelos de IA en runtime.</strong>
+          <span class="insight-tag">Transparente</span>
+        </div>
+      </div>
+      <footer class="slide-footer">
+        <span class="eyebrow">Flujo principal de usuario</span>
+        <nav class="slide-nav" aria-label="Navegación de diapositivas">
+          <a class="nav-link" href="#slide-3">← Anterior</a>
+          <a class="nav-link" href="#slide-5">Siguiente →</a>
+        </nav>
+      </footer>
+    </section>
+
+    <section class="slide" id="slide-5" aria-labelledby="title-5">
+      <header class="slide-header">
+        <span class="brand"><span class="brand-mark" aria-hidden="true"></span> LifeTrack</span>
+        <span class="slide-count">05 / 08</span>
+      </header>
+      <div class="slide-content">
+        <p class="eyebrow">Cómo se construyó</p>
+        <h2 id="title-5">Desarrollo dirigido por especificaciones con apoyo de IA.</h2>
+        <div style="display: grid; gap: 1rem;">
+          <div class="process-step">
+            <span class="process-step-number">01</span>
+            <div class="process-step-content">
+              <h3>Especificación como fuente de verdad</h3>
+              <p>Todo parte de <code>docs/01-especificacion.md</code>: requisitos, reglas, historias, criterios de aceptación. Nada se implementa si no está ahí.</p>
+            </div>
+          </div>
+          <div class="process-step">
+            <span class="process-step-number">02</span>
+            <div class="process-step-content">
+              <h3>SDD + IA como copiloto</h3>
+              <p>Exploración → Propuesta → Especificación delta → Diseño técnico → Tareas → Implementación → Verificación. La IA propone, yo decido y valido.</p>
+            </div>
+          </div>
+          <div class="process-step">
+            <span class="process-step-number">03</span>
+            <div class="process-step-content">
+              <h3>Reglas estrictas (AGENTS.md)</h3>
+              <p>Clean Architecture verificada por tests, OWASP Top 10:2025, cero comentarios en código, vistas sin lógica, JavaScript en IIFE, dependencias hacia dentro.</p>
+            </div>
+          </div>
+          <div class="process-step">
+            <span class="process-step-number">04</span>
+            <div class="process-step-content">
+              <h3>Puertas de calidad automáticas</h3>
+              <p>Build Release sin warnings · 255 tests (Domain, Application, Architecture, Integration) · <code>dotnet format</code> · análisis vulnerabilidades · CodeQL en CI.</p>
+            </div>
+          </div>
+        </div>
+        <div class="method-note"><strong>Principio:</strong> La IA acelera la implementación; los requisitos, la seguridad, la arquitectura y la aceptación son decisiones humanas verificables.</div>
+      </div>
+      <footer class="slide-footer">
+        <span class="eyebrow">Proceso SDD asistido por IA</span>
+        <nav class="slide-nav" aria-label="Navegación de diapositivas">
+          <a class="nav-link" href="#slide-4">← Anterior</a>
+          <a class="nav-link" href="#slide-6">Siguiente →</a>
+        </nav>
+      </footer>
+    </section>
+
+    <section class="slide" id="slide-6" aria-labelledby="title-6">
+      <header class="slide-header">
+        <span class="brand"><span class="brand-mark" aria-hidden="true"></span> LifeTrack</span>
+        <span class="slide-count">06 / 08</span>
+      </header>
+      <div class="slide-content">
+        <p class="eyebrow">Arquitectura y seguridad</p>
+        <h2 id="title-6">Capas claras. Datos protegidos por diseño.</h2>
+        <div class="build-grid">
+          <article class="build-panel">
+            <h3>Clean Architecture</h3>
+            <p>Separación estricta de responsabilidades; las reglas financieras no conocen HTTP ni EF Core.</p>
+            <div class="layer-list" aria-label="Capas de la aplicación">
+              <div class="layer"><strong>Web</strong><span>ASP.NET Core MVC · Razor · ISender</span></div>
+              <div class="layer"><strong>Aplicación</strong><span>MediatR · Handlers · DTOs · Interfaces</span></div>
+              <div class="layer"><strong>Dominio</strong><span>Entidades · Invariantes · Excepciones</span></div>
+              <div class="layer"><strong>Infraestructura</strong><span>EF Core · SQL Server · Identity · TimeProvider</span></div>
+            </div>
+          </article>
+          <article class="build-panel">
+            <h3>Seguridad OWASP Top 10:2025</h3>
+            <ul>
+              <li><strong>A01</strong> Autorización denegar-por-defecto; filtro por UserId en cada consulta; tests IDOR.</li>
+              <li><strong>A02–A03</strong> Secretos fuera del repo; versiones centralizadas; <code>MediatR 13.*</code> aprobado.</li>
+              <li><strong>A05</strong> EF Core parametrizado; sin <code>Html.Raw</code>; validación en InputModel y dominio.</li>
+              <li><strong>A07–A08</strong> Contraseña ≥ 12; bloqueo 5 intentos; anti-forgery global; cookies seguras.</li>
+              <li><strong>A09</strong> Logs estructurados con <code>ILogger</code>; eventos de seguridad; sin PII.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="verification-note">Verificación local 24/10/2026: Build Release 0 warnings · 255 tests passed · dotnet format ✓ · paquetes sin vulnerabilidades</div>
+      </div>
+      <footer class="slide-footer">
+        <span class="eyebrow">.NET 10 · MVC · EF Core · SQL Server · Azure</span>
+        <nav class="slide-nav" aria-label="Navegación de diapositivas">
+          <a class="nav-link" href="#slide-5">← Anterior</a>
+          <a class="nav-link" href="#slide-7">Siguiente →</a>
+        </nav>
+      </footer>
+    </section>
+
+    <section class="slide" id="slide-7" aria-labelledby="title-7">
+      <header class="slide-header">
+        <span class="brand"><span class="brand-mark" aria-hidden="true"></span> LifeTrack</span>
+        <span class="slide-count">07 / 08</span>
+      </header>
+      <div class="slide-content">
+        <p class="eyebrow">Próximos pasos</p>
+        <h2 id="title-7">Mejoras pensadas para seguir simplificando mi día a día.</h2>
+        <div class="future-grid">
+          <article class="future-card">
+            <h3>📱 PWA + Notificaciones</h3>
+            <p>Instalable en móvil; recordatorios de presupuesto y resumen semanal vía Web Push.</p>
+          </article>
+          <article class="future-card">
+            <h3>🤖 Categorización asistida</h3>
+            <p>Sugerencia de categoría por reglas de palabras clave (fallback) y opcionalmente LLM local; siempre con validación humana.</p>
+          </article>
+          <article class="future-card">
+            <h3>📊 Gráficos y exportación</h3>
+            <p>Evolución temporal, comparativas año a año, exportar a Excel/PDF para revisión offline.</p>
+          </article>
+          <article class="future-card">
+            <h3>🏷️ Etiquetas y metas</h3>
+            <p>Etiquetas libres en movimientos (ej. "viaje", "regalo") y metas de ahorro con seguimiento visual.</p>
+          </article>
+          <article class="future-card">
+            <h3>🔄 Importación bancaria (Open Banking)</h3>
+            <p>Cuando el alcance lo permita: PSD2 / agregadores para sincronizar cuentas sin credenciales propias.</p>
+          </article>
+          <article class="future-card">
+            <h3>👥 Compartido familiar</h3>
+            <p>Presupuestos y categorías compartidos con mi pareja; visibilidad selectiva y liquidación de gastos comunes.</p>
+          </article>
+        </div>
+        <div class="method-note" style="margin-top: 1.5rem;"><strong>Filosofía:</strong> Cada mejora nace de una fricción real en mi uso diario. LifeTrack no es un producto genérico; es <em>mi</em> herramienta, evolucionando conmigo.</div>
+      </div>
+      <footer class="slide-footer">
+        <span class="eyebrow">Evolución continua</span>
+        <nav class="slide-nav" aria-label="Navegación de diapositivas">
+          <a class="nav-link" href="#slide-6">← Anterior</a>
+          <a class="nav-link" href="#slide-8">Siguiente →</a>
+        </nav>
+      </footer>
+    </section>
+
+    <section class="slide slide--closing" id="slide-8" aria-labelledby="title-8">
+      <header class="slide-header">
+        <span class="brand"><span class="brand-mark" aria-hidden="true"></span> LifeTrack</span>
+        <span class="slide-count">08 / 08</span>
+      </header>
+      <div class="slide-content">
+        <p class="eyebrow">En resumen</p>
+        <h2 class="closing-title" id="title-8">Del registro a una mejor decisión financiera.</h2>
+        <p class="closing-copy">LifeTrack nació para resolver <strong>mi</strong> necesidad: tener claridad financiera sin fricción. La IA apoyó el desarrollo; las proyecciones y alertas del producto son reglas deterministas, explicables y probadas.</p>
+        <ul class="closing-points">
+          <li>Control total por usuario</li>
+          <li>Alertas explicables, no "caja negra"</li>
+          <li>IA como apoyo al desarrollo, no en runtime</li>
+          <li>Arquitectura verificable y segura</li>
+          <li>Diseñado para coste cero en Azure</li>
+        </ul>
+      </div>
+      <footer class="slide-footer">
+        <span class="eyebrow">Gracias</span>
+        <nav class="slide-nav" aria-label="Navegación de diapositivas">
+          <a class="nav-link" href="#slide-7">← Anterior</a>
+          <a class="nav-link" href="#slide-1">Volver al inicio ↑</a>
+        </nav>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
