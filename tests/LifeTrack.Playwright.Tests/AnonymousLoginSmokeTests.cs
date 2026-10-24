@@ -48,7 +48,7 @@ public sealed class AnonymousLoginSmokeTests
         Assert.Equal(new Uri(fixture.BaseAddress, "/account/login").AbsoluteUri, page.Url);
         Assert.True(await page.GetByRole(AriaRole.Heading, new() { Name = "Iniciar sesión", Exact = true }).IsVisibleAsync());
         Assert.True(await page.GetByLabel("Correo electrónico").IsVisibleAsync());
-        Assert.True(await page.GetByLabel("Contraseña").IsVisibleAsync());
+        Assert.True(await page.GetByLabel("Contraseña", new() { Exact = true }).IsVisibleAsync());
         Assert.True(await page.GetByRole(AriaRole.Button, new() { Name = "Iniciar sesión", Exact = true }).IsVisibleAsync());
         Assert.True(await page.GetByRole(AriaRole.Link, new() { Name = "Crear cuenta", Exact = true }).IsVisibleAsync());
 
@@ -60,7 +60,7 @@ public sealed class AnonymousLoginSmokeTests
         var email = $"ux-missing-{Guid.NewGuid():N}@example.com";
         var password = $"NoAccount-{Guid.NewGuid():N}-9!";
         await page.GetByLabel("Correo electrónico").FillAsync(email);
-        await page.GetByLabel("Contraseña").FillAsync(password);
+        await page.GetByLabel("Contraseña", new() { Exact = true }).FillAsync(password);
         await page.GetByRole(AriaRole.Button, new() { Name = "Iniciar sesión", Exact = true }).ClickAsync();
 
         Assert.True(await page.GetByText(GenericLoginErrorMessage, new() { Exact = true }).IsVisibleAsync());

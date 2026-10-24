@@ -21,8 +21,8 @@
         INPUT_TYPE_TEXT: "text",
         ARIA_PRESSED: "aria-pressed",
         ARIA_LABEL: "aria-label",
-        SHOW_PASSWORD_LABEL: "Mostrar contraseña",
-        HIDE_PASSWORD_LABEL: "Ocultar contraseña",
+        SHOW_PASSWORD_LABEL: "Mostrar",
+        HIDE_PASSWORD_LABEL: "Ocultar",
         HIDDEN_ATTRIBUTE: "hidden",
         TRUE: "true",
         FALSE: "false"

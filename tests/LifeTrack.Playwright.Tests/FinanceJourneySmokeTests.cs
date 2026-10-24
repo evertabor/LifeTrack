@@ -10,6 +10,7 @@ public sealed class FinanceJourneySmokeTests
     private const string CategoryCreateModalSelector = "#category-create-modal";
     private const string CategoryNameLabel = "Nombre";
     private const string CategoryTypeLabel = "Tipo";
+    private const string CategoryTypeSelectId = "Type";
     private const string CategoryTypeFilterLabel = "Filtrar por tipo";
     private const string CategoryIncomeTypeValue = "1";
     private const string CategoryExpenseTypeValue = "2";
@@ -20,6 +21,9 @@ public sealed class FinanceJourneySmokeTests
     private const string TransactionCategoryLabel = "Categoría";
     private const string TransactionAmountLabel = "Importe";
     private const string TransactionDateLabel = "Fecha";
+    private const string TransactionFilterMonthSelectId = "transactions-filter-month";
+    private const string DashboardMonthSelectSelector = "select[aria-label='Mes']";
+    private const string DashboardYearSelectSelector = "select[aria-label='Año']";
     private const string TransactionDescriptionLabel = "Descripción";
     private const string InvalidAmountMessage = "El importe debe ser mayor que 0 y no superar 1.000.000.000.";
     private const string IncomeTypeValue = "true";
@@ -39,6 +43,7 @@ public sealed class FinanceJourneySmokeTests
     private const string ScriptMessageText = "script";
     private const string TransactionMetricSelector = ".transactions-metric";
     private const string DashboardMetricSelector = ".app-stat-card";
+    private const string DashboardMetricLabelSelector = ".app-stat-card__label";
     private const string DashboardMetricValueSelector = ".app-stat-card__value";
     private const string DashboardNavigationButtonLabel = "Abrir navegación";
     private const string DashboardSidebarSelector = "[data-app-sidebar]";
@@ -115,8 +120,8 @@ public sealed class FinanceJourneySmokeTests
 
         await page.GetByLabel(LoginEmailLabel).FillAsync(email);
         await page.GetByLabel("Nombre para mostrar").FillAsync("UX Browser Test");
-        await page.GetByLabel(LoginPasswordLabel).FillAsync(password);
-        await page.GetByLabel("Confirmar contraseña").FillAsync(password);
+        await page.GetByLabel(LoginPasswordLabel, new() { Exact = true }).FillAsync(password);
+        await page.GetByLabel("Confirmar contraseña", new() { Exact = true }).FillAsync(password);
         await page.GetByRole(AriaRole.Button, new() { Name = "Crear cuenta", Exact = true }).ClickAsync();
         await page.WaitForURLAsync("**/dashboard");
 
@@ -135,6 +140,8 @@ public sealed class FinanceJourneySmokeTests
 
         await VerifyDuplicateCategoryAsync(page);
         var incomeCategoryName = $"UX Income {Guid.NewGuid():N}";
+        await page.GetByRole(AriaRole.Button, new() { Name = CategoryCreateButtonLabel, Exact = true }).First.ClickAsync();
+        await page.Locator(CategoryCreateModalSelector).WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
         await SubmitCategoryAsync(page, incomeCategoryName, IncomeTypeValue);
         await AssertCategoryVisibilityAsync(page, incomeCategoryName, true);
 
@@ -156,17 +163,24 @@ public sealed class FinanceJourneySmokeTests
     private static async Task VerifyDuplicateCategoryAsync(IPage page)
     {
         await page.GetByRole(AriaRole.Button, new() { Name = CategoryCreateButtonLabel, Exact = true }).First.ClickAsync();
+        await page.Locator(CategoryCreateModalSelector).WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
         await SubmitCategoryAsync(page, "Comida", ExpenseTypeValue);
 
         var modal = page.Locator(CategoryCreateModalSelector);
+        await modal.GetByText(DuplicateCategoryMessage, new() { Exact = true }).WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
         Assert.True(await modal.GetByText(DuplicateCategoryMessage, new() { Exact = true }).IsVisibleAsync());
+
+        await modal.GetByRole(AriaRole.Button, new() { Name = "Cancelar", Exact = true }).ClickAsync();
+        await page.Locator(CategoryCreateModalSelector).WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });
     }
 
     private static async Task SubmitCategoryAsync(IPage page, string name, string type)
     {
         var modal = page.Locator(CategoryCreateModalSelector);
+        var typeSelect = modal.Locator($"#{CategoryTypeSelectId}");
+        await typeSelect.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
         await modal.GetByLabel(CategoryNameLabel).FillAsync(name);
-        await modal.GetByLabel(CategoryTypeLabel).SelectOptionAsync(type);
+        await typeSelect.SelectOptionAsync(type);
         await modal.GetByRole(AriaRole.Button, new() { Name = CategoryCreateButtonLabel, Exact = true }).ClickAsync();
     }
 
@@ -181,15 +195,16 @@ public sealed class FinanceJourneySmokeTests
         await page.GetByRole(AriaRole.Button, new() { Name = CategoryCreateButtonLabel, Exact = true }).First.ClickAsync();
 
         var modal = page.Locator(CategoryCreateModalSelector);
+        await modal.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
         Assert.True(await modal.GetByLabel(CategoryNameLabel).IsVisibleAsync());
-        Assert.True(await modal.GetByLabel(CategoryTypeLabel).IsVisibleAsync());
+        Assert.True(await modal.Locator($"#{CategoryTypeSelectId}").IsVisibleAsync());
     }
 
     private static async Task VerifyTransactionJourneyAsync(IPage page, Uri baseAddress)
     {
         await page.GotoAsync(BuildUrl(baseAddress, "/transactions"));
         var year = await page.GetByLabel("Año").InputValueAsync();
-        var month = await page.GetByLabel("Mes").InputValueAsync();
+        var month = await page.Locator($"#{TransactionFilterMonthSelectId}").InputValueAsync();
         await page.GotoAsync(BuildUrl(baseAddress, $"/transactions?year={year}&month={month}"));
         await page.SetViewportSizeAsync(MobileViewportWidth, MobileViewportHeight);
 
@@ -197,6 +212,7 @@ public sealed class FinanceJourneySmokeTests
         var validDate = await GetMaximumTransactionDateAsync(modal);
         await FillTransactionAsync(modal, ExpenseTypeValue, "Comida", InvalidExpenseAmount, validDate, ExpenseDescription);
         await modal.GetByRole(AriaRole.Button, new() { Name = TransactionCreateButtonLabel, Exact = true }).ClickAsync();
+        await modal.GetByText(InvalidAmountMessage, new() { Exact = true }).WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
         Assert.True(await modal.GetByText(InvalidAmountMessage, new() { Exact = true }).IsVisibleAsync());
         Assert.True(await modal.GetByLabel(TransactionAmountLabel).IsVisibleAsync());
 
@@ -214,7 +230,7 @@ public sealed class FinanceJourneySmokeTests
         await AssertMetricAsync(page, "Gastos", "400,00");
         await AssertMetricAsync(page, "Balance", "600,00");
         Assert.Equal(year, await page.GetByLabel("Año").InputValueAsync());
-        Assert.Equal(month, await page.GetByLabel("Mes").InputValueAsync());
+        Assert.Equal(month, await page.Locator($"#{TransactionFilterMonthSelectId}").InputValueAsync());
         Assert.True(await page.GetByRole(AriaRole.Heading, new() { Name = "Movimientos", Exact = true }).IsVisibleAsync());
         Assert.True(await page.GetByRole(AriaRole.Button, new() { Name = TransactionCreateButtonLabel, Exact = true }).IsVisibleAsync());
 
@@ -225,8 +241,8 @@ public sealed class FinanceJourneySmokeTests
     {
         await page.SetViewportSizeAsync(MobileViewportWidth, MobileViewportHeight);
         await page.GotoAsync(BuildUrl(baseAddress, $"/dashboard?year={year}&month={month}"));
-        Assert.Equal(year, await page.GetByLabel("Año").InputValueAsync());
-        Assert.Equal(month, await page.GetByLabel("Mes").InputValueAsync());
+        Assert.Equal(year, await page.Locator(DashboardYearSelectSelector).InputValueAsync());
+        Assert.Equal(month, await page.Locator(DashboardMonthSelectSelector).InputValueAsync());
         await AssertDashboardMetricAsync(page, "Ingresos", "1.000,00");
         await AssertDashboardMetricAsync(page, "Gastos", "400,00");
         await AssertDashboardMetricAsync(page, "Balance", "600,00");
@@ -291,9 +307,10 @@ public sealed class FinanceJourneySmokeTests
 
     private static async Task AssertDashboardMetricAsync(IPage page, string label, string expectedValue)
     {
-        var metric = page.Locator(DashboardMetricSelector).Filter(new LocatorFilterOptions { HasText = label });
-        Assert.Equal(1, await metric.CountAsync());
-        var renderedValue = await metric.Locator(DashboardMetricValueSelector).InnerTextAsync();
+        var labelLocator = page.Locator(DashboardMetricLabelSelector).Filter(new LocatorFilterOptions { HasText = label });
+        Assert.Equal(1, await labelLocator.CountAsync());
+        var metricCard = labelLocator.First.Locator("..");
+        var renderedValue = await metricCard.Locator(DashboardMetricValueSelector).InnerTextAsync();
         var actualValue = renderedValue
             .Split([' ', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)[0];
         Assert.Equal(expectedValue, actualValue);

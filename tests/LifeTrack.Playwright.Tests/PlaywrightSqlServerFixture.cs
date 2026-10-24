@@ -14,8 +14,10 @@ public sealed class PlaywrightSqlServerFixture : IAsyncLifetime
 {
     private const string WebProjectRelativePath = "src/LifeTrack.Web/LifeTrack.Web.csproj";
     private const int MaxProcessOutputCharacters = 4_000;
+    private const int MaxReadinessDetailCharacters = 512;
     private const string RedactedConnectionString = "[redacted SQL connection string]";
     private const string RedactedCredential = "[redacted SQL credential]";
+    private const string TruncationMarker = "…";
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromSeconds(45);
     private static readonly TimeSpan ReadinessPollInterval = TimeSpan.FromMilliseconds(250);
     private readonly string _databaseName = $"LifeTrackUxTests_{Guid.NewGuid():N}";
@@ -201,7 +203,8 @@ public sealed class PlaywrightSqlServerFixture : IAsyncLifetime
         var projectPath = FindWebProjectPath();
         var projectDirectory = Path.GetDirectoryName(projectPath)
             ?? throw new InvalidOperationException("Could not determine the LifeTrack.Web project directory.");
-        var buildConfiguration = Directory.GetParent(AppContext.BaseDirectory)?.Name
+        var outputDirectory = Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory);
+        var buildConfiguration = Directory.GetParent(outputDirectory)?.Name
             ?? throw new InvalidOperationException("Could not determine the UX test build configuration.");
         var port = ReserveLocalPort();
         var baseAddress = new Uri($"http://127.0.0.1:{port}");
@@ -276,8 +279,12 @@ public sealed class PlaywrightSqlServerFixture : IAsyncLifetime
     private async Task WaitForHostReadyAsync(Uri baseAddress, Process process)
     {
         using var timeout = new CancellationTokenSource(StartupTimeout);
-        using var client = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
+        using var client = new HttpClient(new HttpClientHandler { UseProxy = false })
+        {
+            Timeout = Timeout.InfiniteTimeSpan
+        };
         var healthUri = new Uri(baseAddress, "/health");
+        var lastReadinessDiagnostic = "No readiness response has been received.";
 
         try
         {
@@ -289,10 +296,13 @@ public sealed class PlaywrightSqlServerFixture : IAsyncLifetime
                     throw new InvalidOperationException(
                         $"LifeTrack.Web exited with code {process.ExitCode} before Kestrel became ready. " +
                         "Check the local SQL Server configuration and rerun the focused UX test." +
+                        Environment.NewLine + $"Last readiness result: {lastReadinessDiagnostic}" +
                         Environment.NewLine + GetProcessOutputDiagnostics());
                 }
 
-                if (await IsHealthyAsync(client, healthUri, timeout.Token))
+                var readinessResult = await IsHealthyAsync(client, healthUri, timeout.Token);
+                lastReadinessDiagnostic = readinessResult.Diagnostic;
+                if (readinessResult.IsHealthy)
                     return;
 
                 await Task.Delay(ReadinessPollInterval, timeout.Token);
@@ -303,21 +313,43 @@ public sealed class PlaywrightSqlServerFixture : IAsyncLifetime
             throw new TimeoutException(
                 $"LifeTrack.Web did not become healthy within {StartupTimeout.TotalSeconds} seconds. " +
                 "Check that local SQL Server is available and rerun the focused UX test." +
+                Environment.NewLine + $"Last readiness result: {lastReadinessDiagnostic}" +
                 Environment.NewLine + GetProcessOutputDiagnostics());
         }
     }
 
-    private static async Task<bool> IsHealthyAsync(HttpClient client, Uri healthUri, CancellationToken cancellationToken)
+    private async Task<(bool IsHealthy, string Diagnostic)> IsHealthyAsync(
+        HttpClient client,
+        Uri healthUri,
+        CancellationToken cancellationToken)
     {
         try
         {
-            using var response = await client.GetAsync(healthUri, cancellationToken);
-            return response.IsSuccessStatusCode;
+            using var response = await client.GetAsync(
+                healthUri,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
+            if (response.IsSuccessStatusCode)
+                return (true, $"HTTP {(int)response.StatusCode} {response.StatusCode}.");
+
+            return (false,
+                $"HTTP {(int)response.StatusCode} {response.StatusCode}; " +
+                "the health endpoint returned a non-success status.");
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException exception)
         {
-            return false;
+            return (false, $"HttpRequestException: {SanitizeReadinessDetail(exception.Message)}");
         }
+    }
+
+    private string SanitizeReadinessDetail(string detail)
+    {
+        var safeDetail = ReplaceSensitiveValue(detail, _connectionStringToRedact, RedactedConnectionString);
+        safeDetail = ReplaceSensitiveValue(safeDetail, _passwordToRedact, RedactedCredential);
+        safeDetail = ReplaceSensitiveValue(safeDetail, _userIdToRedact, RedactedCredential);
+        return safeDetail.Length > MaxReadinessDetailCharacters
+            ? safeDetail[..(MaxReadinessDetailCharacters - 1)] + TruncationMarker
+            : safeDetail;
     }
 
     private async Task StartBrowserAsync()
