@@ -88,7 +88,9 @@ Ver detalle completo en [`docs/01-especificacion.md`](docs/01-especificacion.md#
 
 ## Presentación
 
-[`docs/presentacion-lifetrack.html`](docs/presentacion-lifetrack.html) — 8 diapositivas (HTML autocontenido, ábrelo en el navegador).
+[Ver presentación online](https://html-preview.github.io/?url=https://github.com/evertabor/LifeTrack/blob/main/docs/presentacion-lifetrack.html) — 8 diapositivas (HTML autocontenido).
+<br>
+[Archivo local](docs/presentacion-lifetrack.html) — para abrir directo en el navegador.
 
 ## Reglas de negocio clave
 
