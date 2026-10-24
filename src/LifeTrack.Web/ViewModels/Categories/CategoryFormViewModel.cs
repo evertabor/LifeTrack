@@ -8,6 +8,7 @@ public sealed record CategoryFormViewModel
     public string Name { get; init; } = string.Empty;
     public string TypeLabel { get; init; } = string.Empty;
     public bool? Type { get; init; }
+    public int CategoryTypeFilterValue { get; init; }
     public string EditTypeHelpId { get; init; } = string.Empty;
     public string NewName { get; init; } = string.Empty;
     public string EditLabel { get; init; } = string.Empty;
@@ -26,6 +27,7 @@ public sealed record CategoryFormViewModel
             Name = summary.Name,
             TypeLabel = summary.TypeLabel,
             Type = summary.IsIncome,
+            CategoryTypeFilterValue = (int)(summary.IsIncome ? CategoryTypeFilter.Income : CategoryTypeFilter.Expense),
             EditTypeHelpId = $"category-edit-type-help-{summary.Id:D}",
             NewName = summary.Name,
             EditLabel = $"Editar {summary.Name}",

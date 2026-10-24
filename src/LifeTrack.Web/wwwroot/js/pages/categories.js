@@ -11,14 +11,21 @@
         ROW: "[data-categories-row]",
         NAME: "[data-categories-name]",
         NO_RESULTS: "[data-categories-no-results]",
-        VALIDATION_ERROR: ".field-validation-error"
+        VALIDATION_ERROR: ".field-validation-error",
+        CATEGORY_TYPE_ATTRIBUTE: "data-category-type"
     };
 
+    const CSS_CLASSES = {};
 
     const CONSTANTS = {
         EMPTY: "",
+        NULL: null,
+        ZERO: 0,
         EVENT_INPUT: "input",
         EVENT_SUBMIT: "submit",
+        EVENT_CHANGE: "change",
+        EVENT_CLICK: "click",
+        DECIMAL_RADIX: 10,
         NORMALIZE_FORM: "NFD",
         DIACRITICS_PATTERN: /\p{Diacritic}/gu
     };
@@ -42,20 +49,20 @@
         }
 
         const term = _normalize(input.value);
-        const typeValue = parseInt(typeFilter.value, 10);
+        const typeValue = parseInt(typeFilter.value, CONSTANTS.DECIMAL_RADIX);
         const rows = list.querySelectorAll(SELECTORS.ROW);
-        let visible = 0;
+        let visible = CONSTANTS.ZERO;
 
-        for (let index = 0; index < rows.length; index++) {
+        for (let index = CONSTANTS.ZERO; index < rows.length; index++) {
             const name = rows[index].querySelector(SELECTORS.NAME);
-            const typeAttr = rows[index].getAttribute("data-category-type");
-            const categoryType = typeAttr ? parseInt(typeAttr, 10) : null;
+            const typeAttr = rows[index].getAttribute(SELECTORS.CATEGORY_TYPE_ATTRIBUTE);
+            const categoryType = typeAttr ? parseInt(typeAttr, CONSTANTS.DECIMAL_RADIX) : CONSTANTS.NULL;
 
             const nameMatches = term === CONSTANTS.EMPTY ||
                 (name && _normalize(name.textContent).includes(term));
 
-            const typeMatches = typeValue === 0 ||
-                (categoryType !== null && categoryType === typeValue);
+            const typeMatches = typeValue === CONSTANTS.ZERO ||
+                (categoryType !== CONSTANTS.NULL && categoryType === typeValue);
 
             const matches = nameMatches && typeMatches;
             rows[index].hidden = !matches;
@@ -65,10 +72,10 @@
             }
         }
 
-        list.hidden = visible === 0;
+        list.hidden = visible === CONSTANTS.ZERO;
 
         if (message) {
-            message.hidden = visible !== 0;
+            message.hidden = visible !== CONSTANTS.ZERO;
         }
     }
 
@@ -117,11 +124,12 @@
     }
 
     function _initialize() {
+        _filterCategories();
         _openCreateModalOnErrors();
         document.addEventListener(CONSTANTS.EVENT_INPUT, _handleInput);
         document.addEventListener(CONSTANTS.EVENT_SUBMIT, _handleSubmit);
-        document.addEventListener("change", _handleTypeChange);
-        document.addEventListener("click", _handleSearchClear);
+        document.addEventListener(CONSTANTS.EVENT_CHANGE, _handleTypeChange);
+        document.addEventListener(CONSTANTS.EVENT_CLICK, _handleSearchClear);
     }
 
     _initialize();

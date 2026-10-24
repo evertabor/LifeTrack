@@ -32,19 +32,10 @@
                     <button type="button" aria-label="Limpiar búsqueda" data-categories-search-clear hidden><span aria-hidden="true">✕</span></button>
                 </div>
                 <select id="categories-type-filter" class="categories-panel__type-filter form-select form-select-sm" aria-label="Filtrar por tipo" data-categories-type-filter>
-                    <option value="0">Todos</option>
-                    <option value="1">Ingresos</option>
-                    <option value="2">Gastos</option>
+                    <option value="0" selected="@Model.IsAllTypeFilterSelected">Todos</option>
+                    <option value="1" selected="@Model.IsIncomeTypeFilterSelected">Ingresos</option>
+                    <option value="2" selected="@Model.IsExpenseTypeFilterSelected">Gastos</option>
                 </select>
-                <script>
-                    (function() {
-                        var filter = document.getElementById('categories-type-filter');
-                        var type = '@((int)Model.TypeFilter)';
-                        if (filter && type) {
-                            filter.value = type;
-                        }
-                    })();
-                </script>
             </div>
 
             @if (Model.HasCategories)
@@ -58,7 +49,7 @@
                         <tbody>
                     @foreach (var category in Model.Categories)
                     {
-                            <tr tabindex="0" data-categories-row data-category-type="@(category.Type.HasValue && category.Type.Value ? 1 : 2)">
+                            <tr tabindex="0" data-categories-row data-category-type="@category.CategoryTypeFilterValue">
                                 <td><span class="categories-table__name" data-categories-name><span class="categories-list__marker" aria-hidden="true"></span>@category.Name</span></td>
                                 <td>@category.TypeLabel</td>
                                 <td>
