@@ -150,7 +150,6 @@
 
         for (let index = 0; index < forms.length; index++) {
             _renderChecklist(forms[index]);
-            _renderConfirm(forms[index]);
         }
 
         document.addEventListener(CONSTANTS.EVENT_INPUT, _handleInput);
