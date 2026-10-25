@@ -11,7 +11,7 @@
             <p class="app-page-header__eyebrow">@Model.MonthLabel</p>
             <h1 class="app-page-header__title">Resumen</h1>
         </div>
-        <form class="app-page-header__filters" method="get" asp-action="Index">
+        <form class="app-page-header__filters" method="get" asp-action="Index" data-dashboard-filters>
             <select asp-for="Period.Month" name="month" class="form-select form-select-sm" aria-label="Mes">
                 @foreach (var option in Model.MonthOptions)
                 {
@@ -24,7 +24,6 @@
                     <option value="@option.Year" selected="@(option.IsSelected ? "selected" : null)">@option.Year</option>
                 }
             </select>
-            <button type="submit" class="btn btn-outline-secondary btn-sm">Filtrar</button>
         </form>
     </header>
 
@@ -152,3 +151,7 @@
         </section>
     }
 </div>
+
+@section Scripts {
+    <script src="~/js/pages/dashboard.js" asp-append-version="true" defer></script>
+}

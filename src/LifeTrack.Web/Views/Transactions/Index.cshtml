@@ -31,11 +31,23 @@
         <form class="transactions-filter__form" method="get" asp-controller="Transactions" asp-action="Index">
             <div class="app-form-field transactions-filter__field">
                 <label class="form-label" for="transactions-filter-year">Año</label>
-                <input id="transactions-filter-year" name="year" class="form-control" type="number" value="@Model.Year" min="@SetBudgetInputModel.MinYear" max="@Model.MaxFilterYear" required />
+                <select id="transactions-filter-year" name="year" class="form-select form-select-sm">
+                    @foreach (var option in Model.YearOptions)
+                    {
+                        @if (option.IsSelected)
+                        {
+                            <option value="@option.Year" selected>@option.Year</option>
+                        }
+                        else
+                        {
+                            <option value="@option.Year">@option.Year</option>
+                        }
+                    }
+                </select>
             </div>
             <div class="app-form-field transactions-filter__field">
                 <label class="form-label" for="transactions-filter-month">Mes</label>
-                <select id="transactions-filter-month" name="month" class="form-select">
+                <select id="transactions-filter-month" name="month" class="form-select form-select-sm">
                     @foreach (var option in Model.MonthOptions)
                     {
                         @if (option.IsSelected)
@@ -51,7 +63,7 @@
             </div>
             <div class="app-form-field transactions-filter__field">
                 <label class="form-label" for="transactions-filter-category">Categoría</label>
-                <select id="transactions-filter-category" name="categoryId" class="form-select">
+                <select id="transactions-filter-category" name="categoryId" class="form-select form-select-sm">
                     <option value="">Todas las categorías</option>
                     @foreach (var option in Model.CategoryOptions)
                     {

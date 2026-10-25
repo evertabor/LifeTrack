@@ -22,6 +22,15 @@ public sealed class DashboardController(
     [HttpGet("")]
     public async Task<IActionResult> Index(int? year, int? month, CancellationToken ct)
     {
+        var today = timeProvider.Today();
+        var y = year ?? today.Year;
+        var m = month ?? today.Month;
+
+        if (y > today.Year || (y == today.Year && m > today.Month))
+        {
+            return RedirectToAction("Index", new { year = today.Year, month = today.Month });
+        }
+
         try
         {
             var monthly = await sender.Send(new ListMonthlyTransactionsQuery(year, month, null), ct);

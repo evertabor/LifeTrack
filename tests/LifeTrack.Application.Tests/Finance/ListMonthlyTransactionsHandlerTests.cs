@@ -58,12 +58,21 @@ public class ListMonthlyTransactionsHandlerTests
     }
 
     [Fact]
+    public async Task Handle_FutureMonth_ThrowsBusinessRule()
+    {
+        var arranged = await ArrangeAsync();
+
+        await Assert.ThrowsAsync<BusinessRuleException>(
+            () => arranged.Handler.Handle(new ListMonthlyTransactionsQuery(2026, 11), CancellationToken.None));
+    }
+
+    [Fact]
     public async Task Handle_MonthWithoutTransactions_ReturnsZeros()
     {
         var arranged = await ArrangeAsync();
 
         var result = await arranged.Handler.Handle(
-            new ListMonthlyTransactionsQuery(2026, 11), CancellationToken.None);
+            new ListMonthlyTransactionsQuery(2026, 8), CancellationToken.None);
 
         Assert.Equal(0m, result.TotalIncome);
         Assert.Equal(0m, result.TotalExpense);

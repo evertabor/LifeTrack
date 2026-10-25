@@ -30,6 +30,11 @@ public sealed class GetUnusualSpendingAlertsHandler(
             throw new BusinessRuleException("El periodo solicitado no es válido.");
         }
 
+        if (year > today.Year || (year == today.Year && month > today.Month))
+        {
+            throw new BusinessRuleException("No se puede consultar alertas de un periodo futuro.");
+        }
+
         var userId = currentUser.UserId.Value;
         var from = new DateOnly(year, month, 1);
         var to = from.AddMonths(1);

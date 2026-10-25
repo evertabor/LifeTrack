@@ -109,7 +109,7 @@ public class GetBudgetStatusHandlerTests
             transactions.AddAsync(Transaction.Create(userId, new TransactionData(food.Id, TransactionType.Expense, foodSpent, new DateOnly(2026, 10, 6), null), today, food), CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        var handler = new GetBudgetStatusHandler(budgets, transactions, categories, new FakeCurrentUser(userId));
+        var handler = new GetBudgetStatusHandler(budgets, transactions, categories, new FakeCurrentUser(userId), new FixedTimeProvider(new DateOnly(2026, 10, 31)));
         return (handler, userId, food.Id);
     }
 
@@ -152,7 +152,7 @@ public class GetBudgetStatusHandlerTests
     public async Task Handle_NoBudgets_ReturnsEmpty()
     {
         var handler = new GetBudgetStatusHandler(
-            new FakeBudgetRepository(), new FakeTransactionRepository(), new FakeCategoryRepository(), new FakeCurrentUser(Guid.NewGuid()));
+            new FakeBudgetRepository(), new FakeTransactionRepository(), new FakeCategoryRepository(), new FakeCurrentUser(Guid.NewGuid()), new FixedTimeProvider(new DateOnly(2026, 10, 15)));
 
         var result = await handler.Handle(new GetBudgetStatusQuery(2026, 10), CancellationToken.None);
 
@@ -172,7 +172,7 @@ public class GetBudgetStatusHandlerTests
     public async Task Handle_NoAuthenticatedUser_ThrowsBusinessRuleException()
     {
         var handler = new GetBudgetStatusHandler(
-            new FakeBudgetRepository(), new FakeTransactionRepository(), new FakeCategoryRepository(), new FakeCurrentUser(null));
+            new FakeBudgetRepository(), new FakeTransactionRepository(), new FakeCategoryRepository(), new FakeCurrentUser(null), new FixedTimeProvider(new DateOnly(2026, 10, 15)));
 
         var ex = await Assert.ThrowsAsync<BusinessRuleException>(
             () => handler.Handle(new GetBudgetStatusQuery(2026, 10), CancellationToken.None));
@@ -192,7 +192,7 @@ public class GetBudgetStatusHandlerTests
         await categories.AddAsync(transport, CancellationToken.None);
         await budgets.AddAsync(Budget.Create(userId, food.Id, new BudgetPeriod(2026, 10), 100m, food), CancellationToken.None);
         await budgets.AddAsync(Budget.Create(userId, transport.Id, new BudgetPeriod(2026, 10), 200m, transport), CancellationToken.None);
-        var handler = new GetBudgetStatusHandler(budgets, transactions, categories, new FakeCurrentUser(userId));
+        var handler = new GetBudgetStatusHandler(budgets, transactions, categories, new FakeCurrentUser(userId), new FixedTimeProvider(new DateOnly(2026, 10, 31)));
 
         var result = await handler.Handle(new GetBudgetStatusQuery(2026, 10, food.Id), CancellationToken.None);
 

@@ -8,7 +8,8 @@
         CHECKLIST: "[data-register-checklist]",
         RULE: "[data-register-rule]",
         RULE_KEY: "registerRule",
-        CONFIRM_HINT: "[data-register-confirm-hint]"
+        CONFIRM_HINT: "[data-register-confirm-hint]",
+        SERVER_ERROR: "#register-error"
     };
 
     const CSS_CLASSES = {
@@ -123,6 +124,13 @@
         hint.textContent = CONSTANTS.MISMATCH_TEXT;
     }
 
+    function _hideServerError(form) {
+        const error = form.querySelector(SELECTORS.SERVER_ERROR);
+        if (error) {
+            error.remove();
+        }
+    }
+
     function _handleInput(event) {
         const form = event.target.form;
 
@@ -130,6 +138,7 @@
             return;
         }
 
+        _hideServerError(form);
         _renderChecklist(form);
         _renderConfirm(form);
     }

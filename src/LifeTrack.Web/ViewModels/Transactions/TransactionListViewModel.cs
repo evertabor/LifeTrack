@@ -56,6 +56,19 @@ public sealed record TransactionMonthOption
         };
 }
 
+public sealed record TransactionYearOption
+{
+    public int Year { get; init; }
+    public bool IsSelected { get; init; }
+
+    public static TransactionYearOption From(int year, int selectedYear) =>
+        new()
+        {
+            Year = year,
+            IsSelected = year == selectedYear
+        };
+}
+
 public sealed record TransactionListOptions(
     string? Message,
     CreateTransactionInputModel? NewTransaction = null,
@@ -90,6 +103,7 @@ public sealed record TransactionListViewModel
     public string MaxTransactionDateText { get; init; } = string.Empty;
     public string TransactionDateHelpText { get; init; } = string.Empty;
     public int MaxFilterYear { get; init; }
+    public IReadOnlyList<TransactionYearOption> YearOptions { get; init; } = [];
 
     public bool HasSuccessMessage => !string.IsNullOrEmpty(SuccessMessage);
     public bool HasTransactions => Transactions.Count > 0;
@@ -105,14 +119,25 @@ public sealed record TransactionListViewModel
         TransactionListOptions options)
     {
         var current = options.NewTransaction ?? new();
+        var today = options.Today ?? DateOnly.MinValue;
         var monthOptions = new List<TransactionMonthOption>();
-        for (var month = SetBudgetInputModel.MinMonth; month <= SetBudgetInputModel.MaxMonth; month++)
+        var maxMonth = result.Year == today.Year ? today.Month : SetBudgetInputModel.MaxMonth;
+        for (var month = SetBudgetInputModel.MinMonth; month <= maxMonth; month++)
         {
             monthOptions.Add(TransactionMonthOption.From(month, result.Month));
         }
+        var yearOptions = new List<TransactionYearOption>();
+        var minYear = today.Year - 5;
+        if (minYear < SetBudgetInputModel.MinYear)
+        {
+            minYear = SetBudgetInputModel.MinYear;
+        }
+        for (var year = minYear; year <= today.Year; year++)
+        {
+            yearOptions.Add(TransactionYearOption.From(year, result.Year));
+        }
         var firstDay = new DateOnly(result.Year, result.Month, 1);
         var lastDay = firstDay.AddMonths(1).AddDays(-1);
-        var today = options.Today ?? lastDay;
         var minDay = firstDay;
         var maxDay = lastDay <= today ? lastDay : today;
         return new()
@@ -129,6 +154,7 @@ public sealed record TransactionListViewModel
             CreateCategoryOptions = categories.Select(c => TransactionCategoryOption.From(c, current.CategoryId == Guid.Empty ? null : current.CategoryId)).ToList(),
             BudgetCategoryOptions = categories.Where(c => !c.IsIncome).Select(c => TransactionCategoryOption.From(c, null)).ToList(),
             MonthOptions = monthOptions,
+            YearOptions = yearOptions,
             SelectedCategoryId = options.SelectedCategoryId,
             NewTransaction = current,
             NewBudget = options.NewBudget ?? new() { Year = result.Year, Month = result.Month },

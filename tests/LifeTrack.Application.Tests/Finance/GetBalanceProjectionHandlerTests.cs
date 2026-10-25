@@ -136,18 +136,15 @@ public class GetBalanceProjectionHandlerTests
     }
 
     [Fact]
-    public async Task Handle_FutureMonth_ReturnsZeroElapsed()
+    public async Task Handle_FutureMonth_ThrowsBusinessRule()
     {
         var arranged = Arrange();
         var today = new DateOnly(2026, 10, 10);
 
         await arranged.Transactions.AddAsync(Transaction.Create(arranged.UserId, new TransactionData(arranged.ExpenseCategory.Id, TransactionType.Expense, 500m, today, null), today, arranged.ExpenseCategory), CancellationToken.None);
 
-        var result = await arranged.Handler.Handle(new GetBalanceProjectionQuery(2026, 11), CancellationToken.None);
-
-        Assert.Equal(0, result.DaysElapsed);
-        Assert.Equal(DateTime.DaysInMonth(2026, 11), result.DaysRemaining);
-        Assert.Equal(0m, result.DailyAverageExpense);
+        await Assert.ThrowsAsync<BusinessRuleException>(
+            () => arranged.Handler.Handle(new GetBalanceProjectionQuery(2026, 11), CancellationToken.None));
     }
 
     [Fact]

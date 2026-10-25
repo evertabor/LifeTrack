@@ -9,7 +9,8 @@ public sealed class GetBudgetStatusHandler(
     IBudgetRepository budgets,
     ITransactionRepository transactions,
     ICategoryRepository categories,
-    ICurrentUser currentUser) : IRequestHandler<GetBudgetStatusQuery, IReadOnlyList<BudgetStatusDto>>
+    ICurrentUser currentUser,
+    TimeProvider timeProvider) : IRequestHandler<GetBudgetStatusQuery, IReadOnlyList<BudgetStatusDto>>
 {
     public const decimal WarningPercent = 80m;
     public const decimal FullPercent = 100m;
@@ -24,6 +25,12 @@ public sealed class GetBudgetStatusHandler(
         if (request.Year is < Budget.MinYear or > Budget.MaxYear || request.Month is < Budget.MinMonth or > Budget.MaxMonth)
         {
             throw new BusinessRuleException("El periodo solicitado no es válido.");
+        }
+
+        var today = timeProvider.Today();
+        if (request.Year > today.Year || (request.Year == today.Year && request.Month > today.Month))
+        {
+            throw new BusinessRuleException("No se puede consultar un periodo futuro.");
         }
 
         var userId = currentUser.UserId.Value;

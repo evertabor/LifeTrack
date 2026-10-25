@@ -85,7 +85,8 @@ public sealed class DashboardService : IDashboardService
         var (projectionStatusText, projectionStatusClass) = BuildProjectionStatus(projection);
 
         var monthLabel = new DateTime(monthly.Year, monthly.Month, 1).ToString("MMMM yyyy", Spanish);
-        var monthOptions = Enumerable.Range(1, MONTHS_IN_YEAR)
+        var maxMonth = monthly.Year == today.Year ? today.Month : MONTHS_IN_YEAR;
+        var monthOptions = Enumerable.Range(1, maxMonth)
             .Select(m => MonthOptionViewModel.From(m, monthly.Month))
             .ToList();
         var yearOptions = Enumerable.Range(today.Year - YEARS_RANGE, YEARS_RANGE + 1)

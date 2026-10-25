@@ -26,6 +26,11 @@ public sealed class GetMonthlyComparisonHandler(
             throw new BusinessRuleException("El periodo solicitado no es válido.");
         }
 
+        if (year > today.Year || (year == today.Year && month > today.Month))
+        {
+            throw new BusinessRuleException("No se puede consultar la comparativa de un periodo futuro.");
+        }
+
         var userId = currentUser.UserId.Value;
 
         var currentFrom = new DateOnly(year, month, 1);
